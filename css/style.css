@@ -1,0 +1,260 @@
+/*
+ * Custom styling for the personal website.
+ *
+ * This stylesheet defines a simple, responsive layout without relying on
+ * external frameworks such as Bootstrap. It includes rules for the fixed
+ * navigation bar, section spacing, profile image appearance, and basic
+ * typography. The palette loosely follows the blue accent of the original
+ * site.
+ */
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
+
+a {
+  color: #1565c0;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: #0d47a1;
+}
+
+h1, h2, h3, h4, h5 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Navigation bar */
+#navbar {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e5e5e5;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 0.5rem 1rem;
+}
+
+#navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+#navbar .brand {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+#navbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+#navbar li {
+  margin-left: 1rem;
+  position: relative;
+}
+
+#navbar a {
+  color: #333;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.5rem;
+  display: block;
+}
+
+#navbar a:hover {
+  color: #1565c0;
+}
+
+/* Dropdown styles */
+#navbar .dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
+  margin-top: 0.5rem;
+  min-width: 200px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  z-index: 2000;
+}
+
+#navbar li:hover .dropdown-menu {
+  display: block;
+}
+
+#navbar .dropdown-menu a {
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+  color: #333;
+}
+
+#navbar .dropdown-menu a:hover {
+  background-color: #f0f0f0;
+  color: #1565c0;
+}
+
+/* Layout container */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Section spacing (account for fixed navbar) */
+section {
+  padding: 4rem 0;
+}
+
+/* Profile image and social links */
+.profile-image {
+  max-width: 270px;
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+}
+
+.social-icons {
+  margin-top: 1rem;
+}
+
+.social-icons a {
+  margin-right: 1rem;
+  font-weight: bold;
+}
+
+.social-icons a:last-child {
+  margin-right: 0;
+}
+
+/* Education list styling */
+.education-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.education-list li {
+  margin-bottom: 0.75rem;
+}
+
+/* News and contact backgrounds */
+#news, #contact {
+  background-color: #f8f9fa;
+}
+
+/* Publication section styling */
+.publication {
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.publication:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background-color: #1565c0;
+  color: #fff;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background-color: #0d47a1;
+}
+
+/* Simple grid system inspired by Bootstrap for flexibility without external dependencies */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+.row > div {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Column classes for different breakpoints */
+.col-12 {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+.col-lg-4 {
+  flex: 0 0 33.3333%;
+  max-width: 33.3333%;
+}
+
+.col-lg-8 {
+  flex: 0 0 66.6667%;
+  max-width: 66.6667%;
+}
+
+.col-md-5 {
+  flex: 0 0 41.6667%;
+  max-width: 41.6667%;
+}
+
+.col-md-7 {
+  flex: 0 0 58.3333%;
+  max-width: 58.3333%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .col-lg-4,
+  .col-lg-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .col-md-5,
+  .col-md-7 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* Make publication titles larger */
+.publication-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+/* Make author names grey */
+.publication-authors {
+  color: #666;   /* soft grey */
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}

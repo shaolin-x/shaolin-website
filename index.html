@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shelly Xie – Personal Website</title>
+  <!-- The page is intentionally self‑contained and does not rely on external
+       CSS frameworks. All styles live in css/style.css. -->
+  <!-- Custom site styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation bar -->
+  <nav id="navbar">
+    <div class="container">
+      <div class="brand"><a href="#home">Shaolin Xie</a></div>
+      <ul class="nav-links">
+        <li><a class="nav-link" href="#home">Home</a></li>
+        <li><a class="nav-link" href="#publications">Publications</a></li>
+        <!-- <li>
+          <a class="nav-link" href="#" aria-haspopup="true">Datasets</a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="https://siheng-chen.github.io/CoPerception-UAV/" target="_blank" rel="noopener">CoPerception‑UAV</a>
+            <a class="dropdown-item" href="https://siheng-chen.github.io/AM3D/" target="_blank" rel="noopener">AM3D</a>
+          </div>
+        </li> -->
+        <li><a class="nav-link" href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Home / Biography section -->
+  <section id="home" class="section pt-5">
+    <div class="container pt-5">
+      <div class="row align-items-center">
+        <!-- Profile side -->
+        <div class="col-12 col-lg-4 text-center mb-4 mb-lg-0">
+          <img src="assets/avatar.jpg" alt="Shaolin Xie" class="rounded-circle img-fluid profile-image">
+          <h2 class="mt-3">Shaolin (Shelly)&nbsp;Xie</h2>
+          <h5>PhD&nbsp;Student</h5>
+          <p><a href="https://www.usc.edu/" target="_blank" rel="noopener">University of Southern California</a></p>
+          <div class="social-icons mt-3">
+            <!-- Optional: provide a Google Scholar link if available -->
+            <!-- <a href="YOUR_GOOGLE_SCHOLAR_LINK" target="_blank" rel="noopener" class="mr-3" aria-label="Google Scholar"><i class="ai ai-google-scholar ai-2x"></i></a> -->
+            <a href="https://github.com/shaolin-x" target="_blank" rel="noopener" class="mr-3" aria-label="GitHub"><i class="fab fa-github fa-2x"></i></a>
+            <!-- CV link remains as a placeholder; replace uploads/cv.pdf with your own CV file -->
+            <a href="uploads/cv.pdf" target="_blank" rel="noopener" aria-label="Curriculum Vitae"><i class="ai ai-cv ai-2x"></i></a>
+          </div>
+        </div>
+        <!-- Biography and details side -->
+        <div class="col-12 col-lg-8">
+          <h1>Biography</h1>
+          <p>I am a PhD student in computer science at the University of Southern California, advised by Prof.&nbsp;<a href="http://viterbi-web.usc.edu/~sabek/" target="_blank" rel="noopener">Ibrahim Sabek</a> in the <a href="https://nexdig.usc.edu/" target="_blank" rel="noopener">NEXDIG Lab</a>. My research focuses on building next‑generation data systems and multi‑agent systems. I am especially interested in lifelong query optimization, geospatial reasoning, and collaborative data management.</p>
+          <p>I am always open to collaborations and discussions. Feel free to reach out if you are interested in data systems, multi‑agent systems, or related topics.</p>
+          <div class="row">
+            <div class="col-md-5 mt-4">
+              <h3>Interests</h3>
+              <ul class="list-unstyled">
+                <li>Multi‑agent systems</li>
+                <li>Query optimization and database performance</li>
+                <li>Geospatial data systems</li>
+              </ul>
+            </div>
+            <div class="col-md-7 mt-4">
+              <h3>Education</h3>
+              <ul class="education-list">
+                <li><strong>Ph.D. in Computer Science (in progress)</strong><br><span class="text-muted">University of Southern California</span></li>
+                <!-- Add previous degrees here if desired -->
+                 <li><strong>M.S. in Computer Science</strong><br><span class="text-muted">Boston University</span></li>
+                 <li><strong>B.S. in Computer Science and Data Science</strong><br><span class="text-muted">Worcester Polytechnic Institute</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent News section -->
+  <section id="news" class="section bg-light py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-4 mb-3 mb-lg-0 d-flex flex-column justify-content-start">
+          <h1 class="mb-0">Recent News</h1>
+          <p class="mt-1"><a href="news.html">All news »</a></p>
+        </div>
+        <div class="col-12 col-lg-8">
+          <!-- List each news item with a date and description -->
+          <p><strong>[Nov.&nbsp;2025]</strong> Presented <a href="https://dl.acm.org/doi/10.1145/3764915.3770722" target="_blank" rel="noopener">Evaluating Intrinsic Geospatial Topological Reasoning in LLMs</a> at the GeoGenAgent’25 workshop.</p>
+          <p><strong>[Jun.&nbsp;2025]</strong> Our paper <a href="https://arxiv.org/abs/2507.00188" target="_blank" rel="noopener">LIMAO: A Framework for Lifelong Modular Learned Query Optimization</a> is accepted to VLDB'25.</p>
+          <!-- Add additional news items here as they become available -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Publications section -->
+  <section id="publications" class="section py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-4 mb-3 mb-lg-0 d-flex flex-column align-items-center align-items-lg-start">
+          <h1 class="mb-0">Recent Publications</h1>
+        </div>
+        <div class="col-12 col-lg-8">
+          <!-- Each publication is grouped in its own block for clarity -->
+          
+          <div class="media mb-4">
+            <div class="media-body">
+              <h5 class="publication-title">Evaluating Intrinsic Geospatial Topological Reasoning in LLMs [SIGSPATIAL - GeoGenAgent’25]</h5>
+              <p class="publication-authors">Shaolin&nbsp;Xie, Shang‑Ling&nbsp;Hsu, Qihan&nbsp;Zhang, Yiming&nbsp;Gao, Cyrus Shahabi, Ibrahim Sabek</p>
+              <a class="btn" href="https://dl.acm.org/doi/10.1145/3764915.3770722" target="_blank" rel="noopener">Paper</a>
+            </div>
+          </div>
+
+          <div class="media mb-4">
+            <div class="media-body">
+              <h5 class="publication-title">LIMAO: A Framework for Lifelong Modular Learned Query Optimization [VLDB&nbsp;2025]</h5>
+              <p class="publication-authors">Qihan&nbsp;Zhang, Shaolin&nbsp;Xie, Ibrahim&nbsp;Sabek</p>
+              <a class="btn" href="https://arxiv.org/abs/2507.00188" target="_blank" rel="noopener">Paper</a>
+            </div>
+          </div>
+          <!-- Add more publications as you produce new work -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact section -->
+  <section id="contact" class="section bg-light py-5">
+    <div class="container">
+      <h1>Contact</h1>
+      <ul class="list-unstyled">
+        <li><strong>Email:</strong> <a href="mailto:shaolinx@usc.edu">shaolinx@usc.edu</a></li>
+        <li><strong>Address:</strong> University&nbsp;of&nbsp;Southern&nbsp;California, Los&nbsp;Angeles, CA&nbsp;90089</li>
+      </ul>
+      <p class="mt-4 mb-0">©&nbsp;2025&nbsp;Shaolin&nbsp;Xie</p>
+    </div>
+  </section>
+
+  <!-- Custom scripts -->
+  <script src="js/script.js"></script>
+</body>
+</html>
