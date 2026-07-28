@@ -1,663 +1,1262 @@
 {
  "meta": {
   "title": "Would you have asked the same question?",
-  "built_at": "2026-07-28T06:48:29+00:00",
-  "seed": 20260727,
-  "n_requested": 20,
-  "n_decisions": 20,
-  "n_runs": 12,
-  "n_early_stopped": 10,
-  "n_with_candidates": 10,
+  "built_at": "2026-07-28T11:45:53+00:00",
+  "seed": 123,
+  "n_requested": 10,
+  "n_decisions": 10,
+  "n_runs": 3,
+  "n_early_stopped": 2,
+  "stop_share": 0.2,
+  "stop_share_band": [
+   0.3,
+   0.7
+  ],
+  "n_with_candidates": 7,
   "min_candidates": 2,
   "drop_unanswerable": false,
   "reveal": true,
-  "feedback": true
+  "feedback": true,
+  "n_stop_judged": 6,
+  "n_stop_inferred": 2,
+  "metrics": {
+   "version": "2",
+   "table": [
+    {
+     "key": "is_top",
+     "base": "e_top",
+     "label": "\u03ba_sel (chance-corrected agreement)",
+     "fmt": "num",
+     "est": "kappa",
+     "group": "selection",
+     "only": null
+    },
+    {
+     "key": "is_top",
+     "base": "e_top",
+     "label": "  \u251c raw agreement rate",
+     "fmt": "pct",
+     "est": "mean",
+     "group": "selection",
+     "only": null
+    },
+    {
+     "key": "attainment",
+     "base": "e_attainment",
+     "label": "utility attainment [0,1]",
+     "fmt": "num",
+     "est": "mean",
+     "group": "selection",
+     "only": null
+    },
+    {
+     "key": "d_std",
+     "base": "e_d_std",
+     "label": "standardized regret (pool SDs)",
+     "fmt": "num",
+     "est": "mean",
+     "group": "selection",
+     "only": "d_std"
+    },
+    {
+     "key": "within_noise",
+     "base": "e_within_noise",
+     "label": "  \u2514 within-noise rate (d<0.5)",
+     "fmt": "pct",
+     "est": "mean",
+     "group": "selection",
+     "only": "d_std"
+    },
+    {
+     "key": "action_hit",
+     "base": "e_action_hit",
+     "label": "action agreement",
+     "fmt": "pct",
+     "est": "mean",
+     "group": "selection",
+     "only": null
+    },
+    {
+     "key": "agree",
+     "base": null,
+     "label": "margin-weighted agreement",
+     "fmt": "pct",
+     "est": "wmean",
+     "group": "continuation",
+     "only": "margin"
+    },
+    {
+     "key": "agree",
+     "base": null,
+     "label": "  \u251c unweighted (w\u22611)",
+     "fmt": "pct",
+     "est": "mean",
+     "group": "continuation",
+     "only": "margin"
+    },
+    {
+     "key": "utility",
+     "base": null,
+     "label": "AUROC (utility vs human label)",
+     "fmt": "num",
+     "est": "auroc",
+     "group": "continuation",
+     "only": "margin"
+    },
+    {
+     "key": "utility",
+     "base": null,
+     "label": "implied human threshold \u03c4\u0302",
+     "fmt": "num",
+     "est": "youden",
+     "group": "continuation",
+     "only": "margin"
+    }
+   ],
+   "terms": [
+    "llm",
+    "sem",
+    "cov",
+    "imp",
+    "traj"
+   ],
+   "within_noise_d": 0.5
+  }
+ },
+ "samples": {
+  "procurement-easy": {
+   "n_rows": 326963,
+   "n_columns": 46,
+   "columns": [
+    "invoiceid",
+    "invoicedateid",
+    "itemid",
+    "currencyid",
+    "line_item",
+    "line_item_quantity",
+    "unit_price_loc",
+    "invoice_loc_amount",
+    "exchangerate",
+    "invoice_amount",
+    "savings",
+    "vendorid",
+    "locationid",
+    "discount_days",
+    "discount_percent",
+    "payment_terms_days",
+    "commodity",
+    "sub_category",
+    "category",
+    "item",
+    "commodity_detail",
+    "currency",
+    "symbol",
+    "currency_abbr",
+    "day",
+    "dayofweekno",
+    "dayofweek",
+    "dayofyear",
+    "weekno",
+    "monthno",
+    "month",
+    "qtrno",
+    "quarter",
+    "year",
+    "mon",
+    "location_number",
+    "country_region",
+    "location_region",
+    "city",
+    "vendor_name",
+    "vendor_city",
+    "vendor_state",
+    "vendor_postal_code",
+    "vendor_country_region",
+    "total_spend",
+    "tier"
+   ],
+   "rows": [
+    {
+     "invoiceid": 487480,
+     "invoicedateid": 20131205,
+     "itemid": 199373,
+     "currencyid": 67,
+     "line_item": "t",
+     "line_item_quantity": "t",
+     "unit_price_loc": 0.12,
+     "invoice_loc_amount": 480.0,
+     "exchangerate": 1.0,
+     "invoice_amount": 480.0,
+     "savings": 0.0,
+     "vendorid": 137,
+     "locationid": 492,
+     "discount_days": "f",
+     "discount_percent": "f",
+     "payment_terms_days": 45,
+     "commodity": "Hardware",
+     "sub_category": "Hardware",
+     "category": "Direct",
+     "item": "Hardware-199373",
+     "commodity_detail": "Hardware - Springs",
+     "currency": "United States Dollar",
+     "symbol": "$",
+     "currency_abbr": "USD",
+     "day": 5.0,
+     "dayofweekno": 5.0,
+     "dayofweek": "Thursday",
+     "dayofyear": 339.0,
+     "weekno": 49.0,
+     "monthno": 12.0,
+     "month": "0001-12-01T00:00:00",
+     "qtrno": 4.0,
+     "quarter": "Q4",
+     "year": 2013.0,
+     "mon": "0001-12-01T00:00:00",
+     "location_number": 492,
+     "country_region": "USA",
+     "location_region": "North America",
+     "city": "Miami, FL",
+     "vendor_name": "Canegeoin LLC",
+     "vendor_city": "Unknown",
+     "vendor_state": "IL",
+     "vendor_postal_code": "Unknown",
+     "vendor_country_region": "US",
+     "total_spend": 591590.149,
+     "tier": 1
+    },
+    {
+     "invoiceid": 520518,
+     "invoicedateid": 20121231,
+     "itemid": 202965,
+     "currencyid": 67,
+     "line_item": "t",
+     "line_item_quantity": "t",
+     "unit_price_loc": 1.98,
+     "invoice_loc_amount": 166.32,
+     "exchangerate": 1.0,
+     "invoice_amount": 166.32,
+     "savings": 16.632,
+     "vendorid": 30,
+     "locationid": 489,
+     "discount_days": "t",
+     "discount_percent": "f",
+     "payment_terms_days": 10,
+     "commodity": "Outsourced",
+     "sub_category": "Outsourced",
+     "category": "Direct",
+     "item": "Outsourced-202965",
+     "commodity_detail": "Outsourced Plating",
+     "currency": "United States Dollar",
+     "symbol": "$",
+     "currency_abbr": "USD",
+     "day": 31.0,
+     "dayofweekno": 2.0,
+     "dayofweek": "Monday",
+     "dayofyear": 366.0,
+     "weekno": 53.0,
+     "monthno": 12.0,
+     "month": "0001-12-01T00:00:00",
+     "qtrno": 4.0,
+     "quarter": "Q4",
+     "year": 2012.0,
+     "mon": "0001-12-01T00:00:00",
+     "location_number": 489,
+     "country_region": "USA",
+     "location_region": "North America",
+     "city": "Chicago, IL",
+     "vendor_name": "Istechnology Inc.",
+     "vendor_city": "Unknown",
+     "vendor_state": "CA",
+     "vendor_postal_code": "92123",
+     "vendor_country_region": "US",
+     "total_spend": 4838268.9339,
+     "tier": 1
+    },
+    {
+     "invoiceid": 534694,
+     "invoicedateid": 20130417,
+     "itemid": 200234,
+     "currencyid": 67,
+     "line_item": "t",
+     "line_item_quantity": "t",
+     "unit_price_loc": 6.066,
+     "invoice_loc_amount": 1601.424,
+     "exchangerate": 1.0,
+     "invoice_amount": 1601.424,
+     "savings": 0.0,
+     "vendorid": 272,
+     "locationid": 489,
+     "discount_days": "f",
+     "discount_percent": "f",
+     "payment_terms_days": 60,
+     "commodity": "Outsourced",
+     "sub_category": "Outsourced",
+     "category": "Direct",
+     "item": "Outsourced-200234",
+     "commodity_detail": "Outsourced Parts",
+     "currency": "United States Dollar",
+     "symbol": "$",
+     "currency_abbr": "USD",
+     "day": 17.0,
+     "dayofweekno": 4.0,
+     "dayofweek": "Wednesday",
+     "dayofyear": 107.0,
+     "weekno": 16.0,
+     "monthno": 4.0,
+     "month": "0001-04-01T00:00:00",
+     "qtrno": 2.0,
+     "quarter": "Q2",
+     "year": 2013.0,
+     "mon": "0001-04-01T00:00:00",
+     "location_number": 489,
+     "country_region": "USA",
+     "location_region": "North America",
+     "city": "Chicago, IL",
+     "vendor_name": "Indikix Corporation",
+     "vendor_city": "Unknown",
+     "vendor_state": "Unknown",
+     "vendor_postal_code": "820",
+     "vendor_country_region": "TW",
+     "total_spend": 4799656.1439,
+     "tier": 1
+    },
+    {
+     "invoiceid": 486202,
+     "invoicedateid": 20120312,
+     "itemid": 199814,
+     "currencyid": 67,
+     "line_item": "t",
+     "line_item_quantity": "t",
+     "unit_price_loc": 0.65,
+     "invoice_loc_amount": 1508.0,
+     "exchangerate": 1.0,
+     "invoice_amount": 1508.0,
+     "savings": 0.0,
+     "vendorid": 27,
+     "locationid": 489,
+     "discount_days": "f",
+     "discount_percent": "f",
+     "payment_terms_days": 30,
+     "commodity": "Outsourced",
+     "sub_category": "Outsourced",
+     "category": "Direct",
+     "item": "Outsourced-199814",
+     "commodity_detail": "Outsourced Eng",
+     "currency": "United States Dollar",
+     "symbol": "$",
+     "currency_abbr": "USD",
+     "day": 12.0,
+     "dayofweekno": 2.0,
+     "dayofweek": "Monday",
+     "dayofyear": 72.0,
+     "weekno": 11.0,
+     "monthno": 3.0,
+     "month": "0001-03-01T00:00:00",
+     "qtrno": 1.0,
+     "quarter": "Q1",
+     "year": 2012.0,
+     "mon": "0001-03-01T00:00:00",
+     "location_number": 489,
+     "country_region": "USA",
+     "location_region": "North America",
+     "city": "Chicago, IL",
+     "vendor_name": "Isholdings Inc.",
+     "vendor_city": "Madison Heights",
+     "vendor_state": "MI",
+     "vendor_postal_code": "48071",
+     "vendor_country_region": "US",
+     "total_spend": 1534885.56,
+     "tier": 1
+    },
+    {
+     "invoiceid": 548559,
+     "invoicedateid": 20130531,
+     "itemid": 205854,
+     "currencyid": 67,
+     "line_item": "t",
+     "line_item_quantity": "t",
+     "unit_price_loc": 20.1402,
+     "invoice_loc_amount": 80.5608,
+     "exchangerate": 1.0,
+     "invoice_amount": 80.5608,
+     "savings": 0.0,
+     "vendorid": 216,
+     "locationid": 489,
+     "discount_days": "f",
+     "discount_percent": "f",
+     "payment_terms_days": 0,
+     "commodity": "Other",
+     "sub_category": "Other",
+     "category": "Other",
+     "item": "Other-205854",
+     "commodity_detail": "Other",
+     "currency": "United States Dollar",
+     "symbol": "$",
+     "currency_abbr": "USD",
+     "day": 31.0,
+     "dayofweekno": 6.0,
+     "dayofweek": "Friday",
+     "dayofyear": 151.0,
+     "weekno": 22.0,
+     "monthno": 5.0,
+     "month": "0001-05-01T00:00:00",
+     "qtrno": 2.0,
+     "quarter": "Q2",
+     "year": 2013.0,
+     "mon": "0001-05-01T00:00:00",
+     "location_number": 489,
+     "country_region": "USA",
+     "location_region": "North America",
+     "city": "Chicago, IL",
+     "vendor_name": "duo-techi Corporation",
+     "vendor_city": "Unknown",
+     "vendor_state": "IN",
+     "vendor_postal_code": "Unknown",
+     "vendor_country_region": "US",
+     "total_spend": 568147.611,
+     "tier": 1
+    }
+   ]
+  },
+  "census-easy": {
+   "n_rows": 32561,
+   "n_columns": 15,
+   "columns": [
+    "age",
+    "workclass",
+    "final-weight",
+    "education",
+    "education-num",
+    "marital-status",
+    "occupation",
+    "relationship",
+    "race",
+    "sex",
+    "capital-gain",
+    "capital-loos",
+    "hour-per-week",
+    "native-country",
+    "income"
+   ],
+   "rows": [
+    {
+     "age": 25,
+     "workclass": "Private",
+     "final-weight": 256263,
+     "education": "Assoc-acdm",
+     "education-num": 12,
+     "marital-status": "Married-civ-spouse",
+     "occupation": "Sales",
+     "relationship": "Husband",
+     "race": "White",
+     "sex": "Male",
+     "capital-gain": 0,
+     "capital-loos": 0,
+     "hour-per-week": 40,
+     "native-country": "United-States",
+     "income": "<=50K"
+    },
+    {
+     "age": 27,
+     "workclass": "Private",
+     "final-weight": 216481,
+     "education": "Bachelors",
+     "education-num": 13,
+     "marital-status": "Never-married",
+     "occupation": "Prof-specialty",
+     "relationship": "Not-in-family",
+     "race": "White",
+     "sex": "Female",
+     "capital-gain": 0,
+     "capital-loos": 0,
+     "hour-per-week": 40,
+     "native-country": "United-States",
+     "income": "<=50K"
+    },
+    {
+     "age": 46,
+     "workclass": "Private",
+     "final-weight": 147640,
+     "education": "5th-6th",
+     "education-num": 3,
+     "marital-status": "Married-civ-spouse",
+     "occupation": "Transport-moving",
+     "relationship": "Husband",
+     "race": "Amer-Indian-Eskimo",
+     "sex": "Male",
+     "capital-gain": 0,
+     "capital-loos": 1902,
+     "hour-per-week": 40,
+     "native-country": "United-States",
+     "income": "<=50K"
+    },
+    {
+     "age": 45,
+     "workclass": "Private",
+     "final-weight": 172822,
+     "education": "11th",
+     "education-num": 7,
+     "marital-status": "Divorced",
+     "occupation": "Transport-moving",
+     "relationship": "Not-in-family",
+     "race": "White",
+     "sex": "Male",
+     "capital-gain": 0,
+     "capital-loos": 2824,
+     "hour-per-week": 76,
+     "native-country": "United-States",
+     "income": ">50K"
+    },
+    {
+     "age": 27,
+     "workclass": "Private",
+     "final-weight": 177119,
+     "education": "Some-college",
+     "education-num": 10,
+     "marital-status": "Divorced",
+     "occupation": "Adm-clerical",
+     "relationship": "Unmarried",
+     "race": "White",
+     "sex": "Female",
+     "capital-gain": 0,
+     "capital-loos": 0,
+     "hour-per-week": 44,
+     "native-country": "United-States",
+     "income": "<=50K"
+    }
+   ]
+  },
+  "carsales-easy": {
+   "n_rows": 275,
+   "n_columns": 5,
+   "columns": [
+    "year",
+    "brand",
+    "category",
+    "model",
+    "sales"
+   ],
+   "rows": [
+    {
+     "year": "2010-01-01T00:00:00",
+     "brand": "GMC",
+     "category": "SUV",
+     "model": "Terrain",
+     "sales": 60519
+    },
+    {
+     "year": "2010-01-01T00:00:00",
+     "brand": "Honda",
+     "category": "SUV",
+     "model": "Element",
+     "sales": 14247
+    },
+    {
+     "year": "2009-01-01T00:00:00",
+     "brand": "Mazda",
+     "category": "Compact",
+     "model": "Mazda 3",
+     "sales": 96466
+    },
+    {
+     "year": "2011-01-01T00:00:00",
+     "brand": "Toyota",
+     "category": "Midsize",
+     "model": "Camry",
+     "sales": 308510
+    },
+    {
+     "year": "2011-01-01T00:00:00",
+     "brand": "Toyota",
+     "category": "Subcompact",
+     "model": "Corolla",
+     "sales": 240259
+    }
+   ]
+  }
+ },
+ "runs": {
+  "procurement-easy": {
+   "run_dir": "procurement-easy",
+   "parent": "20260728-014100_d2i_bench",
+   "path": "/Users/shaolinx/Desktop/shaolin-website/runs/20260728-014100_d2i_bench/procurement-easy",
+   "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
+   "provider": "openai",
+   "model": "gpt-4o-mini",
+   "beam_width": 5,
+   "max_depth": 2,
+   "depth_reached": 2,
+   "questions_answered": 10,
+   "n_insights": 15,
+   "started_at": "2026-07-28T10:25:54.315+00:00",
+   "duration_s": 345.33,
+   "dataset": {
+    "n_rows": 326963,
+    "n_columns": 46
+   },
+   "columns": [
+    "invoiceid (Measure)",
+    "invoicedateid (Measure)",
+    "itemid (Measure)",
+    "currencyid (Measure)",
+    "line_item_quantity (Dimension)",
+    "unit_price_loc (Measure)",
+    "invoice_loc_amount (Measure)",
+    "exchangerate (Measure)",
+    "invoice_amount (Measure)",
+    "savings (Measure)",
+    "vendorid (Measure)",
+    "locationid (Measure)",
+    "discount_days (Dimension)",
+    "payment_terms_days (Measure)",
+    "commodity (Dimension)",
+    "sub_category (Dimension)",
+    "category (Dimension)",
+    "item (Dimension)",
+    "commodity_detail (Dimension)",
+    "currency (Dimension)",
+    "currency_abbr (Dimension)",
+    "day (Measure)",
+    "dayofweekno (Measure)",
+    "dayofweek (Dimension)",
+    "dayofyear (Measure)",
+    "weekno (Measure)",
+    "monthno (Measure)",
+    "month (Time)",
+    "qtrno (Measure)",
+    "quarter (Dimension)",
+    "year (Time)",
+    "mon (Time)",
+    "location_number (Measure)",
+    "country_region (Dimension)",
+    "city (Dimension)",
+    "vendor_name (Dimension)",
+    "vendor_city (Dimension)",
+    "vendor_state (Dimension)",
+    "vendor_postal_code (Dimension)",
+    "vendor_country_region (Dimension)",
+    "total_spend (Measure)",
+    "tier (Measure)"
+   ]
+  },
+  "census-easy": {
+   "run_dir": "census-easy",
+   "parent": "20260728-014100_d2i_bench",
+   "path": "/Users/shaolinx/Desktop/shaolin-website/runs/20260728-014100_d2i_bench/census-easy",
+   "goal": "Report the share of records with income above 50K by education, sex, and occupation, treating the ' ?' placeholder in workclass, occupation, and native-country as missing.",
+   "provider": "openai",
+   "model": "gpt-4o-mini",
+   "beam_width": 5,
+   "max_depth": 2,
+   "depth_reached": 2,
+   "questions_answered": 11,
+   "n_insights": 15,
+   "started_at": "2026-07-28T10:50:50.122+00:00",
+   "duration_s": 496.83,
+   "dataset": {
+    "n_rows": 32561,
+    "n_columns": 15
+   },
+   "columns": [
+    "age (Dimension)",
+    "workclass (Dimension)",
+    "final-weight (Measure)",
+    "education (Dimension)",
+    "education-num (Measure)",
+    "marital-status (Dimension)",
+    "occupation (Dimension)",
+    "relationship (Dimension)",
+    "race (Dimension)",
+    "sex (Dimension)",
+    "capital-gain (Measure)",
+    "capital-loos (Measure)",
+    "hour-per-week (Measure)",
+    "native-country (Dimension)",
+    "income (Dimension)"
+   ]
+  },
+  "carsales-easy": {
+   "run_dir": "carsales-easy",
+   "parent": "20260728-014100_d2i_bench",
+   "path": "/Users/shaolinx/Desktop/shaolin-website/runs/20260728-014100_d2i_bench/carsales-easy",
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "provider": "openai",
+   "model": "gpt-4o-mini",
+   "beam_width": 5,
+   "max_depth": 2,
+   "depth_reached": 2,
+   "questions_answered": 8,
+   "n_insights": 13,
+   "started_at": "2026-07-28T08:41:03.622+00:00",
+   "duration_s": 285.08,
+   "dataset": {
+    "n_rows": 275,
+    "n_columns": 5
+   },
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ]
+  }
  },
  "decisions": [
   {
-   "id": "data-47#1cecbfd4",
-   "run": "data-47",
-   "node": "1cecbfd4",
+   "id": "procurement-easy#2e2a00d4",
+   "run": "procurement-easy",
+   "node": "2e2a00d4",
    "depth": 1,
    "child_depth": 2,
-   "goal": "Quantify and analyze the distribution of incidents across categories by calculating incident counts per category and identifying significant discrepancies or imbalances in these counts.",
+   "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
    "columns": [
+    "invoiceid (Measure)",
+    "invoicedateid (Measure)",
+    "itemid (Measure)",
+    "currencyid (Measure)",
+    "line_item_quantity (Dimension)",
+    "unit_price_loc (Measure)",
+    "invoice_loc_amount (Measure)",
+    "exchangerate (Measure)",
+    "invoice_amount (Measure)",
+    "savings (Measure)",
+    "vendorid (Measure)",
+    "locationid (Measure)",
+    "discount_days (Dimension)",
+    "payment_terms_days (Measure)",
+    "commodity (Dimension)",
+    "sub_category (Dimension)",
     "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
+    "item (Dimension)",
+    "commodity_detail (Dimension)",
+    "currency (Dimension)",
+    "currency_abbr (Dimension)",
+    "day (Measure)",
+    "dayofweekno (Measure)",
+    "dayofweek (Dimension)",
+    "dayofyear (Measure)",
+    "weekno (Measure)",
+    "monthno (Measure)",
+    "month (Time)",
+    "qtrno (Measure)",
+    "quarter (Dimension)",
+    "year (Time)",
+    "mon (Time)",
+    "location_number (Measure)",
+    "country_region (Dimension)",
+    "city (Dimension)",
+    "vendor_name (Dimension)",
+    "vendor_city (Dimension)",
+    "vendor_state (Dimension)",
+    "vendor_postal_code (Dimension)",
+    "vendor_country_region (Dimension)",
+    "total_spend (Measure)",
+    "tier (Measure)"
    ],
    "path": [
     {
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+     "label": "Currencyid differs significantly by country_region, with 'USA' averaging 64.946 compared to 'Mexico' at 45.3, resulting in a grand mean of 55.123 (Cohen's d=4.032).",
+     "statistic": "p=0 eff=4.03 stat=7.83e+05"
     },
     {
      "depth": 1,
      "action": "compare",
-     "question": "How does the decline in incident counts for the Network category compare to the decline in counts for the Software category over the closed_at period?",
-     "label": "The Network category experienced an infinite percentage decline in incident counts, while the Software category also saw an infinite percentage decline over the closed_at period.",
-     "statistic": "Network_decline_percentage=inf Software_decline_percentage=inf"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-55#374c0ad1",
-   "run": "data-55",
-   "node": "374c0ad1",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Analyze incident ticket distribution by caller by aggregating the incident counts over time using the 'caller_id' and 'opened_at' columns, and identify the caller whose incident frequency exhibits a statistically significant upward trend.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by state, sys_updated_on: 'Closed' record count is declining over sys_updated_on \u2014 strong trend: 29 in the first period \u2192 22 in the last (peak 3",
-     "statistic": "p=0.109 eff=0.538 stat=-0.824"
-    },
-    {
-     "depth": 1,
-     "action": "trend",
-     "question": "How has the frequency of closed incidents changed over the past year for each caller?",
-     "label": "The caller 'Bud Richman' exhibited an upward trend in closed incident frequency with a slope of 0.000251, but the trend is not statistically significant (p-value = 0.7416).",
-     "statistic": "p=0.742"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-59#0e89ba46",
-   "run": "data-59",
-   "node": "0e89ba46",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Examine the distribution of incidents across both individual assignees and assignment groups to identify any significant imbalances or discrepancies, such as unequal workload distribution or deviations from expected assignment patterns.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    },
-    {
-     "depth": 1,
-     "action": "compare",
-     "question": "How does the declining trend in the record count for 'Network' incidents compare to the trend for 'Database' incidents over the same period?",
-     "label": "The trend for 'Network' incidents shows a slight decline with a slope of -0.0012, while 'Database' incidents exhibit a slight increase with a slope of 0.0014.",
-     "statistic": "Network.slope=-0.00116 Database.slope=0.00145"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-58#7540892e",
-   "run": "data-58",
-   "node": "7540892e",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Compute the resolution time for each incident using the difference between closed_at and opened_at. Analyze resolution time trends over the period captured, categorizing the incidents by category, priority, and assignment group, while also inspecting factors like location and the personnel involved. Identify which incident categories show increasing resolution times and explore potential correlations or underlying causes related to these incident attributes.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    },
-    {
-     "depth": 1,
-     "action": "trend",
-     "question": "How has the record count for the 'Network' category changed over the last year compared to the previous year?",
-     "label": "The record count for the 'Network' category dropped from 94 incidents in 2023 to just 6 incidents in 2024, indicating a significant decline.",
-     "statistic": "last_year_count=94 previous_year_count=0"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-54#8ec67a57",
-   "run": "data-54",
-   "node": "8ec67a57",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Perform a time-series analysis of incident assignments by aggregating counts from the 'assigned_to' column over defined time periods (e.g., weekly or monthly) to identify and quantify agents experiencing an increasing trend in workload, which may indicate an overload situation.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    },
-    {
-     "depth": 1,
-     "action": "segment",
-     "question": "Which assignment groups show a different trend in incident counts compared to the declining trend observed in the 'Network' group?",
-     "label": "The 'Hardware', 'Inquiry / Help', and 'Software' assignment groups have stable trends with slopes of 0.0, contrasting with the declining trend of the 'Network' group, which has a slope of approximately -1.09e-13.",
-     "statistic": "Network.slope=-1.09e-13"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-47#51f2d843",
-   "run": "data-47",
-   "node": "51f2d843",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Quantify and analyze the distribution of incidents across categories by calculating incident counts per category and identifying significant discrepancies or imbalances in these counts.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    },
-    {
-     "depth": 1,
-     "action": "segment",
-     "question": "Which assignment groups show a significant decline in incident counts for the Network category over the closed_at period?",
-     "label": "No records for assignement_group, closed_at within [the full dataset]",
-     "statistic": "significant_declines_count=0"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-59#879db0dd",
-   "run": "data-59",
-   "node": "879db0dd",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Examine the distribution of incidents across both individual assignees and assignment groups to identify any significant imbalances or discrepancies, such as unequal workload distribution or deviations from expected assignment patterns.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    },
-    {
-     "depth": 1,
-     "action": "segment",
-     "question": "Which categories of incidents are contributing to the decline in the record count for 'Network' incidents over time?",
-     "label": "The 'Network' category incidents showed a decline from 9 incidents in January 2023 to just 1 incident by February 2024, with fluctuations in between.",
-     "statistic": "stat \u2014"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-61#f7c12182",
-   "run": "data-61",
-   "node": "f7c12182",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Analyze incident resolution performance for human agents by calculating their average resolution times (using the opened_at and closed_at data) and incident volumes, with a focused case study on a specific agent. Additionally, investigate potential correlations between performance dips and the agent's absence periods inferred from their schedule information, to propose optimized workload management strategies during such absences.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    },
-    {
-     "depth": 1,
-     "action": "trend",
-     "question": "How has the resolution count for the Network group changed over the last year compared to the previous year?",
-     "label": "The resolution count for the Network group decreased from 94 in 2023 to 6 in 2024, a drop of 88 incidents.",
-     "statistic": "change=-88"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-60#9bab91ef",
-   "run": "data-60",
-   "node": "9bab91ef",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Analyze trends over time in incident assignment volumes by examining counts of incidents assigned to both assignment groups and individual agents (assigned_to), and assess their potential correlation with workload indicators such as resolution time (derived from opened_at and closed_at) to understand impacts on user agents.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    },
-    {
-     "depth": 1,
-     "action": "compare",
-     "question": "How does the decline in incident counts for the Network group compare to the trend in incident counts for the Database group over the same time period?",
-     "label": "Incident counts for the Network group declined to 1 incident on 2023-01-06, while the Database group had 0 incidents on the same date, with both groups showing no significant difference in trends (p-value = 1.0).",
-     "statistic": "p=1"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-49#f76e67b4",
-   "run": "data-49",
-   "node": "f76e67b4",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Analyze the distribution of incidents among agents by quantifying the number of tasks assigned to each agent using the \"assigned_to\" column. Identify any imbalances or overburdened agents, and propose strategies to more evenly distribute incident assignments to reduce workload disparities.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    },
-    {
-     "depth": 1,
-     "action": "trend",
-     "question": "How has the record count for the 'Network' assignment group changed over the last year compared to the previous year?",
-     "label": "The record count for the 'Network' assignment group dropped from 94 incidents in 2023 to 6 incidents in 2024, indicating a decrease of 88 incidents.",
-     "statistic": "change=-88"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "data-57#66f123e2",
-   "run": "data-57",
-   "node": "66f123e2",
-   "depth": 0,
-   "child_depth": 1,
-   "goal": "Analyze how key incident attributes, including incident category, priority, assignment group, personnel, location, and the duration between opened_at and closed_at, correlate with and potentially drive increases in time-to-resolution (TTR) for ServiceNow incidents.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+     "question": "how does currencyid vary by category between the USA and Mexico?",
+     "label": "In the comparison of currencyid by category between the USA and Mexico, the USA predominantly uses currencyid 67 (United States Dollar) with 173,578 instances in the 'Indirect' category, while Mexico primarily uses currencyid 45 (Pesos) with 55,432 instances in the 'Indirect' category.",
+     "statistic": "p=0"
     }
    ],
    "ask_stop": true,
    "candidates": [
     {
      "slot": 1,
-     "action": "compare",
-     "question": "How does the record count trend for the 'Network' assignment group compare to the trend for the 'Database' assignment group over the same time period?"
-    },
-    {
-     "slot": 2,
-     "action": "validate",
-     "question": "Is the declining trend in record count for the 'Network' assignment group still significant when controlling for the location of incidents?"
-    },
-    {
-     "slot": 3,
-     "action": "filter",
-     "question": "Does the declining trend in the record count for the 'Network' assignment group persist when focusing only on incidents with a priority of '2 - High'?"
-    },
-    {
-     "slot": 4,
      "action": "relationship",
-     "question": "Is there a relationship between the priority of incidents and the record count trend for the 'Network' assignment group?"
-    },
-    {
-     "slot": 5,
-     "action": "trend",
-     "question": "How has the overall record count for all assignment groups changed over the same time period as the declining trend for the 'Network' assignment group?"
-    },
-    {
-     "slot": 6,
-     "action": "segment",
-     "question": "Which assignment groups show a different trend in record count compared to the declining trend observed in the 'Network' assignment group?"
-    },
-    {
-     "slot": 7,
-     "action": "contribution",
-     "question": "What proportion of the total incidents in the 'Network' assignment group are classified as '1 - Critical' compared to other priority levels?"
-    }
-   ]
-  },
-  {
-   "id": "data-60#ab2c5b58",
-   "run": "data-60",
-   "node": "ab2c5b58",
-   "depth": 0,
-   "child_depth": 1,
-   "goal": "Analyze trends over time in incident assignment volumes by examining counts of incidents assigned to both assignment groups and individual agents (assigned_to), and assess their potential correlation with workload indicators such as resolution time (derived from opened_at and closed_at) to understand impacts on user agents.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "segment",
-     "question": "Which assignment groups show a more significant decline in incident counts compared to the Network group over the same period?"
+     "question": "How does the invoice_amount relate to savings for transactions categorized under 'Other'?"
     },
     {
      "slot": 2,
-     "action": "validate",
-     "question": "Is the observed decline in incident counts for the Network group consistent across different priority levels?"
-    },
-    {
-     "slot": 3,
-     "action": "compare",
-     "question": "How does the decline in incident counts for the Network group compare to the trend in incident counts for the Database group over the same time period?"
-    },
-    {
-     "slot": 4,
-     "action": "contribution",
-     "question": "What proportion of the total incidents closed in the last quarter were assigned to the Network group, and how does this compare to previous quarters?"
-    },
-    {
-     "slot": 5,
-     "action": "trend",
-     "question": "How has the overall count of incidents assigned to the Network group changed over the last year?"
-    },
-    {
-     "slot": 6,
      "action": "filter",
-     "question": "Does the declining trend in incident counts for the Network group persist when analyzing only incidents closed by Fred Luddy?"
-    }
-   ]
-  },
-  {
-   "id": "data-50#57c87caf",
-   "run": "data-50",
-   "node": "57c87caf",
-   "depth": 0,
-   "child_depth": 1,
-   "goal": "Investigate the temporal trends in incidents assigned to agents by analyzing incident counts per agent over uniform time intervals (such as monthly) using the 'opened_at' and 'assigned_to' columns. Additionally, assess the potential impact on agents' workload and efficiency by evaluating related metrics like resolution time (calculated from 'opened_at' and 'closed_at').",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "contribution",
-     "question": "What proportion of the total incidents in the 'Network' assignment group are attributed to each priority level?"
-    },
-    {
-     "slot": 2,
-     "action": "compare",
-     "question": "How does the declining trend in the 'Network' assignment group compare to the trends in other assignment groups over the same period?"
+     "question": "What are the total invoice_amount and savings by commodity and category for transactions in the USA only?"
     },
     {
      "slot": 3,
      "action": "validate",
-     "question": "Does the declining trend in the 'Network' assignment group hold true when considering only incidents that were opened in the last six months?"
+     "question": "Is the observed difference in total invoice_amount between the USA and Mexico consistent across all categories?"
     },
     {
      "slot": 4,
-     "action": "relationship",
-     "question": "Is there a relationship between the priority of incidents and the declining trend in the 'Network' assignment group?"
+     "action": "trend",
+     "question": "What are the trends in total invoice_amount and savings for the 'Hardware' commodity over the years?"
     },
     {
      "slot": 5,
-     "action": "filter",
-     "question": "Does the declining trend in incidents for the 'Network' assignment group persist when focusing only on incidents that were closed in the last three months?"
+     "action": "compare",
+     "question": "How do total invoice_amount and savings differ between the 'Logistics' and 'Other' categories across the years?"
     },
     {
      "slot": 6,
-     "action": "trend",
-     "question": "How has the record count for the 'Network' assignment group changed month over month in the last year?"
+     "action": "contribution",
+     "question": "Which categories contribute the most to total invoice_amount and savings in the Mexico region?"
     },
     {
      "slot": 7,
      "action": "segment",
-     "question": "Which agents are primarily responsible for the declining trend in incidents for the 'Network' assignment group?"
+     "question": "Which commodities show the highest total invoice_amount and savings in the 'Direct' category compared to the 'Indirect' category?"
     }
    ]
   },
   {
-   "id": "data-54#46488739",
-   "run": "data-54",
-   "node": "46488739",
+   "id": "procurement-easy#a7fac2ea",
+   "run": "procurement-easy",
+   "node": "a7fac2ea",
    "depth": 0,
    "child_depth": 1,
-   "goal": "Perform a time-series analysis of incident assignments by aggregating counts from the 'assigned_to' column over defined time periods (e.g., weekly or monthly) to identify and quantify agents experiencing an increasing trend in workload, which may indicate an overload situation.",
+   "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
    "columns": [
+    "invoiceid (Measure)",
+    "invoicedateid (Measure)",
+    "itemid (Measure)",
+    "currencyid (Measure)",
+    "line_item_quantity (Dimension)",
+    "unit_price_loc (Measure)",
+    "invoice_loc_amount (Measure)",
+    "exchangerate (Measure)",
+    "invoice_amount (Measure)",
+    "savings (Measure)",
+    "vendorid (Measure)",
+    "locationid (Measure)",
+    "discount_days (Dimension)",
+    "payment_terms_days (Measure)",
+    "commodity (Dimension)",
+    "sub_category (Dimension)",
     "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
+    "item (Dimension)",
+    "commodity_detail (Dimension)",
+    "currency (Dimension)",
+    "currency_abbr (Dimension)",
+    "day (Measure)",
+    "dayofweekno (Measure)",
+    "dayofweek (Dimension)",
+    "dayofyear (Measure)",
+    "weekno (Measure)",
+    "monthno (Measure)",
+    "month (Time)",
+    "qtrno (Measure)",
+    "quarter (Dimension)",
+    "year (Time)",
+    "mon (Time)",
+    "location_number (Measure)",
+    "country_region (Dimension)",
+    "city (Dimension)",
+    "vendor_name (Dimension)",
+    "vendor_city (Dimension)",
+    "vendor_state (Dimension)",
+    "vendor_postal_code (Dimension)",
+    "vendor_country_region (Dimension)",
+    "total_spend (Measure)",
+    "tier (Measure)"
    ],
    "path": [
     {
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by priority, opened_at: '1 - Critical' record count is rising over opened_at \u2014 strong trend: 12 in the first period \u2192 15 in the last (peak 17, 1",
-     "statistic": "p=0.0995 eff=0.55 stat=0.697"
+     "label": "Currencyid differs significantly by country_region, with 'USA' averaging 64.946 compared to 'Mexico' at 45.3, resulting in a grand mean of 55.123 (Cohen's d=4.032).",
+     "statistic": "p=0 eff=4.03 stat=7.83e+05"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "validate",
+     "question": "is the difference in currencyid between country_region consistent when controlling for invoice_amount?"
+    },
+    {
+     "slot": 2,
+     "action": "filter",
+     "question": "how does currencyid differ by country_region for transactions with invoice_amount greater than 1000?"
+    },
+    {
+     "slot": 3,
+     "action": "contribution",
+     "question": "which categories contribute most to the differences in currencyid between the USA and Mexico?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "what is the relationship between invoice_amount and currencyid for transactions in the USA?"
+    },
+    {
+     "slot": 5,
+     "action": "segment",
+     "question": "which commodities have the highest currencyid averages in the USA compared to Mexico?"
+    },
+    {
+     "slot": 6,
+     "action": "trend",
+     "question": "how has the average currencyid changed over the years for transactions in the USA compared to Mexico?"
+    },
+    {
+     "slot": 7,
+     "action": "compare",
+     "question": "how does currencyid vary by category between the USA and Mexico?"
+    }
+   ]
+  },
+  {
+   "id": "procurement-easy#206ccb52",
+   "run": "procurement-easy",
+   "node": "206ccb52",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
+   "columns": [
+    "invoiceid (Measure)",
+    "invoicedateid (Measure)",
+    "itemid (Measure)",
+    "currencyid (Measure)",
+    "line_item_quantity (Dimension)",
+    "unit_price_loc (Measure)",
+    "invoice_loc_amount (Measure)",
+    "exchangerate (Measure)",
+    "invoice_amount (Measure)",
+    "savings (Measure)",
+    "vendorid (Measure)",
+    "locationid (Measure)",
+    "discount_days (Dimension)",
+    "payment_terms_days (Measure)",
+    "commodity (Dimension)",
+    "sub_category (Dimension)",
+    "category (Dimension)",
+    "item (Dimension)",
+    "commodity_detail (Dimension)",
+    "currency (Dimension)",
+    "currency_abbr (Dimension)",
+    "day (Measure)",
+    "dayofweekno (Measure)",
+    "dayofweek (Dimension)",
+    "dayofyear (Measure)",
+    "weekno (Measure)",
+    "monthno (Measure)",
+    "month (Time)",
+    "qtrno (Measure)",
+    "quarter (Dimension)",
+    "year (Time)",
+    "mon (Time)",
+    "location_number (Measure)",
+    "country_region (Dimension)",
+    "city (Dimension)",
+    "vendor_name (Dimension)",
+    "vendor_city (Dimension)",
+    "vendor_state (Dimension)",
+    "vendor_postal_code (Dimension)",
+    "vendor_country_region (Dimension)",
+    "total_spend (Measure)",
+    "tier (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Savings distribution varies by discount_days, with 'f' having a median of 0.0 and 't' at 19.603, indicating that discounts lead to higher savings (KS=0.869).",
+     "statistic": "p=0 eff=0.869 stat=0.869"
+    },
+    {
+     "depth": 1,
+     "action": "trend",
+     "question": "How have savings associated with discount_days 't' evolved over the years compared to 'f'?",
+     "label": "Savings associated with discount_days 't' increased significantly from 2009 to 2014, reaching 4,565,500.53 in 2013, while savings for 'f' remained at 0.00 across all years.",
+     "statistic": "savings_t.slope=6.24e+05 savings_f.slope=0"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "validate",
+     "question": "Is the observed increase in savings for discount_days 't' consistent across different commodities and categories?"
+    },
+    {
+     "slot": 2,
+     "action": "contribution",
+     "question": "Which categories contribute the most to total invoice_amount and savings in Mexico compared to the USA?"
+    },
+    {
+     "slot": 3,
+     "action": "relationship",
+     "question": "How does the invoice_amount relate to the savings for transactions categorized under 'Outsourced' across different country_regions?"
+    },
+    {
+     "slot": 4,
+     "action": "compare",
+     "question": "How do total invoice_amount and savings differ between the 'Logistics' and 'Other' categories across the years?"
+    },
+    {
+     "slot": 5,
+     "action": "filter",
+     "question": "What is the total invoice_amount and savings by commodity and category for transactions in the USA with discount_days 't'?"
+    },
+    {
+     "slot": 6,
+     "action": "segment",
+     "question": "Which commodities show the highest total invoice_amount and savings in the 'Direct' category compared to the 'Indirect' category across all years?"
+    },
+    {
+     "slot": 7,
+     "action": "trend",
+     "question": "What trends can be observed in total invoice_amount and savings for the 'Hardware' sub_category over the years?"
+    }
+   ]
+  },
+  {
+   "id": "procurement-easy#03835f49",
+   "run": "procurement-easy",
+   "node": "03835f49",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
+   "columns": [
+    "invoiceid (Measure)",
+    "invoicedateid (Measure)",
+    "itemid (Measure)",
+    "currencyid (Measure)",
+    "line_item_quantity (Dimension)",
+    "unit_price_loc (Measure)",
+    "invoice_loc_amount (Measure)",
+    "exchangerate (Measure)",
+    "invoice_amount (Measure)",
+    "savings (Measure)",
+    "vendorid (Measure)",
+    "locationid (Measure)",
+    "discount_days (Dimension)",
+    "payment_terms_days (Measure)",
+    "commodity (Dimension)",
+    "sub_category (Dimension)",
+    "category (Dimension)",
+    "item (Dimension)",
+    "commodity_detail (Dimension)",
+    "currency (Dimension)",
+    "currency_abbr (Dimension)",
+    "day (Measure)",
+    "dayofweekno (Measure)",
+    "dayofweek (Dimension)",
+    "dayofyear (Measure)",
+    "weekno (Measure)",
+    "monthno (Measure)",
+    "month (Time)",
+    "qtrno (Measure)",
+    "quarter (Dimension)",
+    "year (Time)",
+    "mon (Time)",
+    "location_number (Measure)",
+    "country_region (Dimension)",
+    "city (Dimension)",
+    "vendor_name (Dimension)",
+    "vendor_city (Dimension)",
+    "vendor_state (Dimension)",
+    "vendor_postal_code (Dimension)",
+    "vendor_country_region (Dimension)",
+    "total_spend (Measure)",
+    "tier (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Total spend varies significantly by sub_category, with 'Raw Materials' averaging 5,978,278.87 compared to 'Contracting & Services' at 473,801.91, resulting in a grand mean of 3,067,548.67 (Cohen's d=1.604).",
+     "statistic": "p=0 eff=1.6 stat=3.17e+04"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "compare",
+     "question": "how does total spend for 'Raw Materials' compare to 'Contracting & Services' across different years?"
+    },
+    {
+     "slot": 2,
+     "action": "contribution",
+     "question": "which sub_categories contribute most to the overall total spend when analyzing the 'Other' category?"
+    },
+    {
+     "slot": 3,
+     "action": "validate",
+     "question": "is the observed disparity in total spend between 'Raw Materials' and 'Contracting & Services' robust when controlling for country_region?"
+    },
+    {
+     "slot": 4,
+     "action": "trend",
+     "question": "how has the total spend for 'Raw Materials' evolved over the years compared to the overall grand mean of total spend?"
+    },
+    {
+     "slot": 5,
+     "action": "relationship",
+     "question": "what is the relationship between total spend and savings for 'Raw Materials' compared to 'Contracting & Services'?"
+    },
+    {
+     "slot": 6,
+     "action": "filter",
+     "question": "does the total spend for 'Raw Materials' persist when filtering for transactions in the USA?"
+    },
+    {
+     "slot": 7,
+     "action": "segment",
+     "question": "which sub_categories show the highest total spend when segmented by country_region?"
+    }
+   ]
+  },
+  {
+   "id": "procurement-easy#451680dd",
+   "run": "procurement-easy",
+   "node": "451680dd",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
+   "columns": [
+    "invoiceid (Measure)",
+    "invoicedateid (Measure)",
+    "itemid (Measure)",
+    "currencyid (Measure)",
+    "line_item_quantity (Dimension)",
+    "unit_price_loc (Measure)",
+    "invoice_loc_amount (Measure)",
+    "exchangerate (Measure)",
+    "invoice_amount (Measure)",
+    "savings (Measure)",
+    "vendorid (Measure)",
+    "locationid (Measure)",
+    "discount_days (Dimension)",
+    "payment_terms_days (Measure)",
+    "commodity (Dimension)",
+    "sub_category (Dimension)",
+    "category (Dimension)",
+    "item (Dimension)",
+    "commodity_detail (Dimension)",
+    "currency (Dimension)",
+    "currency_abbr (Dimension)",
+    "day (Measure)",
+    "dayofweekno (Measure)",
+    "dayofweek (Dimension)",
+    "dayofyear (Measure)",
+    "weekno (Measure)",
+    "monthno (Measure)",
+    "month (Time)",
+    "qtrno (Measure)",
+    "quarter (Dimension)",
+    "year (Time)",
+    "mon (Time)",
+    "location_number (Measure)",
+    "country_region (Dimension)",
+    "city (Dimension)",
+    "vendor_name (Dimension)",
+    "vendor_city (Dimension)",
+    "vendor_state (Dimension)",
+    "vendor_postal_code (Dimension)",
+    "vendor_country_region (Dimension)",
+    "total_spend (Measure)",
+    "tier (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Currencyid differs significantly by country_region, with 'USA' averaging 64.946 compared to 'Mexico' at 45.3, resulting in a grand mean of 55.123 (Cohen's d=4.032).",
+     "statistic": "p=0 eff=4.03 stat=7.83e+05"
+    },
+    {
+     "depth": 1,
+     "action": "segment",
+     "question": "which commodities have the highest currencyid averages in the USA compared to Mexico?",
+     "label": "The commodity with the highest average currencyid in the USA is 'Warehouse' at 66.76, compared to 45.00 in Mexico, resulting in a difference of 21.76.",
+     "statistic": "highest_average_value=67"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "trend",
+     "question": "What are the trends in total invoice_amount and savings for the 'Logistics' category over the years?"
+    },
+    {
+     "slot": 2,
+     "action": "contribution",
+     "question": "Which categories contribute the most to total invoice_amount and savings in the 'USA' country_region?"
+    },
+    {
+     "slot": 3,
+     "action": "segment",
+     "question": "Which commodities show the highest total invoice_amount and savings in the 'Direct' category across all years?"
+    },
+    {
+     "slot": 4,
+     "action": "validate",
+     "question": "Is the observed difference in total invoice_amount and savings between 'USA' and 'Mexico' consistent across different commodities?"
+    },
+    {
+     "slot": 5,
+     "action": "compare",
+     "question": "How do total invoice_amount and savings differ between 'Direct' and 'Indirect' categories across the years?"
+    },
+    {
+     "slot": 6,
+     "action": "relationship",
+     "question": "How does the invoice_amount relate to savings across different commodities in the 'Mexico' country_region?"
+    },
+    {
+     "slot": 7,
+     "action": "filter",
+     "question": "What is the total invoice_amount and savings by commodity for transactions in the 'USA' country_region across the years?"
+    }
+   ]
+  },
+  {
+   "id": "census-easy#c093c676",
+   "run": "census-easy",
+   "node": "c093c676",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Report the share of records with income above 50K by education, sex, and occupation, treating the ' ?' placeholder in workclass, occupation, and native-country as missing.",
+   "columns": [
+    "age (Dimension)",
+    "workclass (Dimension)",
+    "final-weight (Measure)",
+    "education (Dimension)",
+    "education-num (Measure)",
+    "marital-status (Dimension)",
+    "occupation (Dimension)",
+    "relationship (Dimension)",
+    "race (Dimension)",
+    "sex (Dimension)",
+    "capital-gain (Measure)",
+    "capital-loos (Measure)",
+    "hour-per-week (Measure)",
+    "native-country (Dimension)",
+    "income (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "There is a very strong difference in education-num across income groups, with the highest mean for income '>50K' at 11.612 compared to the lowest mean for income '<=50K' at 9.595, resulting in a Cohen's d of 0.836.",
+     "statistic": "p=0 eff=0.836 stat=4.12e+03"
+    },
+    {
+     "depth": 1,
+     "action": "validate",
+     "question": "Is the difference in mean education-num between income groups consistent when controlling for occupation?",
+     "label": "In the occupation 'Exec-managerial', individuals with income >50K have a mean education-num of 12.10, compared to 10.84 for those with income <=50K, indicating a notable difference in education levels.",
+     "statistic": "?=1.15e-31 Adm-clerical=3.84e-19"
     }
    ],
    "ask_stop": true,
@@ -665,256 +1264,156 @@
     {
      "slot": 1,
      "action": "compare",
-     "question": "How does the trend in critical incidents compare to high-priority incidents over the same time period?"
+     "question": "How does the share of individuals earning >50K differ between males and females across various education levels?"
     },
     {
      "slot": 2,
-     "action": "relationship",
-     "question": "Is there a relationship between the priority of incidents and the workload of agents based on the number of incidents assigned?"
+     "action": "filter",
+     "question": "What is the share of records with income >50K among individuals with a Doctorate degree, segmented by sex and occupation, while excluding records with workclass as '?'?"
     },
     {
      "slot": 3,
-     "action": "trend",
-     "question": "How has the count of critical incidents changed on a monthly basis over the past year?"
+     "action": "contribution",
+     "question": "Which education levels contribute most significantly to the share of individuals earning >50K within the 'Prof-specialty' occupation?"
     },
     {
      "slot": 4,
-     "action": "validate",
-     "question": "Does the rising trend in critical incidents hold true when considering only incidents closed in the last month?"
+     "action": "relationship",
+     "question": "What is the relationship between education-num and income levels, segmented by occupation and sex?"
     },
     {
      "slot": 5,
-     "action": "contribution",
-     "question": "Which categories of incidents are most frequently assigned as critical?"
+     "action": "segment",
+     "question": "Which occupations have the highest share of individuals earning >50K among those with a Bachelor's degree, segmented by sex?"
     },
     {
      "slot": 6,
-     "action": "segment",
-     "question": "Which agents are contributing most to the rising trend in critical incidents?"
-    },
-    {
-     "slot": 7,
-     "action": "filter",
-     "question": "Among incidents opened in the last month, is the rising trend in critical incidents still present?"
+     "action": "validate",
+     "question": "Is the observed relationship between education and income consistent when controlling for workclass and sex?"
     }
    ]
   },
   {
-   "id": "data-58#d598e474",
-   "run": "data-58",
-   "node": "d598e474",
-   "depth": 0,
-   "child_depth": 1,
-   "goal": "Compute the resolution time for each incident using the difference between closed_at and opened_at. Analyze resolution time trends over the period captured, categorizing the incidents by category, priority, and assignment group, while also inspecting factors like location and the personnel involved. Identify which incident categories show increasing resolution times and explore potential correlations or underlying causes related to these incident attributes.",
+   "id": "census-easy#31786411",
+   "run": "census-easy",
+   "node": "31786411",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Report the share of records with income above 50K by education, sex, and occupation, treating the ' ?' placeholder in workclass, occupation, and native-country as missing.",
    "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
+    "age (Dimension)",
+    "workclass (Dimension)",
+    "final-weight (Measure)",
+    "education (Dimension)",
+    "education-num (Measure)",
+    "marital-status (Dimension)",
+    "occupation (Dimension)",
+    "relationship (Dimension)",
+    "race (Dimension)",
+    "sex (Dimension)",
+    "capital-gain (Measure)",
+    "capital-loos (Measure)",
+    "hour-per-week (Measure)",
+    "native-country (Dimension)",
+    "income (Dimension)"
    ],
    "path": [
     {
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+     "label": "There is a very strong difference in capital-gain across education groups, with the highest mean for 'Prof-school' at 10414.417 compared to the lowest mean for '1st-4th' at 125.875, resulting in a Cohen's d of 1.103.",
+     "statistic": "p=4.98e-268 eff=1.1 stat=88.4"
+    },
+    {
+     "depth": 1,
+     "action": "validate",
+     "question": "Is the strong difference in capital-gain across education groups consistent when controlling for sex?",
+     "label": "The average capital-gain for individuals with a Doctorate is 3346.78 for females and 5144.49 for males, indicating a substantial gender disparity across education levels.",
+     "statistic": "p=2.81e-288"
     }
    ],
    "ask_stop": true,
    "candidates": [
     {
      "slot": 1,
-     "action": "contribution",
-     "question": "Which categories of incidents are most prevalent in the declining record count for the 'Network' assignment group?"
+     "action": "compare",
+     "question": "How does the share of individuals earning >50K differ between males and females across various occupations?"
     },
     {
      "slot": 2,
      "action": "compare",
-     "question": "How does the declining record count for the 'Network' assignment group compare to the trends observed in the 'Database' assignment group over the same period?"
+     "question": "What is the share of individuals earning >50K across different education levels for males and females?"
     },
     {
      "slot": 3,
-     "action": "trend",
-     "question": "How has the record count for the 'Network' assignment group changed over the last six months compared to the previous six months?"
+     "action": "validate",
+     "question": "Is the observed share of individuals earning >50K consistent across different workclass categories when controlling for education and sex?"
     },
     {
      "slot": 4,
      "action": "segment",
-     "question": "Which personnel assigned to the 'Network' assignment group are associated with the declining record count over time?"
+     "question": "Which occupations have the highest share of individuals earning >50K among those with a Bachelor's degree, and how does this vary by sex?"
     },
     {
      "slot": 5,
      "action": "filter",
-     "question": "Does the declining trend in the record count for the 'Network' assignment group persist when analyzing only incidents with priority '4 - Low'?"
+     "question": "What is the share of records with income >50K among individuals with a Doctorate degree, segmented by occupation and sex?"
     },
     {
      "slot": 6,
-     "action": "relationship",
-     "question": "Is there a correlation between the priority level of incidents and the declining record count for the 'Network' assignment group?"
+     "action": "contribution",
+     "question": "Which education levels contribute most significantly to the share of individuals earning >50K within the 'Exec-managerial' occupation?"
     },
     {
      "slot": 7,
-     "action": "validate",
-     "question": "Does the declining trend in the record count for the 'Network' assignment group remain significant when controlling for the location of incidents?"
+     "action": "relationship",
+     "question": "What is the relationship between education level (education-num) and income share (>50K) across different occupations?"
     }
    ]
   },
   {
-   "id": "data-59#f15142bb",
-   "run": "data-59",
-   "node": "f15142bb",
+   "id": "census-easy#38f1554e",
+   "run": "census-easy",
+   "node": "38f1554e",
    "depth": 0,
    "child_depth": 1,
-   "goal": "Examine the distribution of incidents across both individual assignees and assignment groups to identify any significant imbalances or discrepancies, such as unequal workload distribution or deviations from expected assignment patterns.",
+   "goal": "Report the share of records with income above 50K by education, sex, and occupation, treating the ' ?' placeholder in workclass, occupation, and native-country as missing.",
    "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
+    "age (Dimension)",
+    "workclass (Dimension)",
+    "final-weight (Measure)",
+    "education (Dimension)",
+    "education-num (Measure)",
+    "marital-status (Dimension)",
+    "occupation (Dimension)",
+    "relationship (Dimension)",
+    "race (Dimension)",
+    "sex (Dimension)",
+    "capital-gain (Measure)",
+    "capital-loos (Measure)",
+    "hour-per-week (Measure)",
+    "native-country (Dimension)",
+    "income (Dimension)"
    ],
    "path": [
     {
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+     "label": "There is a strong association between education and income, with counts concentrating unevenly across the education and income categories, particularly for 'Masters' (959 vs 414.9), 'Bachelors' (2221 vs 1289.5), and 'Prof-school' (423 vs 138.7) for income '>50K'.",
+     "statistic": "p=0 eff=0.369 stat=4.43e+03"
     }
    ],
    "ask_stop": true,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "filter",
-     "question": "Does the declining trend in the record count for 'Network' incidents persist when analyzing only incidents closed by Fred Luddy?"
-    },
-    {
-     "slot": 2,
-     "action": "trend",
-     "question": "How has the record count for 'Network' incidents changed over the last year compared to the previous year?"
-    },
-    {
-     "slot": 3,
-     "action": "compare",
-     "question": "How does the declining trend in the record count for 'Network' incidents compare to the trend for 'Database' incidents over the same period?"
-    },
-    {
-     "slot": 4,
-     "action": "relationship",
-     "question": "Is there a relationship between the priority level of 'Network' incidents and the declining record count over time?"
-    },
-    {
-     "slot": 5,
-     "action": "segment",
-     "question": "Which categories of incidents are contributing to the decline in the record count for 'Network' incidents over time?"
-    },
-    {
-     "slot": 6,
-     "action": "validate",
-     "question": "Is the observed decline in 'Network' incidents statistically significant when controlling for the total number of incidents closed?"
-    },
-    {
-     "slot": 7,
-     "action": "contribution",
-     "question": "What proportion of the total incidents closed in the last quarter were 'Network' incidents, and how does this compare to previous quarters?"
-    }
-   ]
+   "candidates": []
   },
   {
-   "id": "data-48#b6d6107e",
-   "run": "data-48",
-   "node": "b6d6107e",
-   "depth": 0,
-   "child_depth": 1,
-   "goal": "Analyze the trend of incident resolution times by calculating the time difference between opened_at and closed_at, then segmenting these times by incident category, priority, and location to identify specific factors\u2014such as assignment groups or workload peaks\u2014that may explain variations.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "trend",
-     "question": "How has the record count for the 'Network' assignment group changed over the last year compared to the previous year?"
-    },
-    {
-     "slot": 2,
-     "action": "filter",
-     "question": "Does the declining trend in record count for the 'Network' assignment group persist when only considering incidents with a priority of '2 - High'?"
-    },
-    {
-     "slot": 3,
-     "action": "segment",
-     "question": "Which assignment groups show a more significant decline in record count compared to the 'Network' group over the same time period?"
-    },
-    {
-     "slot": 4,
-     "action": "relationship",
-     "question": "Is there a relationship between the priority of incidents and the record count for the 'Network' assignment group over time?"
-    },
-    {
-     "slot": 5,
-     "action": "compare",
-     "question": "How does the declining trend in record count for the 'Network' assignment group compare to the trend for the 'Database' assignment group over the same time period?"
-    },
-    {
-     "slot": 6,
-     "action": "contribution",
-     "question": "Which priorities contribute most to the declining record count in the 'Network' assignment group?"
-    },
-    {
-     "slot": 7,
-     "action": "validate",
-     "question": "Is the declining trend in record count for the 'Network' assignment group still significant when controlling for the location of incidents?"
-    }
-   ]
-  },
-  {
-   "id": "carsales-easy#b97ac3bc",
+   "id": "carsales-easy#6f1e0574",
    "run": "carsales-easy",
-   "node": "b97ac3bc",
-   "depth": 0,
-   "child_depth": 1,
+   "node": "6f1e0574",
+   "depth": 1,
+   "child_depth": 2,
    "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
    "columns": [
     "year (Time)",
@@ -928,188 +1427,52 @@
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "The sales data exhibits a strong right-skew, with a mean of 79,715.52 significantly higher than the median of 46,531.0, indicating that a small number of brands or categories are driving the majority of sales.",
-     "statistic": "p=9e-19 eff=1.81 stat=1.81"
+     "label": "Sales by brand show a very strong difference, with 'Honda' leading at a mean of 177257.04 units sold, while 'Volkswagen' has the lowest mean at 16060.257, against a grand mean of 82166.641 (Cohen's d=2.125).",
+     "statistic": "p=1.27e-21 eff=2.12 stat=20.1"
+    },
+    {
+     "depth": 1,
+     "action": "contribution",
+     "question": "Which brands account for the highest percentage of total sales from 2007 to 2011?",
+     "label": "From 2007 to 2011, Ford and Toyota accounted for the largest shares of total sales, with 25.04% and 24.09% respectively, out of a total of 21,921,768 units sold.",
+     "statistic": "total_sales=2.19e+07"
     }
    ],
    "ask_stop": true,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "segment",
-     "question": "Which categories are driving the most sales among the top 3 brands?"
-    },
-    {
-     "slot": 2,
-     "action": "filter",
-     "question": "How does the right-skew in sales data persist when focusing only on the top 5 brands?"
-    },
-    {
-     "slot": 3,
-     "action": "validate",
-     "question": "Is the observed sales skew consistent when analyzing only the top-selling category?"
-    },
-    {
-     "slot": 4,
-     "action": "contribution",
-     "question": "Which brands account for the highest percentage of total sales, highlighting the skew?"
-    },
-    {
-     "slot": 5,
-     "action": "trend",
-     "question": "How has the sales skew changed from 2007 to 2011 across different brands?"
-    },
-    {
-     "slot": 6,
-     "action": "relationship",
-     "question": "What is the relationship between brand and sales volume in terms of skewness?"
-    },
-    {
-     "slot": 7,
-     "action": "compare",
-     "question": "How does the sales skew differ between SUVs and other categories?"
-    }
-   ]
+   "candidates": []
   },
   {
-   "id": "data-47#2bc00fa5",
-   "run": "data-47",
-   "node": "2bc00fa5",
-   "depth": 0,
-   "child_depth": 1,
-   "goal": "Quantify and analyze the distribution of incidents across categories by calculating incident counts per category and identifying significant discrepancies or imbalances in these counts.",
+   "id": "carsales-easy#7a321b94",
+   "run": "carsales-easy",
+   "node": "7a321b94",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
    "columns": [
+    "year (Time)",
+    "brand (Dimension)",
     "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
+    "model (Dimension)",
+    "sales (Measure)"
    ],
    "path": [
     {
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+     "label": "Sales by category reveal a very strong difference, with 'Midsize' leading at a mean of 149148.974 units sold, while 'Sporty' has the lowest mean at 26794.0, against a grand mean of 87124.787 (Cohen's d=1.364).",
+     "statistic": "p=2.62e-07 eff=1.36 stat=9.74"
+    },
+    {
+     "depth": 1,
+     "action": "trend",
+     "question": "How have the sales of Midsize and Sporty vehicles evolved from 2007 to 2011?",
+     "label": "From 2007 to 2011, Midsize vehicle sales totaled 5,800,310 units, while Sporty vehicle sales totaled 1,000,000 units, indicating a consistent disparity in sales favoring Midsize vehicles.",
+     "statistic": "stat \u2014"
     }
    ],
    "ask_stop": true,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "contribution",
-     "question": "Which categories account for the overall decline in incident counts observed in the Network category over the closed_at period?"
-    },
-    {
-     "slot": 2,
-     "action": "relationship",
-     "question": "Is there a relationship between the priority level of incidents and the decline in counts for the Network category over the closed_at period?"
-    },
-    {
-     "slot": 3,
-     "action": "trend",
-     "question": "How has the overall incident count for the Network category changed over the last year compared to the first six months?"
-    },
-    {
-     "slot": 4,
-     "action": "filter",
-     "question": "Does the declining trend in incident counts for the Network category persist when analyzing only incidents assigned to the Database group?"
-    },
-    {
-     "slot": 5,
-     "action": "validate",
-     "question": "Is the observed decline in incident counts for the Network category robust when controlling for the assigned_to dimension?"
-    },
-    {
-     "slot": 6,
-     "action": "compare",
-     "question": "How does the decline in incident counts for the Network category compare to the decline in counts for the Software category over the closed_at period?"
-    },
-    {
-     "slot": 7,
-     "action": "segment",
-     "question": "Which assignment groups show a significant decline in incident counts for the Network category over the closed_at period?"
-    }
-   ]
-  },
-  {
-   "id": "data-54#fcc04d12",
-   "run": "data-54",
-   "node": "fcc04d12",
-   "depth": 0,
-   "child_depth": 1,
-   "goal": "Perform a time-series analysis of incident assignments by aggregating counts from the 'assigned_to' column over defined time periods (e.g., weekly or monthly) to identify and quantify agents experiencing an increasing trend in workload, which may indicate an overload situation.",
-   "columns": [
-    "category (Dimension)",
-    "state (Dimension)",
-    "closed_at (Time)",
-    "opened_at (Time)",
-    "closed_by (Dimension)",
-    "number (Dimension)",
-    "sys_updated_by (Dimension)",
-    "location (Dimension)",
-    "assigned_to (Dimension)",
-    "caller_id (Dimension)",
-    "sys_updated_on (Time)",
-    "priority (Dimension)",
-    "assignement_group (Dimension)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
-     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "trend",
-     "question": "How has the count of incidents in the 'Network' category changed on a monthly basis over the past year?"
-    },
-    {
-     "slot": 2,
-     "action": "validate",
-     "question": "Is the observed decline in incident counts for the 'Network' category consistent across different assignment groups?"
-    },
-    {
-     "slot": 3,
-     "action": "compare",
-     "question": "How does the decline in incident counts for the 'Network' category compare to the trend in incident counts for the 'Database' category over the same time period?"
-    },
-    {
-     "slot": 4,
-     "action": "filter",
-     "question": "Does the declining trend in incident counts for the 'Network' category persist when focusing only on incidents closed by 'Fred Luddy'?"
-    },
-    {
-     "slot": 5,
-     "action": "relationship",
-     "question": "Is there a relationship between the priority level of incidents and the declining trend in the 'Network' category?"
-    },
-    {
-     "slot": 6,
-     "action": "contribution",
-     "question": "Which categories account for the overall decline in incident counts, particularly focusing on the 'Network' category?"
-    },
-    {
-     "slot": 7,
-     "action": "segment",
-     "question": "Which agents are contributing to the decline in incident counts for the 'Network' category over time?"
-    }
-   ]
+   "candidates": []
   }
  ]
 }

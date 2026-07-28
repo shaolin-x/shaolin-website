@@ -27,11 +27,32 @@ const SHEET_RESPONSES = 'responses';   // one row per person
 const SHEET_ANSWERS = 'answers';       // one row per answer — the analysable shape
 const MAX_BYTES = 400000;              // a real response is a few KB; this only stops abuse
 
+// A Sheets *cell* holds at most 50 000 characters and silently truncates past that, which
+// would leave a raw_json that no longer parses — discovered only when the analysis is run,
+// long after the respondent has gone. The response now carries its scored results as well
+// as its answers, so this is worth guarding rather than assuming. Nothing is lost when it
+// trips: the full body is still attached to the notification email.
+const CELL_LIMIT = 45000;
+
 const RESPONSE_COLS = [
   'received_at', 'id', 'name', 'email', 'background', 'started_at', 'finished_at',
   'n_answered', 'n_picks', 'n_terminate', 'n_skipped', 'seed', 'built_at',
-  'user_agent', 'raw_json',
+  // The headline metrics, lifted out of the results block so the sheet is readable without
+  // parsing raw_json. Blank on a response from a build with no answer key.
+  'kappa_sel', 'attainment', 'std_regret', 'margin_weighted_agree', 'auroc',
+  'metrics_version', 'user_agent', 'raw_json', 'raw_truncated',
 ];
+
+/** One metric's value out of the results block, by a substring of its label. */
+function metric(R, needle) {
+  const summary = ((R.results || {}).summary) || [];
+  for (var i = 0; i < summary.length; i++) {
+    if (String(summary[i].label || '').indexOf(needle) >= 0) {
+      return summary[i].value === null || summary[i].value === undefined ? '' : summary[i].value;
+    }
+  }
+  return '';
+}
 const ANSWER_COLS = [
   'received_at', 'id', 'name', 'decision', 'terminate', 'slot', 'choice', 'note', 'answered_at',
 ];
@@ -91,12 +112,18 @@ function doPost(e) {
     const terms = R.verdicts.filter(function (v) { return v.terminate === true; });
     const skips = R.verdicts.filter(function (v) { return v.choice === 's'; });
 
+    const truncated = body.length > CELL_LIMIT;
     responses.appendRow([
       now, id, name, String(who.email || ''), String(who.background || ''),
       String(R.started_at || ''), String(R.finished_at || ''),
       R.verdicts.length, picks.length, terms.length, skips.length,
       survey.seed === undefined ? '' : survey.seed, String(survey.built_at || ''),
-      String(R.user_agent || ''), body,
+      metric(R, 'κ_sel'), metric(R, 'attainment'), metric(R, 'standardized regret'),
+      metric(R, 'margin-weighted'), metric(R, 'AUROC'),
+      String((R.results || {}).metrics_version || ''),
+      String(R.user_agent || ''),
+      truncated ? body.slice(0, CELL_LIMIT) : body,
+      truncated ? 'yes — use the emailed attachment' : '',
     ]);
 
     const answers = tab(SHEET_ANSWERS, ANSWER_COLS);

@@ -279,33 +279,123 @@ def candidate_pool(
     return kept, len(pool) - len(kept)
 
 
+_UTILITY_RE = re.compile(r"continuation utility\s*([\d.]+)\s*<\s*([\d.]+)")
+
+
+def _utility_from_reason(reason: str) -> tuple[float | None, float | None]:
+    """`(utility, threshold)` scraped out of a termination reason, or `(None, None)`.
+
+    Run folders written before `report.json` carried a structured `continuation` object
+    still print the judge's arithmetic into the reason prose — `"continuation utility 0.30
+    < 0.35 — …"`. That recovers the utility for *terminated* nodes on those runs. It cannot
+    recover anything for a node the judge let continue: nothing is printed in that case,
+    which is exactly the gap the structured field closes.
+    """
+    m = _UTILITY_RE.search(reason or "")
+    if not m:
+        return None, None
+    try:
+        return float(m.group(1)), float(m.group(2))
+    except ValueError:                                   # pragma: no cover - regex guards it
+        return None, None
+
+
+def continuations(report: dict) -> dict[str, dict]:
+    """`{head record id: the judge's continuation ruling}` from `report.json`.
+
+    Newer runs hang a `continuation` object off the trajectory step the judge ruled on::
+
+        {"depth": 1, "head_id": "7a321b94ef50493c", "utility": 0.3, "threshold": 0.35,
+         "decision": "terminate", "criteria": {...}, "rationale": "..."}
+
+    `head_id` is a record id, so this joins straight onto `records`. It is the only source
+    that carries a *continue* verdict with a utility attached — `terminated` only ever
+    describes the trajectories that stopped — which is what makes the margin and the ROC
+    metrics possible at all.
+
+    Any top-level list whose items carry a `trajectory` list is walked, rather than the two
+    section names in use today, so a future `pruned[]` that grows trajectories is picked up
+    without another edit. Older runs have the key nowhere and get `{}`.
+    """
+    out: dict[str, dict] = {}
+    for value in report.values():
+        if not isinstance(value, list):
+            continue
+        for item in value:
+            if not isinstance(item, dict) or not isinstance(item.get("trajectory"), list):
+                continue
+            for step in item["trajectory"]:
+                cont = step.get("continuation") if isinstance(step, dict) else None
+                if not isinstance(cont, dict):
+                    continue
+                head = cont.get("head_id")
+                # First ruling wins: a trajectory can be listed twice (it is both an
+                # insight and the head of a terminated line) and both copies are the same
+                # judge call, so this is de-duplication rather than a real conflict.
+                if isinstance(head, str) and head not in out:
+                    out[head] = cont
+    return out
+
+
 def termination_verdicts(
-    report: dict, records: dict[str, dict], children: dict[str, list[str]]
-) -> dict[str, tuple[bool, str]]:
-    """`{record id: (did the search stop here, the judge's reason)}`.
+    report: dict, records: dict[str, dict], children: dict[str, list[str]],
+    conts: dict[str, dict] | None = None,
+) -> dict[str, dict]:
+    """`{record id: {terminate, reason, source, utility, threshold, criteria}}`.
 
-    Two verdicts are recoverable from the artifacts:
+    Three verdicts are recoverable, and they are *not* equally good evidence — which is why
+    `source` travels with every one of them:
 
-    * **terminate** — the node heads a trajectory the multi-agent judge early-stopped
-      (`report.json.terminated`, matched to its head record through `trajectory_id`). Such
-      a node has no children *and* no pruned questions: the search stopped before ever
-      proposing a follow-up, which is why it is invisible to the candidate question and
-      needs this one.
-    * **continue** — at least one child was answered, so the search did go on from here.
+    * `"judged"` — `report.json` carries the judge's own ruling for this node, utility and
+      criteria included. The only source that yields a judged **continue**, and the only
+      one the margin-weighted and ROC metrics may use.
+    * `"terminated"` — the node heads a trajectory in `report.json.terminated`, matched
+      through `trajectory_id`. Such a node has no children *and* no pruned questions: the
+      search stopped before proposing a follow-up, which is why it is invisible to the
+      candidate question and needs this one. Utility is scraped from the reason prose.
+    * `"inferred"` — at least one child was answered, so the search did go on from here.
+      Nothing was actually ruled: the beam moved on. There is no utility, and scoring a
+      human against it is a weaker claim than the other two, so callers report it apart.
 
     Everything else is left out. A node whose branch merely lost the level's ranking was
-    never judged: the beam moved on without deciding anything about it, so scoring a human
-    "terminate" against it would be scoring against nothing.
+    never judged at all, so scoring a human "terminate" against it would be scoring against
+    nothing.
     """
-    out: dict[str, tuple[bool, str]] = {}
+    out: dict[str, dict] = {}
+
+    def put(rid: str, terminate: bool, reason: str, source: str,
+            utility: float | None, threshold: float | None, criteria: dict | None) -> None:
+        out[rid] = {
+            "terminate": terminate, "reason": reason, "source": source,
+            "utility": utility, "threshold": threshold, "criteria": criteria,
+        }
+
+    for rid, cont in (conts or {}).items():
+        if rid not in records:
+            continue
+        util, thr = cont.get("utility"), cont.get("threshold")
+        decision = str(cont.get("decision") or "").lower()
+        terminate = decision == "terminate"
+        if not decision and _numeric(util) and _numeric(thr):
+            terminate = float(util) < float(thr)          # ruling implied by the arithmetic
+        put(rid, terminate, str(cont.get("rationale") or ""), "judged",
+            float(util) if _numeric(util) else None,
+            float(thr) if _numeric(thr) else None,
+            cont.get("criteria") if isinstance(cont.get("criteria"), dict) else None)
+
     for t in report.get("terminated", []):
         heads = [r for r in records.values() if r.get("trajectory_id") == t.get("id")]
         if heads:
             head = max(heads, key=lambda r: r.get("depth", 0))
-            out[head["id"]] = (True, str(t.get("reason") or ""))
+            if head["id"] in out:                        # a judged ruling already covers it
+                continue
+            reason = str(t.get("reason") or "")
+            util, thr = _utility_from_reason(reason)
+            put(head["id"], True, reason, "terminated", util, thr, None)
+
     for rid in records:
         if children.get(rid) and rid not in out:
-            out[rid] = (False, "")
+            put(rid, False, "", "inferred", None, None, None)
     return out
 
 
@@ -360,7 +450,7 @@ def decision_points(
         pruned_by_parent[q["parent_id"]].append(q)
 
     thresholds = level_thresholds(report, records)
-    verdicts = termination_verdicts(report, records, children)
+    verdicts = termination_verdicts(report, records, children, continuations(report))
     traced = breakdowns_from_trace(run_dir)
     weights = lambdas(run_dir)
     goal = report.get("goal") or repository.get("goal") or ""
@@ -369,7 +459,9 @@ def decision_points(
     notes: list[str] = []
     out: dict[str, dict] = {}
     for rid, rec in records.items():
-        stop, reason = verdicts.get(rid, (None, ""))
+        verdict = verdicts.get(rid)
+        stop = verdict["terminate"] if verdict else None
+        reason = verdict["reason"] if verdict else ""
         offered = len(children.get(rid, [])) + len(pruned_by_parent.get(rid, []))
         if not offered and stop is None:                 # a leaf nobody judged: nothing to ask
             continue
@@ -408,6 +500,7 @@ def decision_points(
             "depth": depth,
             "child_depth": depth + 1,
             "trajectory": [s["id"] for s in path_to(rid, records)],
+            "trajectory_id": rec.get("trajectory_id"),
             "path": path,
             "candidates": pool,
             "n_selected": sum(1 for c in pool if c["status"] in SELECTED),
@@ -416,6 +509,17 @@ def decision_points(
             # None when no verdict is recoverable — the node is then candidates-only.
             "d2i_terminate": stop,
             "terminate_reason": reason,
+            # How good the verdict above is: "judged" carries the judge's own utility,
+            # "terminated" scrapes it from prose, "inferred" has none. Only "judged" rows
+            # may feed the margin and ROC metrics — see `stop_row`.
+            "terminate_source": verdict["source"] if verdict else None,
+            "continuation": {
+                "utility": verdict["utility"], "threshold": verdict["threshold"],
+                "criteria": verdict["criteria"],
+            } if verdict and verdict["utility"] is not None else None,
+            "stop_margin": (verdict["utility"] - verdict["threshold"])
+            if verdict and verdict["utility"] is not None
+            and verdict["threshold"] is not None else None,
         }
     return out, trajectories(records, children), notes
 
@@ -693,12 +797,189 @@ def save_session(session: dict, path: Path) -> None:
 
 # ----------------------------------------------------------------- metrics
 
-def _harmonic(n: int) -> float:
-    return math.fsum(1.0 / j for j in range(1, n + 1))
+# Bumped whenever a metric's definition changes. `survey.json` carries it and the browser
+# echoes it back in the response, so a page served against a stale bundle is detectable
+# rather than silently reporting numbers computed two different ways.
+METRICS_VERSION = "2"
+
+# The metric surface, in report order. `key` is the per-row field aggregated; `base` the
+# per-row chance column (exact, never a closed form — see `pick_row`); `est` how the column
+# is reduced, which is what makes κ and the weighted mean fit the same table as a plain
+# rate; `only` restricts the rows a metric may use.
+METRIC_TABLE = [
+    {"key": "is_top", "base": "e_top", "label": "κ_sel (chance-corrected agreement)",
+     "fmt": "num", "est": "kappa", "group": "selection", "only": None},
+    {"key": "is_top", "base": "e_top", "label": "  ├ raw agreement rate",
+     "fmt": "pct", "est": "mean", "group": "selection", "only": None},
+    {"key": "attainment", "base": "e_attainment", "label": "utility attainment [0,1]",
+     "fmt": "num", "est": "mean", "group": "selection", "only": None},
+    {"key": "d_std", "base": "e_d_std", "label": "standardized regret (pool SDs)",
+     "fmt": "num", "est": "mean", "group": "selection", "only": "d_std"},
+    {"key": "within_noise", "base": "e_within_noise", "label": "  └ within-noise rate (d<0.5)",
+     "fmt": "pct", "est": "mean", "group": "selection", "only": "d_std"},
+    {"key": "action_hit", "base": "e_action_hit", "label": "action agreement",
+     "fmt": "pct", "est": "mean", "group": "selection", "only": None},
+    {"key": "agree", "base": None, "label": "margin-weighted agreement",
+     "fmt": "pct", "est": "wmean", "group": "continuation", "only": "margin"},
+    {"key": "agree", "base": None, "label": "  ├ unweighted (w≡1)",
+     "fmt": "pct", "est": "mean", "group": "continuation", "only": "margin"},
+    {"key": "utility", "base": None, "label": "AUROC (utility vs human label)",
+     "fmt": "num", "est": "auroc", "group": "continuation", "only": "margin"},
+    {"key": "utility", "base": None, "label": "implied human threshold τ̂",
+     "fmt": "num", "est": "youden", "group": "continuation", "only": "margin"},
+]
+
+# A pick is "within noise" of the top when it falls under half a pool standard deviation of
+# it — Cohen's conventional small-effect line, used here to separate a real disagreement
+# from one D2I's own scores cannot resolve.
+WITHIN_NOISE_D = 0.5
+
+
+def _pool_stats(scores: list[float]) -> dict:
+    """Everything about a candidate pool that does not depend on which one was picked."""
+    n = len(scores)
+    top, lo = max(scores), min(scores)
+    mean = math.fsum(scores) / n
+    var = math.fsum((s - mean) ** 2 for s in scores) / n          # population SD: the pool
+    sd = math.sqrt(var)                                           # is the whole population
+    ordered = sorted(scores, reverse=True)
+    return {
+        "n": n, "top": top, "lo": lo, "mean": mean, "sd": sd,
+        "span": top - lo,
+        "top2_gap": (ordered[0] - ordered[1]) if n > 1 else 0.0,
+        "n_top": sum(1 for s in scores if s == top),
+    }
+
+
+def _one_pick(pool: dict, score: float, action: str, top_action: str) -> dict:
+    """The three selection metrics for a single candidate. Shared by the real pick and by
+    each of the `n` hypothetical picks the exact chance baseline averages over."""
+    return {
+        # Score equality, not slot identity: an exact tie with the top is agreement, not a
+        # distinction D2I ever drew.
+        "is_top": 1.0 if score == pool["top"] else 0.0,
+        # A flat pool has nothing to attain and nothing to regret; it is scored as full
+        # agreement and counted separately so it can be excluded on inspection.
+        "attainment": ((score - pool["lo"]) / pool["span"]) if pool["span"] > 0 else 1.0,
+        "d_std": ((pool["top"] - score) / pool["sd"]) if pool["sd"] > 0 else None,
+        "within_noise": (1.0 if (pool["top"] - score) / pool["sd"] < WITHIN_NOISE_D else 0.0)
+        if pool["sd"] > 0 else None,
+        "action_hit": 1.0 if action == top_action else 0.0,
+    }
+
+
+def pick_row(decision: dict, true_index: int) -> dict:
+    """One scored row for "the human picked `candidates[true_index]` at this decision".
+
+    The single definition of the selection metrics. `build_survey.py` calls it once per slot
+    at build time and publishes the result in `truth.json`, so the browser only ever
+    averages numbers computed here — there is no second implementation to drift.
+
+    Every chance baseline is the exact mean of the metric over all `n` candidates, i.e.
+    literally "what a uniform pick from this pool would have scored". No closed form, so
+    ties, flat pools and odd pool sizes are all handled by construction.
+    """
+    cands = decision["candidates"]
+    scores = [float(c["score"]) for c in cands]
+    pool = _pool_stats(scores)
+    top_action = cands[0]["action"]
+    pick = cands[true_index]
+
+    row = _one_pick(pool, float(pick["score"]), pick["action"], top_action)
+    each = [_one_pick(pool, s, c["action"], top_action) for s, c in zip(scores, cands)]
+
+    def chance(key: str) -> float | None:
+        vals = [e[key] for e in each if e[key] is not None]
+        return math.fsum(vals) / len(vals) if vals else None
+
+    row.update({
+        "id": decision["id"],
+        "run": decision["run"],
+        "depth": decision["child_depth"],
+        # Two survey items can hang off one trajectory, so this is the cluster the
+        # bootstrap resamples — not the decision.
+        "cluster": decision.get("trajectory_id") or decision["id"],
+        "n": pool["n"],
+        "pick_action": pick["action"],
+        "top_action": top_action,
+        "pick_status": pick["status"],
+        "flat_pool": 1.0 if pool["span"] <= 0 else 0.0,
+        "pool_sd": pool["sd"],
+        "top2_gap": pool["top2_gap"],
+        "e_top": chance("is_top"),
+        "e_attainment": chance("attainment"),
+        "e_d_std": chance("d_std"),
+        "e_within_noise": chance("within_noise"),
+        "e_action_hit": chance("action_hit"),
+        # Component attribution: the same two headline estimators recomputed against each
+        # single term's ranking, so the table stays one-dimensional.
+        "terms": _term_picks(cands, true_index),
+    })
+    return row
+
+
+def _term_picks(cands: list[dict], true_index: int) -> dict[str, dict]:
+    """`{term: {is_top, attainment, e_top, e_attainment}}` — the pool re-ranked by one
+    score component at a time. A term with no usable breakdown is left out entirely rather
+    than defaulted, so it shows as "not estimable" instead of as agreement."""
+    out: dict[str, dict] = {}
+    for key, short in TERMS:
+        vals = [(c.get("breakdown") or {}).get(key) for c in cands]
+        if not all(_numeric(v) for v in vals):
+            continue
+        vals = [float(v) for v in vals]
+        pool = _pool_stats(vals)
+        each = [_one_pick(pool, v, "", "") for v in vals]
+        mine = _one_pick(pool, vals[true_index], "", "")
+        out[short] = {
+            "is_top": mine["is_top"],
+            "attainment": mine["attainment"],
+            "e_top": math.fsum(e["is_top"] for e in each) / len(each),
+            "e_attainment": math.fsum(e["attainment"] for e in each) / len(each),
+        }
+    return out
+
+
+def stop_row(decision: dict, human: bool) -> dict:
+    """One scored row for the human's stop/continue call at this decision.
+
+    `source` decides what the row may be used for, and the line that matters is whether the
+    judge actually ruled — not which artifact recorded it. `"judged"` and `"terminated"`
+    both carry the judge's own utility (structured, and scraped from its printed arithmetic
+    respectively), so both feed the margin-weighted, ROC and threshold metrics. `"inferred"`
+    never does: nothing was ruled there, so `margin` is `None`, which is what the
+    `only: "margin"` filter keys off.
+
+    The catch with a `"terminated"`-only sample is class imbalance rather than validity —
+    every such row is a terminate by construction, so AUROC has one class and returns
+    `None`. Only `"judged"` rows can supply a *continue* with a utility attached, which is
+    why `n_stop_judged` is worth reporting on its own.
+    """
+    model = bool(decision["d2i_terminate"])
+    cont = decision.get("continuation") or {}
+    utility, tau = cont.get("utility"), cont.get("threshold")
+    source = decision.get("terminate_source")
+    usable = source in ("judged", "terminated") and utility is not None and tau is not None
+    return {
+        "id": decision["id"],
+        "run": decision["run"],
+        "depth": decision["depth"],
+        "cluster": decision.get("trajectory_id") or decision["id"],
+        "source": source,
+        "model": model,
+        "human": bool(human),
+        "agree": 1.0 if model == bool(human) else 0.0,
+        # `human_continue` is the ROC label; utility is the score that should order it.
+        "human_continue": 0.0 if human else 1.0,
+        "utility": float(utility) if usable else None,
+        "threshold": float(tau) if usable else None,
+        "margin": (float(utility) - float(tau)) if usable else None,
+        "criteria": cont.get("criteria") if usable else None,
+    }
 
 
 def scored_picks(session: dict) -> list[dict]:
-    """One row per judged (non-skipped) decision, with its random-pick baselines.
+    """One row per judged (non-skipped) decision.
 
     Recomputed from the pick list every time, like human_eval's elo/tally — so `u` needs no
     rollback and `--report` works on a half-finished session.
@@ -706,52 +987,10 @@ def scored_picks(session: dict) -> list[dict]:
     by_id = {d["id"]: d for d in session.get("decisions", [])}
     rows: list[dict] = []
     for v in session.get("verdicts", []):
-        if v.get("true_index") is None:
-            continue
         d = by_id.get(v["decision"])
-        if d is None:
+        if v.get("true_index") is None or d is None or not d.get("candidates"):
             continue
-        cands = d["candidates"]
-        n = len(cands)
-        scores = [float(c["score"]) for c in cands]
-        pick = cands[v["true_index"]]
-        p, top, lo = float(pick["score"]), scores[0], scores[-1]
-        # Competition ranking with a strict `>`: an exact tie with the top counts as
-        # agreement rather than punishing the judge for a distinction D2I did not draw.
-        rank = 1 + sum(1 for s in scores if s > p)
-        rng_span = top - lo
-        k = d.get("n_selected") or 0
-        tau = d.get("threshold")
-        rows.append({
-            "id": d["id"],
-            "run": d["run"],
-            "depth": d["child_depth"],
-            "top_action": cands[0]["action"],
-            "pick_action": pick["action"],
-            "pick_status": pick["status"],
-            "n": n,
-            "rank": rank,
-            "top1": 1.0 if rank == 1 else 0.0,
-            "rr": 1.0 / rank,
-            "n_rank": (n - rank) / (n - 1) if n > 1 else 1.0,
-            "gap": top - p,
-            "n_gap": (top - p) / rng_span if rng_span > 0 else 0.0,
-            "action_hit": 1.0 if pick["action"] == cands[0]["action"] else 0.0,
-            "k": k,
-            "in_k": (1.0 if rank <= k else 0.0) if k else None,
-            "over_tau": (1.0 if p >= tau else 0.0) if tau is not None else None,
-            "d2i_over_tau": (1.0 if top >= tau else 0.0) if tau is not None else None,
-            # Baselines: what a uniformly random pick from this same pool would score.
-            "e_top1": sum(1 for s in scores if s == top) / n,
-            "e_rank": (n + 1) / 2,
-            "e_rr": _harmonic(n) / n,
-            "e_n_rank": 0.5,
-            "e_gap": top - (math.fsum(scores) / n),
-            "e_n_gap": ((top - math.fsum(scores) / n) / rng_span) if rng_span > 0 else 0.0,
-            "e_action_hit": sum(1 for c in cands if c["action"] == cands[0]["action"]) / n,
-            "e_in_k": (k / n) if k else None,
-            "e_over_tau": (sum(1 for s in scores if s >= tau) / n) if tau is not None else None,
-        })
+        rows.append(pick_row(d, v["true_index"]))
     return rows
 
 
@@ -763,11 +1002,7 @@ def termination_rows(session: dict) -> list[dict]:
         d = by_id.get(v["decision"])
         if d is None or v.get("terminate") is None or d.get("d2i_terminate") is None:
             continue
-        rows.append({
-            "id": d["id"], "run": d["run"], "depth": d["depth"],
-            "model": bool(d["d2i_terminate"]), "human": bool(v["terminate"]),
-            "agree": 1.0 if bool(d["d2i_terminate"]) == bool(v["terminate"]) else 0.0,
-        })
+        rows.append(stop_row(d, bool(v["terminate"])))
     return rows
 
 
@@ -775,47 +1010,300 @@ def _mean(xs: list[float]) -> float | None:
     return math.fsum(xs) / len(xs) if xs else None
 
 
-def summarise(rows: list[dict]) -> list[tuple[str, str, str, int]]:
-    """`(label, human, random, n)` for every metric, formatted for the table."""
-    def col(key: str, base: str | None, fmt: str, only: str | None = None
-            ) -> tuple[str, str, int]:
-        sel = [r for r in rows if only is None or r[only] is not None]
-        h = _mean([r[key] for r in sel if r[key] is not None])
-        b = _mean([r[base] for r in sel if r[base] is not None]) if base else None
+# ----------------------------------------------------------------- estimators
+#
+# Deliberately tiny and dependency-free: `survey/metrics.js` reimplements exactly these
+# four, and `survey/tests/` pins the two against each other. Anything more elaborate lives
+# in `score_survey.py`, which is free to use scipy.
+
+def kappa(obs: list[float], exp: list[float]) -> float | None:
+    """Chance-corrected agreement with a *heterogeneous* per-item baseline.
+
+    `(ā − ē)/(1 − ē)` — Cohen's correction, but the expected rate varies by item because
+    the pools differ in size and in how many candidates share the top score. 0 is chance,
+    1 is perfect, negative is worse than guessing. `None` when the baseline is already 1
+    (every candidate tied at the top), where the correction is undefined rather than 0.
+    """
+    a, e = _mean(obs), _mean(exp)
+    if a is None or e is None or e >= 1.0:
+        return None
+    return (a - e) / (1.0 - e)
+
+
+def wmean(vals: list[float], weights: list[float]) -> float | None:
+    """Weight-normalised mean; falls back to the plain mean when every weight is 0 (all
+    decisions sat exactly on the threshold), which is the sensible limit rather than 0/0."""
+    if not vals:
+        return None
+    total = math.fsum(weights)
+    if total <= 0:
+        return _mean(vals)
+    return math.fsum(v * w for v, w in zip(vals, weights)) / total
+
+
+def auroc(scores: list[float], labels: list[float]) -> float | None:
+    """Tie-corrected AUC — the Mann–Whitney statistic, half credit for ties.
+
+    Utilities are heavily quantised (mass sits on 0.30/0.54/0.66), so the tie term is not a
+    rounding detail here: an untied AUC would silently reward or punish the model for
+    orderings its own judge never expressed. `None` unless both classes are present.
+    """
+    pos = [s for s, y in zip(scores, labels) if y > 0]
+    neg = [s for s, y in zip(scores, labels) if y <= 0]
+    if not pos or not neg:
+        return None
+    wins = math.fsum(
+        1.0 if p > q else 0.5 if p == q else 0.0
+        for p in pos for q in neg
+    )
+    return wins / (len(pos) * len(neg))
+
+
+def youden(scores: list[float], labels: list[float]) -> tuple[float, float, float] | None:
+    """`(τ̂, lo, hi)` — the cut on `scores` maximising balanced agreement, and the interval
+    of cuts that tie for it.
+
+    "Continue" is predicted when `score >= cut`. Because the utilities are quantised, a
+    single argmax would be an artefact of which candidate cut happened to be tried first;
+    the whole optimal interval is returned instead, and `τ̂` is its midpoint.
+    """
+    pos = [s for s, y in zip(scores, labels) if y > 0]
+    neg = [s for s, y in zip(scores, labels) if y <= 0]
+    if not pos or not neg:
+        return None
+    lo, hi = min(scores), max(scores)
+    cuts = sorted({lo - 1e-9, hi + 1e-9, *scores})
+    best, keep = -2.0, []
+    for cut in cuts:
+        j = (sum(1 for s in pos if s >= cut) / len(pos)
+             - sum(1 for s in neg if s >= cut) / len(neg))
+        if j > best + 1e-12:
+            best, keep = j, [cut]
+        elif abs(j - best) <= 1e-12:
+            keep.append(cut)
+    return (math.fsum(keep) / len(keep), min(keep), max(keep))
+
+
+def wilson(k: float, n: int, z: float = 1.959963984540054) -> tuple[float | None, float | None]:
+    """Wilson score interval for a proportion — the port of `metrics.js:wilson`.
+
+    Preferred to the normal approximation for the plain rates: at the counts one respondent
+    produces, Wald intervals routinely run past 0 or 1.
+    """
+    if not n:
+        return None, None
+    p = k / n
+    d = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / d
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+    return max(0.0, centre - half), min(1.0, centre + half)
+
+
+def mulberry32(seed: int):
+    """A 32-bit PRNG, reimplemented byte-for-byte in `survey/metrics.js`.
+
+    The browser and this module must produce the *same* confidence interval for the same
+    answers, or a respondent's downloaded table would disagree with the analysis run over
+    it. Python's `random` and JS's `Math.random` cannot both be pinned, so neither is used:
+    this is short enough to hold identical in two languages and is seeded per report.
+    """
+    state = seed & 0xFFFFFFFF
+
+    def nxt() -> float:
+        nonlocal state
+        state = (state + 0x6D2B79F5) & 0xFFFFFFFF
+        t = state
+        t = (t ^ (t >> 15)) * (t | 1) & 0xFFFFFFFF
+        t ^= (t + ((t ^ (t >> 7)) * (t | 61) & 0xFFFFFFFF)) & 0xFFFFFFFF
+        t &= 0xFFFFFFFF
+        return ((t ^ (t >> 14)) & 0xFFFFFFFF) / 4294967296.0
+
+    return nxt
+
+
+# Percentile, not BCa. At the cluster counts this instrument produces (often under 20) the
+# bias-correction and acceleration terms are themselves estimated from too little data to
+# help, and BCa needs an inverse normal CDF that would have to be duplicated in JS —
+# two ways for the numbers to drift for no gain in coverage.
+BOOTSTRAP_DRAWS = 2000
+BOOTSTRAP_SEED = 20260728
+
+
+def cluster_bootstrap(rows: list[dict], stat, seed: int = BOOTSTRAP_SEED,
+                      draws: int = BOOTSTRAP_DRAWS, alpha: float = 0.05
+                      ) -> tuple[float | None, float | None]:
+    """A 95% percentile CI for `stat(rows)`, resampling **clusters** rather than rows.
+
+    Two survey items can descend from one trajectory — one judge call, two questions — so
+    they are not independent observations. Resampling rows directly would treat them as if
+    they were and report an interval that is too narrow. Clusters are drawn with
+    replacement and their rows taken whole.
+    """
+    if not rows:
+        return None, None
+    groups: dict[object, list[dict]] = defaultdict(list)
+    for r in rows:
+        groups[r.get("cluster", r.get("id"))].append(r)
+    keys = sorted(groups, key=str)
+    if len(keys) < 2:
+        return None, None
+    rnd = mulberry32(seed)
+    got: list[float] = []
+    for _ in range(draws):
+        sample: list[dict] = []
+        for _ in range(len(keys)):
+            sample.extend(groups[keys[int(rnd() * len(keys)) % len(keys)]])
+        value = stat(sample)
+        if value is not None:
+            got.append(value)
+    if len(got) < draws // 10:            # too many resamples were not estimable to trust
+        return None, None
+    got.sort()
+
+    def pick(q: float) -> float:
+        return got[min(len(got) - 1, max(0, int(q * (len(got) - 1) + 0.5)))]
+
+    return pick(alpha / 2), pick(1 - alpha / 2)
+
+
+def estimate(spec: dict, rows: list[dict]) -> tuple[float | None, float | None, int]:
+    """`(value, chance, n)` for one `METRIC_TABLE` entry over `rows`."""
+    only = spec.get("only")
+    sel = [r for r in rows if (only is None or r.get(only) is not None)
+           and r.get(spec["key"]) is not None]
+    if not sel:
+        return None, None, 0
+    vals = [float(r[spec["key"]]) for r in sel]
+    base = ([float(r[spec["base"]]) for r in sel]
+            if spec.get("base") and all(r.get(spec["base"]) is not None for r in sel)
+            else None)
+    est = spec.get("est", "mean")
+    if est == "mean":
+        return _mean(vals), (_mean(base) if base else None), len(sel)
+    if est == "kappa":
+        return kappa(vals, base or []), 0.0, len(sel)
+    if est == "wmean":
+        return wmean(vals, [abs(float(r["margin"])) for r in sel]), None, len(sel)
+    if est == "auroc":
+        return auroc(vals, [float(r["human_continue"]) for r in sel]), 0.5, len(sel)
+    if est == "youden":
+        # Not identifiable when every utility sits on one side of D2I's own threshold:
+        # there is no evidence about where the human would have cut on the other side, so
+        # any argmax is an artefact of the range that happened to be sampled.
+        taus = [r["threshold"] for r in sel if r.get("threshold") is not None]
+        if taus and (max(vals) < min(taus) or min(vals) >= max(taus)):
+            return None, None, len(sel)
+        got = youden(vals, [float(r["human_continue"]) for r in sel])
+        return (got[0] if got else None), None, len(sel)
+    raise ValueError(f"unknown estimator {est!r}")
+
+
+def aggregate(picks: list[dict], stops: list[dict] | None = None,
+              seed: int = BOOTSTRAP_SEED) -> list[dict]:
+    """The full metric table as data: `{key, label, group, fmt, value, chance, lo, hi, n}`.
+
+    This is what the page renders, what the download carries and what `--check-parity`
+    compares, so it is deliberately free of formatting.
+    """
+    out = []
+    for spec in METRIC_TABLE:
+        rows = picks if spec["group"] == "selection" else (stops or [])
+        value, chance_, n = estimate(spec, rows)
+        lo = hi = None
+        if value is not None:
+            lo, hi = cluster_bootstrap(rows, lambda rs: estimate(spec, rs)[0], seed=seed)
+        out.append({
+            "key": spec["key"], "label": spec["label"], "group": spec["group"],
+            "fmt": spec["fmt"], "est": spec.get("est", "mean"),
+            "value": value, "chance": chance_, "lo": lo, "hi": hi, "n": n,
+        })
+    return out
+
+
+def summarise(picks: list[dict], stops: list[dict] | None = None
+              ) -> list[tuple[str, str, str, int]]:
+    """`(label, human, chance, n)` for every metric, formatted for the table."""
+    out: list[tuple[str, str, str, int]] = []
+    for spec in METRIC_TABLE:
+        rows = picks if spec["group"] == "selection" else (stops or [])
+        value, chance_, n = estimate(spec, rows)
+
         def cell(x: float | None) -> str:
             if x is None:
                 return f"{'—':>9}"
-            return f"{100 * x:>8.1f}%" if fmt == "pct" else f"{x:>9.3f}"
-        return cell(h), cell(b), len(sel)
+            return f"{100 * x:>8.1f}%" if spec["fmt"] == "pct" else f"{x:>9.3f}"
 
-    out: list[tuple[str, str, str, int]] = []
-    for label, key, base, fmt, only in (
-        ("top-1 agreement rate", "top1", "e_top1", "pct", None),
-        ("action agreement", "action_hit", "e_action_hit", "pct", None),
-        ("mean rank", "rank", "e_rank", "num", None),
-        ("MRR", "rr", "e_rr", "num", None),
-        ("normalised rank [0,1]", "n_rank", "e_n_rank", "num", None),
-        ("score gap to D2I's top", "gap", "e_gap", "num", None),
-        ("score gap (normalised)", "n_gap", "e_n_gap", "num", None),
-        ("answered? per-node top-k", "in_k", "e_in_k", "pct", "in_k"),
-        ("answered? level threshold", "over_tau", "e_over_tau", "pct", "over_tau"),
-        ("... D2I's own top pick", "d2i_over_tau", None, "pct", "d2i_over_tau"),
-    ):
-        h, b, n = col(key, base, fmt, only)
-        out.append((label, h, b, n))
+        out.append((spec["label"], cell(value), cell(chance_), n))
     return out
 
 
 def by_key(rows: list[dict], key: str) -> dict[object, dict[str, float | int]]:
-    """Per-depth / per-action / per-run breakdown: n, top-1 rate, mean normalised rank."""
+    """Per-depth / per-action / per-run breakdown: n, agreement rate, mean attainment."""
     groups: dict[object, list[dict]] = defaultdict(list)
     for r in rows:
         groups[r[key]].append(r)
     return {
-        k: {"n": len(v), "top1": _mean([r["top1"] for r in v]) or 0.0,
-            "n_rank": _mean([r["n_rank"] for r in v]) or 0.0}
+        k: {"n": len(v), "is_top": _mean([r["is_top"] for r in v]) or 0.0,
+            "attainment": _mean([r["attainment"] for r in v]) or 0.0}
         for k, v in groups.items()
     }
+
+
+def confusion(rows: list[dict], row_key: str, col_key: str,
+              labels: list[str] | None = None) -> tuple[list[str], list[list[int]]]:
+    """`(labels, matrix)` with `matrix[i][j]` = rows whose `row_key` is `labels[i]` and
+    `col_key` is `labels[j]`. Used for both the 7×7 action matrix and the 2×2 stop one."""
+    if labels is None:
+        labels = sorted({str(r[row_key]) for r in rows} | {str(r[col_key]) for r in rows})
+    index = {lab: i for i, lab in enumerate(labels)}
+    m = [[0] * len(labels) for _ in labels]
+    for r in rows:
+        i, j = index.get(str(r[row_key])), index.get(str(r[col_key]))
+        if i is not None and j is not None:
+            m[i][j] += 1
+    return labels, m
+
+
+def term_attribution(picks: list[dict]) -> list[dict]:
+    """Component attribution: κ_sel and attainment recomputed per score term.
+
+    Only picks whose pool had a usable breakdown for that term contribute, so `n` varies by
+    row and is reported."""
+    out = []
+    for _, short in TERMS:
+        sel = [p["terms"][short] for p in picks if short in (p.get("terms") or {})]
+        if not sel:
+            out.append({"term": short, "n": 0, "kappa": None, "attainment": None})
+            continue
+        out.append({
+            "term": short,
+            "n": len(sel),
+            "kappa": kappa([s["is_top"] for s in sel], [s["e_top"] for s in sel]),
+            "attainment": _mean([s["attainment"] for s in sel]),
+            "e_attainment": _mean([s["e_attainment"] for s in sel]),
+        })
+    return out
+
+
+def criterion_attribution(stops: list[dict]) -> list[dict]:
+    """Continuation attribution: AUROC of each judge criterion against the human label,
+    for comparison with the AUROC of the aggregate utility."""
+    sel = [s for s in stops if s.get("criteria")]
+    names: list[str] = []
+    for s in sel:
+        for k in s["criteria"]:
+            if k not in names:
+                names.append(k)
+    labels = [float(s["human_continue"]) for s in sel]
+    out = []
+    for name in names:
+        vals = [s["criteria"].get(name) for s in sel]
+        if not all(_numeric(v) for v in vals):
+            out.append({"criterion": name, "n": 0, "auroc": None})
+            continue
+        out.append({"criterion": name, "n": len(sel),
+                    "auroc": auroc([float(v) for v in vals], labels)})
+    return out
 
 
 def report(session: dict) -> list[str]:
@@ -843,51 +1331,111 @@ def report(session: dict) -> list[str]:
         f"({skipped} without a pick, {len(decisions) - len(verdicts)} unjudged)",
     ]
 
-    # -- stage one: should the search have stopped here? -------------------
-    lines += ["", "terminate or continue", "",
-              f"{'metric':>28}  {'human':>9}  {'random':>9}  {'n':>4}", "-" * 56]
-    if stops:
-        agree = _mean([r["agree"] for r in stops]) or 0.0
-        lines.append(f"{'agreement with the judge':>28}  {100 * agree:>8.1f}%  {50.0:>8.1f}%  "
-                     f"{len(stops):>4}")
-        for want, label in ((True, "... where it terminated"), (False, "... where it continued")):
-            sub = [r for r in stops if r["model"] is want]
-            if sub:
-                lines.append(f"{label:>28}  {100 * (_mean([r['agree'] for r in sub]) or 0):>8.1f}%"
-                             f"  {'—':>9}  {len(sub):>4}")
-        lines += ["-" * 56, "",
-                  f"  {'confusion':<17}{'human continue':>16}  {'human terminate':>16}"]
-        for want, name in ((False, "model continue"), (True, "model terminate")):
-            row = [r for r in stops if r["model"] is want]
-            lines.append(f"  {name:<17}{sum(1 for r in row if not r['human']):>16}  "
-                         f"{sum(1 for r in row if r['human']):>16}")
-    else:
-        lines.append(f"{'(no stop/continue calls yet)':>28}")
-
-    # -- stage two: which question next? -----------------------------------
-    lines += ["", "which question next", "",
-              f"{'metric':>28}  {'human':>9}  {'random':>9}  {'n':>4}", "-" * 56]
-    if rows:
-        for label, human, rand, n in summarise(rows):
-            lines.append(f"{label:>28}  {human}  {rand}  {n:>4}")
-    else:
-        lines.append(f"{'(no candidate picks yet)':>28}")
+    # -- the metric table --------------------------------------------------
+    # "ruled" = the judge actually decided here and left a utility behind; "inferred" = the
+    # search merely carried on. Only the first may carry the continuous metrics.
+    judged_stops = [r for r in stops if r["margin"] is not None]
+    inferred = [r for r in stops if r["margin"] is None]
+    table = summarise(rows, stops)
+    lines += ["", "alignment", "",
+              f"{'metric':>34}  {'human':>9}  {'chance':>9}  {'n':>4}", "-" * 62]
+    group = None
+    for spec, (label, human, chance_, n) in zip(METRIC_TABLE, table):
+        if spec["group"] != group:
+            group = spec["group"]
+            lines.append(f"  {'-- selection --' if group == 'selection' else '-- continuation --'}")
+        lines.append(f"{label:>34}  {human}  {chance_}  {n:>4}")
     lines += [
-        "-" * 56,
-        "(rank 1 = the human picked the candidate D2I scored highest. normalised rank is",
-        " 1 when the human picked D2I's top and 0 when they picked its worst; `random` is",
-        " what a uniform pick from the same pool would average, so it is the floor to beat.)",
+        "-" * 62,
+        "(κ_sel is chance-corrected: 0 is a uniform pick from the same pool, 1 is D2I's own",
+        " top choice every time. attainment is the share of the pool's score range captured;",
+        " standardized regret is the shortfall in pool SDs, so <0.5 is inside D2I's own noise.",
+        " margin-weighted agreement discounts stop calls the judge itself was unsure about.)",
     ]
+
+    # -- stop/continue detail ----------------------------------------------
+    if stops:
+        lines += ["", "terminate or continue", ""]
+        if inferred:
+            lines.append(f"  {len(judged_stops)} of {len(stops)} stop call(s) carry the judge's own"
+                         " utility; the rest are inferred from the search having continued,")
+            lines.append("  and are reported apart because no verdict was actually made there.")
+        with_crit = sum(1 for r in judged_stops if r.get("criteria"))
+        utils = [r["utility"] for r in judged_stops if r["utility"] is not None]
+        taus = [r["threshold"] for r in judged_stops if r["threshold"] is not None]
+        if utils and taus and (max(utils) < min(taus) or min(utils) >= max(taus)):
+            lines.append("  every utility falls on one side of the threshold, so τ̂ is not"
+                         " identifiable against it and AUROC is a restricted-range test:")
+            lines.append("  only a run whose report.json carries a structured `continuation`"
+                         " records a utility for the trajectories it let continue.")
+        if with_crit < len(judged_stops):
+            lines.append(f"  {with_crit} of {len(judged_stops)} carry the judge's criteria"
+                         " breakdown (structured `continuation` only).")
+        for name, sub in (("ruled", judged_stops), ("inferred", inferred)):
+            if not sub:
+                continue
+            lines.append(f"  {name}: agreement "
+                         f"{100 * (_mean([r['agree'] for r in sub]) or 0):.1f}% over {len(sub)}")
+            for want, label in ((True, "where it terminated"), (False, "where it continued")):
+                part = [r for r in sub if r["model"] is want]
+                if part:
+                    lines.append(f"      {label:<22}"
+                                 f"{100 * (_mean([r['agree'] for r in part]) or 0):>6.1f}%"
+                                 f"  n={len(part)}")
+        lines += ["", f"  {'confusion (judged)':<20}{'human continue':>16}  {'human terminate':>16}"]
+        for want, name in ((False, "model continue"), (True, "model terminate")):
+            row = [r for r in judged_stops if r["model"] is want]
+            lines.append(f"  {name:<20}{sum(1 for r in row if not r['human']):>16}  "
+                         f"{sum(1 for r in row if r['human']):>16}")
+        # Same identifiability guard as `estimate`: with every utility on one side of the
+        # threshold there is no evidence about where the human would have cut.
+        identifiable = utils and taus and min(utils) < max(taus) <= max(utils)
+        cut = youden(utils, [r["human_continue"] for r in judged_stops
+                             if r["utility"] is not None]) if identifiable else None
+        if cut:
+            tau = min(taus)
+            lines.append(f"  implied human threshold {cut[0]:.3f} (optimal cuts {cut[1]:.2f}"
+                         f"–{cut[2]:.2f}) against D2I's {tau:.2f} — humans would prune "
+                         f"{'less' if cut[0] < tau else 'more'} aggressively.")
+
+    # -- attribution --------------------------------------------------------
+    if rows:
+        lines += ["", "component attribution (which score term the human tracks)", "",
+                  f"{'term':>14}  {'κ_sel':>8}  {'attain':>8}  {'chance':>8}  {'n':>4}", "-" * 50]
+        for a in term_attribution(rows):
+            k = f"{a['kappa']:>8.3f}" if a["kappa"] is not None else f"{'—':>8}"
+            at = f"{a['attainment']:>8.3f}" if a["attainment"] is not None else f"{'—':>8}"
+            ch = f"{a.get('e_attainment'):>8.3f}" if a.get("e_attainment") is not None else f"{'—':>8}"
+            lines.append(f"{a['term']:>14}  {k}  {at}  {ch}  {a['n']:>4}")
+        w = (session.get("decisions") or [{}])[0].get("lambdas")
+        if w:
+            lines.append("  D2I weights: " + "  ".join(f"{s}={w[s]:g}" for _, s in TERMS
+                                                       if s in w))
+
+        labels, matrix = confusion(rows, "top_action", "pick_action")
+        if len(labels) > 1:
+            lines += ["", "action confusion (rows: D2I's top, cols: the human's pick)", "",
+                      "  " + " " * 14 + "".join(f"{l[:6]:>7}" for l in labels)]
+            for i, lab in enumerate(labels):
+                lines.append(f"  {lab:>14}" + "".join(f"{v:>7}" for v in matrix[i]))
+
+    crit = criterion_attribution(judged_stops)
+    if any(c["auroc"] is not None for c in crit):
+        lines += ["", "criterion attribution (AUROC of each judge criterion vs the human)", "",
+                  f"{'criterion':>20}  {'AUROC':>8}  {'n':>4}", "-" * 38]
+        for c in crit:
+            a = f"{c['auroc']:>8.3f}" if c["auroc"] is not None else f"{'—':>8}"
+            lines.append(f"{c['criterion']:>20}  {a}  {c['n']:>4}")
 
     ended = sum(1 for v in verdicts if v.get("terminate") and v.get("true_index") is None)
     if ended:
         lines.append(f"({ended} decision(s) ended at 'terminate', so no next question was picked"
                      " there — the two tables are over different subsets.)")
 
-    zero_k = sum(1 for r in rows if r["k"] == 0)
-    if zero_k:
-        lines.append(f"({zero_k} node(s) had no candidate answered at all — the level's k slots went"
-                     " to other nodes — so they are excluded from the per-node top-k row.)")
+    flat = sum(1 for r in rows if r["flat_pool"])
+    if flat:
+        lines.append(f"({flat} pool(s) had every candidate on the same score — attainment is 1 and"
+                     " regret undefined there, so they carry no evidence either way.)")
     if session.get("feedback"):
         lines.append("(D2I's rank was revealed after each pick, so later picks are not independent"
                      " samples — rerun with --no-feedback for a clean rate.)")
@@ -901,10 +1449,11 @@ def report(session: dict) -> list[str]:
         if len(groups) < 2:
             continue
         lines += ["", title, "",
-                  f"{head:>14}  {'n':>4}  {'top-1':>7}  {'norm-rank':>10}", "-" * 40]
+                  f"{head:>14}  {'n':>4}  {'agree':>7}  {'attain':>10}", "-" * 40]
         for k in sorted(groups, key=lambda x: (isinstance(x, str), x)):
             g = groups[k]
-            lines.append(f"{str(k):>14}  {g['n']:>4}  {100 * g['top1']:>6.1f}%  {g['n_rank']:>10.3f}")
+            lines.append(f"{str(k):>14}  {g['n']:>4}  {100 * g['is_top']:>6.1f}%  "
+                         f"{g['attainment']:>10.3f}")
 
     notes = [v for v in verdicts if v.get("note")]
     if notes:

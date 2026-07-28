@@ -164,6 +164,222 @@ def consensus(all_verdicts: dict[str, list[dict]], by_id: dict[str, dict]) -> li
     return lines
 
 
+def implied_weights(session: dict, seed: int = hte.BOOTSTRAP_SEED) -> list[str]:
+    """The score weights that best explain the humans' picks, against D2I's own.
+
+    A conditional logit over the five score terms: each candidate pool is one choice set,
+    and the probability of picking candidate *j* is `softmax(beta . x_j)` over that pool.
+    The fitted `beta`, rescaled to D2I's own lambda total, is directly comparable to the
+    lambdas in `config.json` — so the result reads as "humans behave as if impact were
+    weighted higher, and trajectory lower, than D2I weights them".
+
+    Read from the decisions rather than from the precomputed pick rows: the design matrix
+    is the whole pool's term values, which would multiply the size of `truth.json` if it
+    were published per slot, and the browser does not fit this model anyway.
+
+    Reported as exploratory below ~30 choice sets: five free parameters need more than that
+    before the direction of any one of them is worth quoting.
+    """
+    try:
+        import numpy as np
+        from scipy.optimize import minimize
+    except ImportError:                                  # pragma: no cover
+        return ["", "(scipy/numpy not installed — implied weights skipped)"]
+
+    shorts = [short for _, short in hte.TERMS]
+    keys = [key for key, _ in hte.TERMS]
+    by_id = {d["id"]: d for d in session.get("decisions", [])}
+    lambdas = next((d.get("lambdas") for d in session.get("decisions", []) if d.get("lambdas")),
+                   None)
+
+    # x[i][j][k]: candidate j's value on term k in choice set i; y[i] the chosen index.
+    xs, ys = [], []
+    for v in session.get("verdicts", []):
+        d = by_id.get(v.get("decision"))
+        if d is None or v.get("true_index") is None or not d.get("candidates"):
+            continue
+        rows = []
+        for c in d["candidates"]:
+            bd = c.get("breakdown") or {}
+            vals = [bd.get(k) for k in keys]
+            if not all(hte._numeric(x) for x in vals):
+                rows = []
+                break
+            rows.append([float(x) for x in vals])
+        if len(rows) > 1:
+            xs.append(np.array(rows, dtype=float))
+            ys.append(int(v["true_index"]))
+    if len(xs) < 4:
+        return ["", "(too few pools carry a full term breakdown for the implied-weight fit)"]
+
+    def negloglik(beta):
+        total = 0.0
+        for x, y in zip(xs, ys):
+            u = x @ beta
+            u -= u.max()                                 # softmax overflow guard
+            total -= u[y] - np.log(np.exp(u).sum())
+        return total
+
+    k = xs[0].shape[1]
+    fit = minimize(negloglik, np.zeros(k), method="BFGS")
+    beta = fit.x
+
+    def stat(sample_idx):
+        sx = [xs[i] for i in sample_idx]
+        sy = [ys[i] for i in sample_idx]
+
+        def nll(b):
+            t = 0.0
+            for x, y in zip(sx, sy):
+                u = x @ b
+                u -= u.max()
+                t -= u[y] - np.log(np.exp(u).sum())
+            return t
+        return minimize(nll, np.zeros(k), method="BFGS").x
+
+    rnd = hte.mulberry32(seed)
+    draws = []
+    for _ in range(200):                                 # 200: each draw refits the model
+        idx = [int(rnd() * len(xs)) % len(xs) for _ in range(len(xs))]
+        try:
+            draws.append(stat(idx))
+        except Exception:                                # pragma: no cover - separation
+            continue
+
+    total = sum(abs(v) for v in beta) or 1.0
+    scale = (sum(lambdas.values()) if lambdas else 1.0) / total
+    lines = ["", "human-implied score weights (conditional logit over the five terms)", "",
+             f"{'term':>14}  {'implied':>9}  {'95% CI':>18}  {'D2I λ':>8}", "-" * 56]
+    for i, short in enumerate(shorts):
+        col = sorted(d[i] * scale for d in draws) if draws else []
+        ci = (f"{col[int(0.025 * (len(col) - 1))]:>8.3f} –{col[int(0.975 * (len(col) - 1))]:>8.3f}"
+              if len(col) > 20 else f"{'—':>18}")
+        lam = f"{lambdas[short]:>8.2f}" if lambdas and short in lambdas else f"{'—':>8}"
+        lines.append(f"{short:>14}  {beta[i] * scale:>9.3f}  {ci}  {lam}")
+    if not fit.success:
+        lines.append("  (the fit did not converge — the terms are near-collinear on this sample)")
+    if len(xs) < 30:
+        lines.append(f"  (exploratory: {len(xs)} choice sets for {k} free parameters)")
+    return lines
+
+
+def csv_export(picks: list[dict], stops: list[dict], agg: list[dict], out: Path) -> list[str]:
+    """One row per pick and per stop call, plus the metric table — for a spreadsheet or a
+    re-analysis that does not want to go through this script at all."""
+    import csv
+
+    written = []
+    with (out / "metrics.csv").open("w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["metric", "group", "estimator", "value", "chance", "ci_lo", "ci_hi", "n"])
+        for r in agg:
+            w.writerow([r["label"], r["group"], r["est"], r["value"], r["chance"],
+                        r["lo"], r["hi"], r["n"]])
+    written.append("metrics.csv")
+
+    if picks:
+        cols = ["id", "run", "depth", "cluster", "n", "is_top", "e_top", "attainment",
+                "e_attainment", "d_std", "e_d_std", "within_noise", "pool_sd", "top2_gap",
+                "flat_pool", "action_hit", "pick_action", "top_action"]
+        with (out / "picks.csv").open("w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(picks)
+        written.append("picks.csv")
+
+    if stops:
+        cols = ["id", "run", "depth", "cluster", "source", "model", "human", "agree",
+                "human_continue", "utility", "threshold", "margin"]
+        with (out / "stops.csv").open("w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(stops)
+        written.append("stops.csv")
+    return written
+
+
+# The table labels are written for a terminal, where Greek and box-drawing characters are
+# free. pdfLaTeX — which is what acmart is normally run under — cannot set any of them, so
+# the export substitutes math mode rather than shipping raw UTF-8 into a paper.
+LATEX_LABELS = {
+    "κ_sel (chance-corrected agreement)": r"$\kappa_{\mathrm{sel}}$ (chance-corrected)",
+    "  ├ raw agreement rate": r"\quad raw agreement rate",
+    "utility attainment [0,1]": r"Utility attainment $A$",
+    "standardized regret (pool SDs)": r"Standardized regret $d$",
+    "  └ within-noise rate (d<0.5)": r"\quad within-noise rate ($d<0.5$)",
+    "action agreement": "Action agreement",
+    "margin-weighted agreement": "Margin-weighted agreement",
+    "  ├ unweighted (w≡1)": r"\quad unweighted ($w \equiv 1$)",
+    "AUROC (utility vs human label)": "AUROC (utility vs.\\ human)",
+    "implied human threshold τ̂": r"Implied threshold $\hat{\tau}$",
+}
+
+
+def latex_export(agg: list[dict], out: Path) -> str:
+    """The metric table as a booktabs tabular, ready to \\input into the paper."""
+    rows = []
+    group = None
+    for r in agg:
+        if r["group"] != group:
+            group = r["group"]
+            rows.append(r"\midrule" if rows else "")
+            rows.append(r"\multicolumn{5}{l}{\textit{%s alignment}} \\" % group.capitalize())
+
+        def cell(x, fmt=r["fmt"]):
+            if x is None:
+                return "--"
+            return f"{100 * x:.1f}\\%" if fmt == "pct" else f"{x:.3f}"
+
+        ci = "--" if r["lo"] is None else f"[{cell(r['lo'])}, {cell(r['hi'])}]"
+        label = LATEX_LABELS.get(
+            r["label"],
+            r["label"].replace("├", "").replace("└", "").replace("_", r"\_").strip())
+        rows.append(f"{label} & {cell(r['value'])} & {cell(r['chance'])} & {ci} & {r['n']} \\\\")
+    body = "\n".join(x for x in rows if x)
+    text = (
+        "% generated by survey/score_survey.py -- do not edit by hand\n"
+        "\\begin{tabular}{lrrrr}\n\\toprule\n"
+        "Metric & Human & Chance & 95\\% CI & $n$ \\\\\n"
+        f"{body}\n\\bottomrule\n\\end{{tabular}}\n"
+    )
+    (out / "metrics.tex").write_text(text, encoding="utf-8")
+    return "metrics.tex"
+
+
+def check_parity(responses: list[tuple[str, dict, dict]]) -> list[str]:
+    """Compare each response's browser-computed table against a recomputation here.
+
+    Under the precompute design this should be near-tautological — the page averages rows
+    Python wrote — so a failure means a *deployment* problem (a page served against a stale
+    truth.json) rather than a formula bug, which is exactly the failure that would otherwise
+    go unnoticed until the numbers were already in a paper.
+    """
+    lines = ["", "parity: browser vs this script", ""]
+    for name, response, session in responses:
+        got = (response.get("results") or {})
+        summary = got.get("summary")
+        if not summary:
+            lines.append(f"  {name:>28}  no results block (an older page, or --no-reveal)")
+            continue
+        if got.get("metrics_version") and got["metrics_version"] != hte.METRICS_VERSION:
+            lines.append(f"  {name:>28}  built by metrics v{got['metrics_version']}, "
+                         f"this is v{hte.METRICS_VERSION} — skipped")
+            continue
+        mine = hte.aggregate(hte.scored_picks(session), hte.termination_rows(session))
+        worst, bad = 0.0, 0
+        for a, b in zip(summary, mine):
+            for field in ("value", "chance", "lo", "hi"):
+                x, y = a.get(field), b.get(field)
+                if x is None or y is None:
+                    bad += 0 if (x is None and y is None) else 1
+                else:
+                    worst = max(worst, abs(x - y))
+                    bad += 1 if abs(x - y) > 1e-9 else 0
+        lines.append(f"  {name:>28}  {'OK' if not bad else f'{bad} cell(s) differ'}"
+                     f"  (worst delta {worst:.2e})")
+    return lines
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("responses", type=Path, nargs="+",
@@ -172,6 +388,10 @@ def main() -> None:
                    help="the build's private bundle (default: survey/private/decisions.json)")
     p.add_argument("--per-respondent", action="store_true",
                    help="also print each respondent's own report, not just the pooled one")
+    p.add_argument("--check-parity", action="store_true",
+                   help="verify each response's browser-computed table against this script")
+    p.add_argument("--export", action="store_true",
+                   help="with -o, also write metrics.csv / picks.csv / stops.csv / metrics.tex")
     p.add_argument("-o", "--out", type=Path, default=None,
                    help="write the tables here (a directory; one .txt per respondent plus "
                         "pooled.txt)")
@@ -193,6 +413,7 @@ def main() -> None:
 
     warnings: list[str] = []
     all_verdicts: dict[str, list[dict]] = {}
+    raw_responses: dict[str, dict] = {}       # kept whole for --check-parity
     built = private.get("seed")
 
     for f in files:
@@ -220,6 +441,7 @@ def main() -> None:
             warnings.append(f"{f.name}: no usable answers — skipped")
             continue
         all_verdicts[who] = verdicts
+        raw_responses[who] = response
 
     if not all_verdicts:
         raise SystemExit("nothing to score" + ("\n  " + "\n  ".join(warnings) if warnings else ""))
@@ -249,8 +471,15 @@ def main() -> None:
     lines.append(f"(pooled over {len(all_verdicts)} respondent(s) × {len(private['decisions'])} "
                  f"decision(s) = {len(pooled)} answer(s); the 'unjudged' count on the header "
                  "line assumes a single judge and can be ignored.)")
+    pooled_session = session_for(private, pooled, f"{len(all_verdicts)} respondent(s)",
+                                 private["stamp"])
+    lines += implied_weights(pooled_session)
     lines += inter_rater(all_verdicts)
     lines += consensus(all_verdicts, by_id)
+    if args.check_parity:
+        lines += check_parity([
+            (who, raw_responses[who], session_for(private, vs, who, private["stamp"]))
+            for who, vs in sorted(all_verdicts.items()) if who in raw_responses])
     if warnings:
         lines += ["", "warnings", ""] + [f"  {w}" for w in warnings]
     lines += ["", "respondents", ""] + [
@@ -260,7 +489,14 @@ def main() -> None:
     print("\n".join(lines))
     if args.out:
         (args.out / "pooled.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
-        print(f"\nwrote {args.out / 'pooled.txt'}")
+        written = ["pooled.txt"]
+        if args.export:
+            picks = hte.scored_picks(pooled_session)
+            stops = hte.termination_rows(pooled_session)
+            agg = hte.aggregate(picks, stops)
+            written += csv_export(picks, stops, agg, args.out)
+            written.append(latex_export(agg, args.out))
+        print(f"\nwrote {', '.join(written)} to {args.out}")
 
 
 if __name__ == "__main__":
