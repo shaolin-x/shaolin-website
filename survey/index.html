@@ -21,6 +21,10 @@ body {
   font-family: Arial, Helvetica, sans-serif; line-height: 1.6;
 }
 .wrap { max-width: 820px; margin: 0 auto; padding: 24px 20px 90px; }
+/* The decision screen only. Prose screens (intro, results) stay at 820px, which is about as
+   wide as a paragraph should be read; the decision screen is not prose but two panels side
+   by side, so it is given room rather than stacking ~240 words into one tall column. */
+.wrap.wide { max-width: 1280px; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 h1, h2, h3 { color: var(--head); margin-top: 0; margin-bottom: .5rem; font-weight: 600; }
@@ -40,6 +44,29 @@ header.top .home { font-size: .85rem; }
   background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 18px 20px; margin-bottom: 16px;
 }
+
+/* The decision screen: context on the left, the question being asked on the right.
+   Single column below the breakpoint, in the same order — context first, then the ask —
+   so nothing depends on the two panels being side by side. */
+/* `minmax(0, 1fr)` even in the single-column case: a grid item defaults to `min-width: auto`,
+   which lets the 46-column sample table size the whole column to its content and push the
+   page sideways. The 0 minimum is what keeps the table scrolling inside its own card. */
+.split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.split > .col-ctx > .card:last-child,
+.split > .col-ask > .card:last-child { margin-bottom: 0; }
+
+@media (min-width: 1040px) {
+  .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 20px; }
+  /* Each panel scrolls with the page, but sticks once its own top passes the viewport, so
+     the candidate list and the trajectory it is being judged against stay together however
+     unequal their heights are. */
+  .split > .col-ctx, .split > .col-ask {
+    position: sticky; top: 16px;
+    max-height: calc(100vh - 32px); overflow-y: auto; overscroll-behavior: contain;
+  }
+  /* The scrollbar would otherwise sit hard against the card edge. */
+  .split > .col-ctx { padding-right: 4px; }
+}
 .eyebrow {
   font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
   color: var(--muted); margin-bottom: 10px;
@@ -51,23 +78,64 @@ header.top .home { font-size: .85rem; }
   background: var(--accent-soft); color: var(--accent);
 }
 
-/* the trajectory: a vertical spine, the current node highlighted */
-.step { border-left: 2px solid var(--line); padding: 0 0 14px 16px; margin-left: 4px; position: relative; }
+/* The trajectory: a vertical spine, the current node highlighted.
+
+   A step carries four different kinds of text, and the point of the styling is that they
+   should never be mistaken for each other:
+
+     .meta     where you are      — a small caps label and the operator as a pill
+     .q        what was asked     — italic, quiet: it is context, not the finding
+     .finding  what was found     — the payload, and the only thing set in full ink
+     .stat     the evidence       — monospace in a chip, so numbers read as numbers
+
+   Only one of the four is dark. Making them all legible-but-grey is what made the panel
+   read as a wall. */
+.step { border-left: 2px solid var(--line); padding: 0 0 18px 18px; margin-left: 4px; position: relative; }
 .step:last-child { padding-bottom: 0; }
 .step::before {
-  content: ""; position: absolute; left: -5px; top: 9px; width: 8px; height: 8px;
+  content: ""; position: absolute; left: -5px; top: 7px; width: 8px; height: 8px;
   border-radius: 99px; background: var(--line);
 }
-.step.head::before { background: var(--accent); }
-.step .meta { font-size: .78rem; color: var(--muted); }
-.step .q { color: var(--muted); font-style: italic; }
+.step.head::before {
+  background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+}
+/* Deliberately *not* the uppercase treatment `.eyebrow` uses: that is the card-title voice,
+   and reusing it here made two ranks of heading compete inside one card. The pill carries
+   the structure; this is just a whereabouts note. */
+.step .meta {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: .74rem; color: var(--muted); margin-bottom: 6px;
+}
+.step .q {
+  color: var(--muted); font-style: italic; font-size: .89rem;
+  margin-bottom: 5px; line-height: 1.5;
+}
+.step .finding { color: var(--head); }
+/* The node actually being judged. Marked by tinting the block, not by bolding the text —
+   these findings run to several lines, and a bold paragraph is harder to read, not easier. */
+.step.head {
+  background: var(--accent-soft); border-left-color: var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 10px 12px 12px 18px; margin-top: 2px;
+}
+.step.head .meta { color: var(--accent); }
+.step.head .stat { background: var(--card); }
 .step .stat {
-  font-size: .75rem; color: var(--muted);
+  display: inline-block; margin-top: 7px; padding: 1px 8px;
+  font-size: .72rem; color: var(--muted); background: var(--soft);
+  border: 1px solid var(--line); border-radius: 5px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-.ask { font-weight: 600; color: var(--head); margin-bottom: 4px; font-size: 1.02rem; }
-.ask-sub { font-size: .85rem; color: var(--muted); margin-bottom: 14px; }
+/* The question being put, separated from the options by a rule rather than by spacing alone
+   — the one place on the screen where the eye should stop first. */
+.ask { font-weight: 700; color: var(--head); margin-bottom: 4px; font-size: 1.06rem; }
+.ask-sub {
+  font-size: .84rem; color: var(--muted);
+  padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--line);
+}
+/* The answer controls are not part of the option list, so they are set apart from it. */
+.actions { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
 .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
 button {
@@ -113,10 +181,11 @@ label.field { display: block; font-size: .82rem; color: var(--muted); font-weigh
 .err { color: var(--accent); font-size: .85rem; margin-top: 10px; font-weight: 600; }
 
 /* the dataset sample above every question: a few real rows, so the goal and the candidate
-   questions can be read against the data they are about */
+   questions can be read against the data they are about. Its own card, so the goal is not
+   read as a caption for the table. */
 .sample-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-  flex-wrap: wrap; margin-top: 16px;
+  flex-wrap: wrap;
 }
 table.sample { font-size: .8rem; margin-top: 6px; }
 table.sample th, table.sample td { white-space: nowrap; text-align: left; }
@@ -134,7 +203,21 @@ tr.top td { color: var(--head); }
 .ok { color: var(--ok); font-weight: 600; }
 .warn { color: var(--warn); font-weight: 600; }
 .muted { color: var(--muted); }
-.scroll { overflow-x: auto; }
+/* Horizontally scrollable, with shadows that appear only on the side there is more to see.
+   Purely CSS: the two `local` gradients are painted with the content and slide away as it
+   scrolls, uncovering the fixed `scroll` shadows underneath. Without this a 46-column
+   sample just looks cut off at the card edge. */
+.scroll {
+  overflow-x: auto;
+  background:
+    linear-gradient(to right, var(--card) 40%, rgba(255, 255, 255, 0)) left center,
+    linear-gradient(to left, var(--card) 40%, rgba(255, 255, 255, 0)) right center,
+    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, .13), rgba(0, 0, 0, 0)) left center,
+    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .13), rgba(0, 0, 0, 0)) right center;
+  background-repeat: no-repeat;
+  background-size: 34px 100%, 34px 100%, 13px 100%, 13px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
 
 .tiles { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 4px; }
 .tile {
@@ -310,6 +393,10 @@ function navLink() {
 
 function chrome() {
   navLink();
+  // Only the decision screen goes two-column, so only it gets the wider container. A reveal
+  // is a single card and reads as prose, so it stays in the narrow measure.
+  document.querySelector(".wrap").classList.toggle(
+    "wide", screen === "judge" && !!R && !revealed && nextIndex() >= 0);
   const c = document.getElementById("counter"), bar = document.getElementById("barwrap");
   if (screen !== "judge" || !R) { c.textContent = ""; bar.style.visibility = "hidden"; return; }
   const done = R.verdicts.length, total = decisions().length, i = nextIndex();
@@ -439,7 +526,10 @@ function dataSample(d) {
   const s = (survey.samples || {})[d.run];
   if (!s || !s.rows || !s.rows.length) {
     return d.columns && d.columns.length
-      ? `<div class="cols">${d.columns.map(c => `<span class="col">${esc(c)}</span>`).join("")}</div>`
+      ? `<div class="card">
+           <div class="eyebrow">The columns</div>
+           <div class="cols">${d.columns.map(c => `<span class="col">${esc(c)}</span>`).join("")}</div>
+         </div>`
       : "";
   }
   const cols = s.columns && s.columns.length ? s.columns : Object.keys(s.rows[0]);
@@ -456,29 +546,40 @@ function dataSample(d) {
     ? `${s.rows.length} of ${s.n_rows.toLocaleString()} rows`
     : `${s.rows.length} rows`;
   return `
-    <div class="sample-head">
-      <div class="eyebrow" style="margin-bottom:0">Sample dataset</div>
-      <span class="muted" style="font-size:.78rem">${shape}${
-        s.n_columns ? ` &nbsp;·&nbsp; ${s.n_columns} columns` : ""} &nbsp;·&nbsp; sampled</span>
-    </div>
-    <div class="scroll"><table class="sample">
-      <thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+    <div class="card">
+      <div class="sample-head">
+        <div class="eyebrow" style="margin-bottom:0">Sample dataset</div>
+        <span class="muted" style="font-size:.78rem">${shape}${
+          s.n_columns ? ` &nbsp;·&nbsp; ${s.n_columns} columns` : ""} &nbsp;·&nbsp; sampled</span>
+      </div>
+      <div class="scroll"><table class="sample">
+        <thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
+    </div>`;
 }
 
+/* Everything the respondent consults but does not act on: the goal, the sample rows and the
+   trajectory that led here. The left panel on a wide screen. */
 function trajectory(d) {
+  const last = d.path.length - 1;
   const steps = d.path.map((s, i) => `
-    <div class="step ${i === d.path.length - 1 ? "head" : ""}">
-      <div class="meta">step ${i} &nbsp;·&nbsp; depth ${s.depth} &nbsp;·&nbsp; ${esc(s.action)}</div>
+    <div class="step ${i === last ? "head" : ""}">
+      <div class="meta">
+        <span class="tag">${esc(s.action)}</span>
+        <span>step ${i} · depth ${s.depth}${i === last ? " · the node being judged" : ""}</span>
+      </div>
       ${s.question ? `<div class="q">${esc(s.question)}</div>` : ""}
-      ${s.label ? `<div>${esc(s.label)}</div>` : ""}
+      ${s.label ? `<div class="finding">${esc(s.label)}</div>` : ""}
       <div class="stat">${esc(s.statistic)}</div>
     </div>`).join("");
+  // Three cards, not two: the goal, the data and the path taken through it are three
+  // different things to look at, and running them together is most of what made the panel
+  // feel like one undifferentiated block of text.
   return `
     <div class="card">
       <div class="eyebrow">The analyst's goal</div>
       <div class="goal">${esc(d.goal)}</div>
-      ${dataSample(d)}
     </div>
+    ${dataSample(d)}
     <div class="card">
       <div class="eyebrow">Trajectory so far &nbsp;·&nbsp; depth ${d.depth} → ${d.child_depth}</div>
       ${steps}
@@ -486,7 +587,7 @@ function trajectory(d) {
 }
 
 function renderDecision(d) {
-  let body = trajectory(d);
+  let body = "";
   if (stage === "stop") {
     // Picked and submitted exactly like a candidate, rather than acted on immediately: the
     // two questions then read as one interface, and a mis-click is recoverable before it is
@@ -503,7 +604,8 @@ function renderDecision(d) {
             <span class="grow"><span class="tag">${act}</span><strong>${label}</strong>
               <span class="muted"> — ${why}</span></span>
           </button>`).join("")}
-        <label class="field" style="margin-top:12px">Why? <span class="muted" style="font-weight:400">— optional, one line</span>
+        <div class="actions">
+        <label class="field">Why? <span class="muted" style="font-weight:400">— optional, one line</span>
           <input type="text" id="note" placeholder="e.g. the goal is already answered"></label>
         <div class="row">
           <button class="primary" id="submit" disabled>Submit</button>
@@ -511,6 +613,7 @@ function renderDecision(d) {
           ${R.verdicts.length ? `<button class="ghost" data-act="undo"><kbd>U</kbd>Back</button>` : ""}
         </div>
         <div class="hint">Press <kbd>1</kbd> or <kbd>2</kbd> to select, <kbd>↵</kbd> to submit.</div>
+        </div>
       </div>`;
   } else {
     body += `
@@ -523,7 +626,8 @@ function renderDecision(d) {
             <span class="n">${c.slot}</span>
             <span class="grow"><span class="tag">${esc(c.action)}</span>${esc(c.question)}</span>
           </button>`).join("")}
-        <label class="field" style="margin-top:12px">Why? <span class="muted" style="font-weight:400">— optional, one line</span>
+        <div class="actions">
+        <label class="field">Why? <span class="muted" style="font-weight:400">— optional, one line</span>
           <input type="text" id="note" placeholder="e.g. the only one that touches the second half of the goal"></label>
         <div class="row">
           <button class="primary" id="submit" disabled>Submit</button>
@@ -531,9 +635,14 @@ function renderDecision(d) {
           <button class="ghost" data-act="back"><kbd>U</kbd>Back</button>
         </div>
         <div class="hint">Press <kbd>1</kbd>–<kbd>${d.candidates.length}</kbd> to select, <kbd>↵</kbd> to submit.</div>
+        </div>
       </div>`;
   }
-  app.innerHTML = ""; app.append($(`<div>${body}</div>`));
+  app.innerHTML = "";
+  app.append($(`<div class="split">
+    <div class="col-ctx">${trajectory(d)}</div>
+    <div class="col-ask">${body}</div>
+  </div>`));
   app.querySelectorAll("[data-act]").forEach(b => b.onclick = () => act(b.dataset.act, d));
 
   // Both stages select the same way; `key` is the attribute that distinguishes them, so

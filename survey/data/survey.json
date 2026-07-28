@@ -1,24 +1,24 @@
 {
  "meta": {
   "title": "Would you have asked the same question?",
-  "built_at": "2026-07-28T11:45:53+00:00",
+  "built_at": "2026-07-28T13:51:30+00:00",
   "seed": 123,
-  "n_requested": 10,
-  "n_decisions": 10,
+  "n_requested": 20,
+  "n_decisions": 20,
   "n_runs": 3,
   "n_early_stopped": 2,
-  "stop_share": 0.2,
+  "stop_share": 0.1,
   "stop_share_band": [
    0.3,
    0.7
   ],
-  "n_with_candidates": 7,
+  "n_with_candidates": 17,
   "min_candidates": 2,
   "drop_unanswerable": false,
   "reveal": true,
   "feedback": true,
-  "n_stop_judged": 6,
-  "n_stop_inferred": 2,
+  "n_stop_judged": 10,
+  "n_stop_inferred": 5,
   "metrics": {
    "version": "2",
    "table": [
@@ -418,6 +418,54 @@
     }
    ]
   },
+  "carsales-easy": {
+   "n_rows": 275,
+   "n_columns": 5,
+   "columns": [
+    "year",
+    "brand",
+    "category",
+    "model",
+    "sales"
+   ],
+   "rows": [
+    {
+     "year": "2010-01-01T00:00:00",
+     "brand": "GMC",
+     "category": "SUV",
+     "model": "Terrain",
+     "sales": 60519
+    },
+    {
+     "year": "2010-01-01T00:00:00",
+     "brand": "Honda",
+     "category": "SUV",
+     "model": "Element",
+     "sales": 14247
+    },
+    {
+     "year": "2009-01-01T00:00:00",
+     "brand": "Mazda",
+     "category": "Compact",
+     "model": "Mazda 3",
+     "sales": 96466
+    },
+    {
+     "year": "2011-01-01T00:00:00",
+     "brand": "Toyota",
+     "category": "Midsize",
+     "model": "Camry",
+     "sales": 308510
+    },
+    {
+     "year": "2011-01-01T00:00:00",
+     "brand": "Toyota",
+     "category": "Subcompact",
+     "model": "Corolla",
+     "sales": 240259
+    }
+   ]
+  },
   "census-easy": {
    "n_rows": 32561,
    "n_columns": 15,
@@ -525,54 +573,6 @@
      "income": "<=50K"
     }
    ]
-  },
-  "carsales-easy": {
-   "n_rows": 275,
-   "n_columns": 5,
-   "columns": [
-    "year",
-    "brand",
-    "category",
-    "model",
-    "sales"
-   ],
-   "rows": [
-    {
-     "year": "2010-01-01T00:00:00",
-     "brand": "GMC",
-     "category": "SUV",
-     "model": "Terrain",
-     "sales": 60519
-    },
-    {
-     "year": "2010-01-01T00:00:00",
-     "brand": "Honda",
-     "category": "SUV",
-     "model": "Element",
-     "sales": 14247
-    },
-    {
-     "year": "2009-01-01T00:00:00",
-     "brand": "Mazda",
-     "category": "Compact",
-     "model": "Mazda 3",
-     "sales": 96466
-    },
-    {
-     "year": "2011-01-01T00:00:00",
-     "brand": "Toyota",
-     "category": "Midsize",
-     "model": "Camry",
-     "sales": 308510
-    },
-    {
-     "year": "2011-01-01T00:00:00",
-     "brand": "Toyota",
-     "category": "Subcompact",
-     "model": "Corolla",
-     "sales": 240259
-    }
-   ]
   }
  },
  "runs": {
@@ -639,6 +639,32 @@
     "tier (Measure)"
    ]
   },
+  "carsales-easy": {
+   "run_dir": "carsales-easy",
+   "parent": "20260728-014100_d2i_bench",
+   "path": "/Users/shaolinx/Desktop/shaolin-website/runs/20260728-014100_d2i_bench/carsales-easy",
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "provider": "openai",
+   "model": "gpt-4o-mini",
+   "beam_width": 5,
+   "max_depth": 2,
+   "depth_reached": 2,
+   "questions_answered": 8,
+   "n_insights": 13,
+   "started_at": "2026-07-28T08:41:03.622+00:00",
+   "duration_s": 285.08,
+   "dataset": {
+    "n_rows": 275,
+    "n_columns": 5
+   },
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ]
+  },
   "census-easy": {
    "run_dir": "census-easy",
    "parent": "20260728-014100_d2i_bench",
@@ -674,39 +700,13 @@
     "native-country (Dimension)",
     "income (Dimension)"
    ]
-  },
-  "carsales-easy": {
-   "run_dir": "carsales-easy",
-   "parent": "20260728-014100_d2i_bench",
-   "path": "/Users/shaolinx/Desktop/shaolin-website/runs/20260728-014100_d2i_bench/carsales-easy",
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
-   "provider": "openai",
-   "model": "gpt-4o-mini",
-   "beam_width": 5,
-   "max_depth": 2,
-   "depth_reached": 2,
-   "questions_answered": 8,
-   "n_insights": 13,
-   "started_at": "2026-07-28T08:41:03.622+00:00",
-   "duration_s": 285.08,
-   "dataset": {
-    "n_rows": 275,
-    "n_columns": 5
-   },
-   "columns": [
-    "year (Time)",
-    "brand (Dimension)",
-    "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
-   ]
   }
  },
  "decisions": [
   {
-   "id": "procurement-easy#2e2a00d4",
+   "id": "procurement-easy#bbea6762",
    "run": "procurement-easy",
-   "node": "2e2a00d4",
+   "node": "bbea6762",
    "depth": 1,
    "child_depth": 2,
    "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
@@ -764,48 +764,48 @@
     },
     {
      "depth": 1,
-     "action": "compare",
-     "question": "how does currencyid vary by category between the USA and Mexico?",
-     "label": "In the comparison of currencyid by category between the USA and Mexico, the USA predominantly uses currencyid 67 (United States Dollar) with 173,578 instances in the 'Indirect' category, while Mexico primarily uses currencyid 45 (Pesos) with 55,432 instances in the 'Indirect' category.",
-     "statistic": "p=0"
+     "action": "trend",
+     "question": "how has the average currencyid changed over the years for transactions in the USA compared to Mexico?",
+     "label": "The average currencyid for transactions in the USA decreased from 67.0 in 2009 to 64.39 in 2014, while Mexico's average currencyid decreased from 45.0 to 45.59 over the same period.",
+     "statistic": "Mexico_slope=-0.815 Mexico_p_value=0.501"
     }
    ],
    "ask_stop": true,
    "candidates": [
     {
      "slot": 1,
-     "action": "relationship",
-     "question": "How does the invoice_amount relate to savings for transactions categorized under 'Other'?"
+     "action": "trend",
+     "question": "What are the trends in total invoice_amount and savings for the 'Hardware' commodity across the years from 2009 to 2014?"
     },
     {
      "slot": 2,
-     "action": "filter",
-     "question": "What are the total invoice_amount and savings by commodity and category for transactions in the USA only?"
-    },
-    {
-     "slot": 3,
-     "action": "validate",
-     "question": "Is the observed difference in total invoice_amount between the USA and Mexico consistent across all categories?"
-    },
-    {
-     "slot": 4,
-     "action": "trend",
-     "question": "What are the trends in total invoice_amount and savings for the 'Hardware' commodity over the years?"
-    },
-    {
-     "slot": 5,
      "action": "compare",
      "question": "How do total invoice_amount and savings differ between the 'Logistics' and 'Other' categories across the years?"
     },
     {
-     "slot": 6,
+     "slot": 3,
+     "action": "validate",
+     "question": "Is the observed trend in total invoice_amount and savings consistent when analyzing only transactions with discount_days 't' across all years?"
+    },
+    {
+     "slot": 4,
      "action": "contribution",
-     "question": "Which categories contribute the most to total invoice_amount and savings in the Mexico region?"
+     "question": "Which categories contribute the most to total invoice_amount and savings in the USA compared to Mexico across all years?"
+    },
+    {
+     "slot": 5,
+     "action": "filter",
+     "question": "What are the total invoice_amount and savings by commodity and category for transactions in the USA during the year 2014?"
+    },
+    {
+     "slot": 6,
+     "action": "segment",
+     "question": "Which commodities show the highest total invoice_amount and savings in the 'Direct' category compared to the 'Indirect' category across all years?"
     },
     {
      "slot": 7,
-     "action": "segment",
-     "question": "Which commodities show the highest total invoice_amount and savings in the 'Direct' category compared to the 'Indirect' category?"
+     "action": "relationship",
+     "question": "How is the invoice_amount associated with savings across different country_regions?"
     }
    ]
   },
@@ -905,6 +905,105 @@
      "slot": 7,
      "action": "compare",
      "question": "how does currencyid vary by category between the USA and Mexico?"
+    }
+   ]
+  },
+  {
+   "id": "procurement-easy#a9c68684",
+   "run": "procurement-easy",
+   "node": "a9c68684",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
+   "columns": [
+    "invoiceid (Measure)",
+    "invoicedateid (Measure)",
+    "itemid (Measure)",
+    "currencyid (Measure)",
+    "line_item_quantity (Dimension)",
+    "unit_price_loc (Measure)",
+    "invoice_loc_amount (Measure)",
+    "exchangerate (Measure)",
+    "invoice_amount (Measure)",
+    "savings (Measure)",
+    "vendorid (Measure)",
+    "locationid (Measure)",
+    "discount_days (Dimension)",
+    "payment_terms_days (Measure)",
+    "commodity (Dimension)",
+    "sub_category (Dimension)",
+    "category (Dimension)",
+    "item (Dimension)",
+    "commodity_detail (Dimension)",
+    "currency (Dimension)",
+    "currency_abbr (Dimension)",
+    "day (Measure)",
+    "dayofweekno (Measure)",
+    "dayofweek (Dimension)",
+    "dayofyear (Measure)",
+    "weekno (Measure)",
+    "monthno (Measure)",
+    "month (Time)",
+    "qtrno (Measure)",
+    "quarter (Dimension)",
+    "year (Time)",
+    "mon (Time)",
+    "location_number (Measure)",
+    "country_region (Dimension)",
+    "city (Dimension)",
+    "vendor_name (Dimension)",
+    "vendor_city (Dimension)",
+    "vendor_state (Dimension)",
+    "vendor_postal_code (Dimension)",
+    "vendor_country_region (Dimension)",
+    "total_spend (Measure)",
+    "tier (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "The distribution of currencyid varies significantly between country_region groups, with 'USA' having a median of 67.0 and 'Mexico' at 45.0, indicating a higher concentration of values in the USA (KS=0.893).",
+     "statistic": "p=0 eff=0.893 stat=0.893"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "filter",
+     "question": "does the distribution of currencyid in the USA persist when filtering for invoices with savings greater than 0?"
+    },
+    {
+     "slot": 2,
+     "action": "contribution",
+     "question": "which categories contribute most to the higher currencyid values observed in the USA?"
+    },
+    {
+     "slot": 3,
+     "action": "segment",
+     "question": "which commodities show a higher concentration of currencyid values in the USA compared to Mexico?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "how are currencyid and invoice_amount associated in the USA compared to Mexico?"
+    },
+    {
+     "slot": 5,
+     "action": "trend",
+     "question": "how has the distribution of currencyid in the USA evolved over the years from 2009 to 2014?"
+    },
+    {
+     "slot": 6,
+     "action": "validate",
+     "question": "is the observed difference in currencyid distribution between USA and Mexico robust when controlling for category?"
+    },
+    {
+     "slot": 7,
+     "action": "compare",
+     "question": "how does the distribution of currencyid differ between the USA and Mexico when segmented by category?"
     }
    ]
   },
@@ -1015,11 +1114,11 @@
    ]
   },
   {
-   "id": "procurement-easy#03835f49",
+   "id": "procurement-easy#2e2a00d4",
    "run": "procurement-easy",
-   "node": "03835f49",
-   "depth": 0,
-   "child_depth": 1,
+   "node": "2e2a00d4",
+   "depth": 1,
+   "child_depth": 2,
    "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
    "columns": [
     "invoiceid (Measure)",
@@ -1070,46 +1169,53 @@
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "Total spend varies significantly by sub_category, with 'Raw Materials' averaging 5,978,278.87 compared to 'Contracting & Services' at 473,801.91, resulting in a grand mean of 3,067,548.67 (Cohen's d=1.604).",
-     "statistic": "p=0 eff=1.6 stat=3.17e+04"
+     "label": "Currencyid differs significantly by country_region, with 'USA' averaging 64.946 compared to 'Mexico' at 45.3, resulting in a grand mean of 55.123 (Cohen's d=4.032).",
+     "statistic": "p=0 eff=4.03 stat=7.83e+05"
+    },
+    {
+     "depth": 1,
+     "action": "compare",
+     "question": "how does currencyid vary by category between the USA and Mexico?",
+     "label": "In the comparison of currencyid by category between the USA and Mexico, the USA predominantly uses currencyid 67 (United States Dollar) with 173,578 instances in the 'Indirect' category, while Mexico primarily uses currencyid 45 (Pesos) with 55,432 instances in the 'Indirect' category.",
+     "statistic": "p=0"
     }
    ],
-   "ask_stop": false,
+   "ask_stop": true,
    "candidates": [
     {
      "slot": 1,
-     "action": "compare",
-     "question": "how does total spend for 'Raw Materials' compare to 'Contracting & Services' across different years?"
+     "action": "relationship",
+     "question": "How does the invoice_amount relate to savings for transactions categorized under 'Other'?"
     },
     {
      "slot": 2,
-     "action": "contribution",
-     "question": "which sub_categories contribute most to the overall total spend when analyzing the 'Other' category?"
+     "action": "filter",
+     "question": "What are the total invoice_amount and savings by commodity and category for transactions in the USA only?"
     },
     {
      "slot": 3,
      "action": "validate",
-     "question": "is the observed disparity in total spend between 'Raw Materials' and 'Contracting & Services' robust when controlling for country_region?"
+     "question": "Is the observed difference in total invoice_amount between the USA and Mexico consistent across all categories?"
     },
     {
      "slot": 4,
      "action": "trend",
-     "question": "how has the total spend for 'Raw Materials' evolved over the years compared to the overall grand mean of total spend?"
+     "question": "What are the trends in total invoice_amount and savings for the 'Hardware' commodity over the years?"
     },
     {
      "slot": 5,
-     "action": "relationship",
-     "question": "what is the relationship between total spend and savings for 'Raw Materials' compared to 'Contracting & Services'?"
+     "action": "compare",
+     "question": "How do total invoice_amount and savings differ between the 'Logistics' and 'Other' categories across the years?"
     },
     {
      "slot": 6,
-     "action": "filter",
-     "question": "does the total spend for 'Raw Materials' persist when filtering for transactions in the USA?"
+     "action": "contribution",
+     "question": "Which categories contribute the most to total invoice_amount and savings in the Mexico region?"
     },
     {
      "slot": 7,
      "action": "segment",
-     "question": "which sub_categories show the highest total spend when segmented by country_region?"
+     "question": "Which commodities show the highest total invoice_amount and savings in the 'Direct' category compared to the 'Indirect' category?"
     }
    ]
   },
@@ -1220,43 +1326,559 @@
    ]
   },
   {
-   "id": "census-easy#c093c676",
-   "run": "census-easy",
-   "node": "c093c676",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Report the share of records with income above 50K by education, sex, and occupation, treating the ' ?' placeholder in workclass, occupation, and native-country as missing.",
+   "id": "procurement-easy#d1391f1a",
+   "run": "procurement-easy",
+   "node": "d1391f1a",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
    "columns": [
-    "age (Dimension)",
-    "workclass (Dimension)",
-    "final-weight (Measure)",
-    "education (Dimension)",
-    "education-num (Measure)",
-    "marital-status (Dimension)",
-    "occupation (Dimension)",
-    "relationship (Dimension)",
-    "race (Dimension)",
-    "sex (Dimension)",
-    "capital-gain (Measure)",
-    "capital-loos (Measure)",
-    "hour-per-week (Measure)",
-    "native-country (Dimension)",
-    "income (Dimension)"
+    "invoiceid (Measure)",
+    "invoicedateid (Measure)",
+    "itemid (Measure)",
+    "currencyid (Measure)",
+    "line_item_quantity (Dimension)",
+    "unit_price_loc (Measure)",
+    "invoice_loc_amount (Measure)",
+    "exchangerate (Measure)",
+    "invoice_amount (Measure)",
+    "savings (Measure)",
+    "vendorid (Measure)",
+    "locationid (Measure)",
+    "discount_days (Dimension)",
+    "payment_terms_days (Measure)",
+    "commodity (Dimension)",
+    "sub_category (Dimension)",
+    "category (Dimension)",
+    "item (Dimension)",
+    "commodity_detail (Dimension)",
+    "currency (Dimension)",
+    "currency_abbr (Dimension)",
+    "day (Measure)",
+    "dayofweekno (Measure)",
+    "dayofweek (Dimension)",
+    "dayofyear (Measure)",
+    "weekno (Measure)",
+    "monthno (Measure)",
+    "month (Time)",
+    "qtrno (Measure)",
+    "quarter (Dimension)",
+    "year (Time)",
+    "mon (Time)",
+    "location_number (Measure)",
+    "country_region (Dimension)",
+    "city (Dimension)",
+    "vendor_name (Dimension)",
+    "vendor_city (Dimension)",
+    "vendor_state (Dimension)",
+    "vendor_postal_code (Dimension)",
+    "vendor_country_region (Dimension)",
+    "total_spend (Measure)",
+    "tier (Measure)"
    ],
    "path": [
     {
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "There is a very strong difference in education-num across income groups, with the highest mean for income '>50K' at 11.612 compared to the lowest mean for income '<=50K' at 9.595, resulting in a Cohen's d of 0.836.",
-     "statistic": "p=0 eff=0.836 stat=4.12e+03"
+     "label": "Total spend shows a very strong difference by category, with 'Direct' averaging 4,438,828.87 while 'Other' averages 885,886.67, leading to a grand mean of 2,689,070.95 (Cohen's d=1.628).",
+     "statistic": "p=0 eff=1.63 stat=4.46e+04"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "relationship",
+     "question": "how are total spend and savings associated when grouped by category?"
+    },
+    {
+     "slot": 2,
+     "action": "compare",
+     "question": "how does total spend by category differ between the years 2010 and 2014?"
+    },
+    {
+     "slot": 3,
+     "action": "filter",
+     "question": "does the strong difference in total spend by category persist when filtering for transactions in the USA?"
+    },
+    {
+     "slot": 4,
+     "action": "contribution",
+     "question": "which categories account for the highest total spend in the overall analysis?"
+    },
+    {
+     "slot": 5,
+     "action": "trend",
+     "question": "how has the average total spend by category evolved from 2009 to 2014?"
+    },
+    {
+     "slot": 6,
+     "action": "segment",
+     "question": "which categories show the highest total spend when segmented by country_region?"
+    },
+    {
+     "slot": 7,
+     "action": "validate",
+     "question": "is the observed difference in total spend by category robust when controlling for commodity type?"
+    }
+   ]
+  },
+  {
+   "id": "procurement-easy#03835f49",
+   "run": "procurement-easy",
+   "node": "03835f49",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Report total invoice_amount and savings by commodity, category, and country_region across the years present in the data.",
+   "columns": [
+    "invoiceid (Measure)",
+    "invoicedateid (Measure)",
+    "itemid (Measure)",
+    "currencyid (Measure)",
+    "line_item_quantity (Dimension)",
+    "unit_price_loc (Measure)",
+    "invoice_loc_amount (Measure)",
+    "exchangerate (Measure)",
+    "invoice_amount (Measure)",
+    "savings (Measure)",
+    "vendorid (Measure)",
+    "locationid (Measure)",
+    "discount_days (Dimension)",
+    "payment_terms_days (Measure)",
+    "commodity (Dimension)",
+    "sub_category (Dimension)",
+    "category (Dimension)",
+    "item (Dimension)",
+    "commodity_detail (Dimension)",
+    "currency (Dimension)",
+    "currency_abbr (Dimension)",
+    "day (Measure)",
+    "dayofweekno (Measure)",
+    "dayofweek (Dimension)",
+    "dayofyear (Measure)",
+    "weekno (Measure)",
+    "monthno (Measure)",
+    "month (Time)",
+    "qtrno (Measure)",
+    "quarter (Dimension)",
+    "year (Time)",
+    "mon (Time)",
+    "location_number (Measure)",
+    "country_region (Dimension)",
+    "city (Dimension)",
+    "vendor_name (Dimension)",
+    "vendor_city (Dimension)",
+    "vendor_state (Dimension)",
+    "vendor_postal_code (Dimension)",
+    "vendor_country_region (Dimension)",
+    "total_spend (Measure)",
+    "tier (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Total spend varies significantly by sub_category, with 'Raw Materials' averaging 5,978,278.87 compared to 'Contracting & Services' at 473,801.91, resulting in a grand mean of 3,067,548.67 (Cohen's d=1.604).",
+     "statistic": "p=0 eff=1.6 stat=3.17e+04"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "compare",
+     "question": "how does total spend for 'Raw Materials' compare to 'Contracting & Services' across different years?"
+    },
+    {
+     "slot": 2,
+     "action": "contribution",
+     "question": "which sub_categories contribute most to the overall total spend when analyzing the 'Other' category?"
+    },
+    {
+     "slot": 3,
+     "action": "validate",
+     "question": "is the observed disparity in total spend between 'Raw Materials' and 'Contracting & Services' robust when controlling for country_region?"
+    },
+    {
+     "slot": 4,
+     "action": "trend",
+     "question": "how has the total spend for 'Raw Materials' evolved over the years compared to the overall grand mean of total spend?"
+    },
+    {
+     "slot": 5,
+     "action": "relationship",
+     "question": "what is the relationship between total spend and savings for 'Raw Materials' compared to 'Contracting & Services'?"
+    },
+    {
+     "slot": 6,
+     "action": "filter",
+     "question": "does the total spend for 'Raw Materials' persist when filtering for transactions in the USA?"
+    },
+    {
+     "slot": 7,
+     "action": "segment",
+     "question": "which sub_categories show the highest total spend when segmented by country_region?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#7a321b94",
+   "run": "carsales-easy",
+   "node": "7a321b94",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Sales by category reveal a very strong difference, with 'Midsize' leading at a mean of 149148.974 units sold, while 'Sporty' has the lowest mean at 26794.0, against a grand mean of 87124.787 (Cohen's d=1.364).",
+     "statistic": "p=2.62e-07 eff=1.36 stat=9.74"
     },
     {
      "depth": 1,
+     "action": "trend",
+     "question": "How have the sales of Midsize and Sporty vehicles evolved from 2007 to 2011?",
+     "label": "From 2007 to 2011, Midsize vehicle sales totaled 5,800,310 units, while Sporty vehicle sales totaled 1,000,000 units, indicating a consistent disparity in sales favoring Midsize vehicles.",
+     "statistic": "stat \u2014"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "carsales-easy#33707655",
+   "run": "carsales-easy",
+   "node": "33707655",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Sales by brand show a very strong difference, with 'Honda' leading at a mean of 177257.04 units sold, while 'Volkswagen' has the lowest mean at 16060.257, against a grand mean of 82166.641 (Cohen's d=2.125).",
+     "statistic": "p=1.27e-21 eff=2.12 stat=20.1"
+    },
+    {
+     "depth": 1,
+     "action": "segment",
+     "question": "Which brands have sales significantly above the mean sales of 82166.641 units?",
+     "label": "The brands with sales above the mean of 82166.641 units are Ford (5,489,641), Toyota (5,282,029), and Honda (4,431,426), among others.",
+     "statistic": "stat \u2014"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "trend",
+     "question": "What is the trend in sales for BMW vehicles from 2007 to 2011, and how does it compare to the overall market trend?"
+    },
+    {
+     "slot": 2,
      "action": "validate",
-     "question": "Is the difference in mean education-num between income groups consistent when controlling for occupation?",
-     "label": "In the occupation 'Exec-managerial', individuals with income >50K have a mean education-num of 12.10, compared to 10.84 for those with income <=50K, indicating a notable difference in education levels.",
-     "statistic": "?=1.15e-31 Adm-clerical=3.84e-19"
+     "question": "Is the observed sales performance of Ford consistent across different vehicle categories?"
+    },
+    {
+     "slot": 3,
+     "action": "compare",
+     "question": "How do the sales figures of Midsize vehicles compare to those of Compact vehicles across different brands?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "What is the relationship between the sales of SUVs and the overall sales of each brand?"
+    },
+    {
+     "slot": 5,
+     "action": "filter",
+     "question": "How do sales of Honda vehicles compare to other brands when focusing only on the SUV category?"
+    },
+    {
+     "slot": 6,
+     "action": "contribution",
+     "question": "Which brands account for the largest share of total sales in the Midsize category?"
+    },
+    {
+     "slot": 7,
+     "action": "segment",
+     "question": "Which specific models of Ford and Honda contribute most significantly to their overall sales figures?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#2bdc0241",
+   "run": "carsales-easy",
+   "node": "2bdc0241",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "The distribution of sales differs significantly between the two largest brand groups, with 'Ford' having a median of 72711.0 units sold compared to 'BMW' at 12018.0, indicating a higher sales concentration for Ford (KS=0.663).",
+     "statistic": "p=7.76e-11 eff=0.663 stat=0.663"
+    },
+    {
+     "depth": 1,
+     "action": "trend",
+     "question": "How has the sales distribution for Ford and BMW evolved over the years from 2007 to 2011?",
+     "label": "From 2007 to 2011, Ford consistently dominated sales with 1,296,077 units sold in 2011, while BMW's sales peaked at 307,361 units in 2007, representing a share of 20% compared to Ford's 80%.",
+     "statistic": "stat \u2014"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "segment",
+     "question": "Which specific models within Ford and BMW have the highest sales, and how do they compare to each other?"
+    },
+    {
+     "slot": 2,
+     "action": "compare",
+     "question": "How do the sales trends of Ford and Toyota differ over the years from 2007 to 2011?"
+    },
+    {
+     "slot": 3,
+     "action": "contribution",
+     "question": "Which categories contribute the most to the sales of Ford compared to BMW?"
+    },
+    {
+     "slot": 4,
+     "action": "filter",
+     "question": "How do sales for Ford compare to other brands when focusing only on the SUV category?"
+    },
+    {
+     "slot": 5,
+     "action": "validate",
+     "question": "Do the sales patterns observed for Ford and BMW hold true when considering only the top-selling models?"
+    },
+    {
+     "slot": 6,
+     "action": "relationship",
+     "question": "Is there a correlation between the sales of different brands and their respective categories?"
+    },
+    {
+     "slot": 7,
+     "action": "trend",
+     "question": "What is the trend in sales for Midsize vehicles compared to Sporty vehicles from 2007 to 2011?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#6f1e0574",
+   "run": "carsales-easy",
+   "node": "6f1e0574",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Sales by brand show a very strong difference, with 'Honda' leading at a mean of 177257.04 units sold, while 'Volkswagen' has the lowest mean at 16060.257, against a grand mean of 82166.641 (Cohen's d=2.125).",
+     "statistic": "p=1.27e-21 eff=2.12 stat=20.1"
+    },
+    {
+     "depth": 1,
+     "action": "contribution",
+     "question": "Which brands account for the highest percentage of total sales from 2007 to 2011?",
+     "label": "From 2007 to 2011, Ford and Toyota accounted for the largest shares of total sales, with 25.04% and 24.09% respectively, out of a total of 21,921,768 units sold.",
+     "statistic": "total_sales=2.19e+07"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "carsales-easy#2c6d8588",
+   "run": "carsales-easy",
+   "node": "2c6d8588",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "The category distribution is strongly imbalanced, with 'SUV' accounting for 40% of 275 records, while 'MPV' is the rarest at 2%, indicating a significant non-uniformity (Cram\u00e9r's V=0.342).",
+     "statistic": "p=5e-45 eff=0.342 stat=225"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "trend",
+     "question": "How has the sales distribution of SUVs evolved from 2007 to 2011?"
+    },
+    {
+     "slot": 2,
+     "action": "validate",
+     "question": "Is the observed imbalance in category distribution consistent across different years?"
+    },
+    {
+     "slot": 3,
+     "action": "contribution",
+     "question": "What percentage of total sales do SUVs account for compared to other categories?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "What is the relationship between the sales of SUVs and the overall sales of all categories?"
+    },
+    {
+     "slot": 5,
+     "action": "compare",
+     "question": "How does the category distribution of SUVs compare to that of Midsize vehicles?"
+    },
+    {
+     "slot": 6,
+     "action": "segment",
+     "question": "Which specific categories are driving the high percentage of SUV sales?"
+    },
+    {
+     "slot": 7,
+     "action": "filter",
+     "question": "How does the category distribution change when focusing only on sales from 2009 to 2011?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#f60f25c9",
+   "run": "carsales-easy",
+   "node": "f60f25c9",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "There is a strong association between brand and category, with notable concentrations in specific combinations, such as Mazda in MPV (5 vs expected 0.5) and GMC in Pickup (10 vs expected 1.6).",
+     "statistic": "p=1.3e-23 eff=0.338 stat=221"
+    },
+    {
+     "depth": 1,
+     "action": "contribution",
+     "question": "Which brands account for the highest concentration of sales in the top categories?",
+     "label": "Ford leads with 32.25% of sales in the Compact category, while GMC dominates Pickup sales with 72.18%.",
+     "statistic": "top_category_count=8 top_brand_count=8"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "segment",
+     "question": "Which brands have the highest sales in the SUV category compared to the overall sales in the same category?"
+    },
+    {
+     "slot": 2,
+     "action": "contribution",
+     "question": "Which categories contribute the most to the total sales of Ford from 2007 to 2011?"
+    },
+    {
+     "slot": 3,
+     "action": "trend",
+     "question": "What is the trend in sales for BMW in the Midsize category from 2007 to 2011?"
+    },
+    {
+     "slot": 4,
+     "action": "filter",
+     "question": "How do sales figures for Ford in the Compact category change when focusing on the years 2009 to 2011?"
+    },
+    {
+     "slot": 5,
+     "action": "relationship",
+     "question": "What is the relationship between the sales of SUVs and the overall sales of all categories from 2007 to 2011?"
+    },
+    {
+     "slot": 6,
+     "action": "validate",
+     "question": "Is the dominance of GMC in the Pickup category consistent across different regions or does it vary?"
+    },
+    {
+     "slot": 7,
+     "action": "compare",
+     "question": "How do sales figures for GMC in the Pickup category compare to those of Ford in the same category over the years 2007 to 2011?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#b833c5a8",
+   "run": "carsales-easy",
+   "node": "b833c5a8",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Sales by category reveal a very strong difference, with 'Midsize' leading at a mean of 149148.974 units sold, while 'Sporty' has the lowest mean at 26794.0, against a grand mean of 87124.787 (Cohen's d=1.364).",
+     "statistic": "p=2.62e-07 eff=1.36 stat=9.74"
     }
    ],
    "ask_stop": true,
@@ -1264,32 +1886,37 @@
     {
      "slot": 1,
      "action": "compare",
-     "question": "How does the share of individuals earning >50K differ between males and females across various education levels?"
+     "question": "How do the sales of Midsize vehicles in 2010 compare to those in 2011?"
     },
     {
      "slot": 2,
-     "action": "filter",
-     "question": "What is the share of records with income >50K among individuals with a Doctorate degree, segmented by sex and occupation, while excluding records with workclass as '?'?"
+     "action": "segment",
+     "question": "Which brands contribute most to the sales of Midsize vehicles compared to Sporty vehicles?"
     },
     {
      "slot": 3,
-     "action": "contribution",
-     "question": "Which education levels contribute most significantly to the share of individuals earning >50K within the 'Prof-specialty' occupation?"
+     "action": "filter",
+     "question": "How do sales of Midsize vehicles compare to Sporty vehicles when focusing only on the years 2009 to 2011?"
     },
     {
      "slot": 4,
-     "action": "relationship",
-     "question": "What is the relationship between education-num and income levels, segmented by occupation and sex?"
+     "action": "validate",
+     "question": "Is the strong difference in sales between Midsize and Sporty vehicles consistent across different brands?"
     },
     {
      "slot": 5,
-     "action": "segment",
-     "question": "Which occupations have the highest share of individuals earning >50K among those with a Bachelor's degree, segmented by sex?"
+     "action": "contribution",
+     "question": "What percentage of total sales do Midsize vehicles account for compared to Sporty vehicles?"
     },
     {
      "slot": 6,
-     "action": "validate",
-     "question": "Is the observed relationship between education and income consistent when controlling for workclass and sex?"
+     "action": "trend",
+     "question": "How have the sales of Midsize and Sporty vehicles evolved from 2007 to 2011?"
+    },
+    {
+     "slot": 7,
+     "action": "relationship",
+     "question": "What is the relationship between the sales of Midsize vehicles and the overall sales across all categories?"
     }
    ]
   },
@@ -1373,6 +2000,147 @@
    ]
   },
   {
+   "id": "census-easy#8cbcfcba",
+   "run": "census-easy",
+   "node": "8cbcfcba",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Report the share of records with income above 50K by education, sex, and occupation, treating the ' ?' placeholder in workclass, occupation, and native-country as missing.",
+   "columns": [
+    "age (Dimension)",
+    "workclass (Dimension)",
+    "final-weight (Measure)",
+    "education (Dimension)",
+    "education-num (Measure)",
+    "marital-status (Dimension)",
+    "occupation (Dimension)",
+    "relationship (Dimension)",
+    "race (Dimension)",
+    "sex (Dimension)",
+    "capital-gain (Measure)",
+    "capital-loos (Measure)",
+    "hour-per-week (Measure)",
+    "native-country (Dimension)",
+    "income (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "There is a very strong difference in education-num across income groups, with the highest mean for income '>50K' at 11.612 compared to the lowest mean for income '<=50K' at 9.595, resulting in a Cohen's d of 0.836.",
+     "statistic": "p=0 eff=0.836 stat=4.12e+03"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "filter",
+     "question": "What is the mean education-num for individuals with income '>50K' who are in the 'Private' workclass?"
+    },
+    {
+     "slot": 2,
+     "action": "contribution",
+     "question": "What proportion of individuals earning '>50K' have a Bachelors degree or higher in terms of education?"
+    },
+    {
+     "slot": 3,
+     "action": "segment",
+     "question": "Which occupations have the highest mean education-num for individuals earning '>50K'?"
+    },
+    {
+     "slot": 4,
+     "action": "validate",
+     "question": "Is the difference in mean education-num between income groups consistent when controlling for occupation?"
+    },
+    {
+     "slot": 5,
+     "action": "relationship",
+     "question": "What is the relationship between education-num and capital-gain for individuals earning '>50K'?"
+    },
+    {
+     "slot": 6,
+     "action": "compare",
+     "question": "How does the mean education-num for income '>50K' compare between males and females?"
+    }
+   ]
+  },
+  {
+   "id": "census-easy#c093c676",
+   "run": "census-easy",
+   "node": "c093c676",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Report the share of records with income above 50K by education, sex, and occupation, treating the ' ?' placeholder in workclass, occupation, and native-country as missing.",
+   "columns": [
+    "age (Dimension)",
+    "workclass (Dimension)",
+    "final-weight (Measure)",
+    "education (Dimension)",
+    "education-num (Measure)",
+    "marital-status (Dimension)",
+    "occupation (Dimension)",
+    "relationship (Dimension)",
+    "race (Dimension)",
+    "sex (Dimension)",
+    "capital-gain (Measure)",
+    "capital-loos (Measure)",
+    "hour-per-week (Measure)",
+    "native-country (Dimension)",
+    "income (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "There is a very strong difference in education-num across income groups, with the highest mean for income '>50K' at 11.612 compared to the lowest mean for income '<=50K' at 9.595, resulting in a Cohen's d of 0.836.",
+     "statistic": "p=0 eff=0.836 stat=4.12e+03"
+    },
+    {
+     "depth": 1,
+     "action": "validate",
+     "question": "Is the difference in mean education-num between income groups consistent when controlling for occupation?",
+     "label": "In the occupation 'Exec-managerial', individuals with income >50K have a mean education-num of 12.10, compared to 10.84 for those with income <=50K, indicating a notable difference in education levels.",
+     "statistic": "?=1.15e-31 Adm-clerical=3.84e-19"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "compare",
+     "question": "How does the share of individuals earning >50K differ between males and females across various education levels?"
+    },
+    {
+     "slot": 2,
+     "action": "filter",
+     "question": "What is the share of records with income >50K among individuals with a Doctorate degree, segmented by sex and occupation, while excluding records with workclass as '?'?"
+    },
+    {
+     "slot": 3,
+     "action": "contribution",
+     "question": "Which education levels contribute most significantly to the share of individuals earning >50K within the 'Prof-specialty' occupation?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "What is the relationship between education-num and income levels, segmented by occupation and sex?"
+    },
+    {
+     "slot": 5,
+     "action": "segment",
+     "question": "Which occupations have the highest share of individuals earning >50K among those with a Bachelor's degree, segmented by sex?"
+    },
+    {
+     "slot": 6,
+     "action": "validate",
+     "question": "Is the observed relationship between education and income consistent when controlling for workclass and sex?"
+    }
+   ]
+  },
+  {
    "id": "census-easy#38f1554e",
    "run": "census-easy",
    "node": "38f1554e",
@@ -1409,70 +2177,78 @@
    "candidates": []
   },
   {
-   "id": "carsales-easy#6f1e0574",
-   "run": "carsales-easy",
-   "node": "6f1e0574",
+   "id": "census-easy#eac8ce05",
+   "run": "census-easy",
+   "node": "eac8ce05",
    "depth": 1,
    "child_depth": 2,
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "goal": "Report the share of records with income above 50K by education, sex, and occupation, treating the ' ?' placeholder in workclass, occupation, and native-country as missing.",
    "columns": [
-    "year (Time)",
-    "brand (Dimension)",
-    "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
+    "age (Dimension)",
+    "workclass (Dimension)",
+    "final-weight (Measure)",
+    "education (Dimension)",
+    "education-num (Measure)",
+    "marital-status (Dimension)",
+    "occupation (Dimension)",
+    "relationship (Dimension)",
+    "race (Dimension)",
+    "sex (Dimension)",
+    "capital-gain (Measure)",
+    "capital-loos (Measure)",
+    "hour-per-week (Measure)",
+    "native-country (Dimension)",
+    "income (Dimension)"
    ],
    "path": [
     {
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "Sales by brand show a very strong difference, with 'Honda' leading at a mean of 177257.04 units sold, while 'Volkswagen' has the lowest mean at 16060.257, against a grand mean of 82166.641 (Cohen's d=2.125).",
-     "statistic": "p=1.27e-21 eff=2.12 stat=20.1"
+     "label": "There is a very strong difference in education-num across income groups, with the highest mean for income '>50K' at 11.612 compared to the lowest mean for income '<=50K' at 9.595, resulting in a Cohen's d of 0.836.",
+     "statistic": "p=0 eff=0.836 stat=4.12e+03"
     },
     {
      "depth": 1,
+     "action": "compare",
+     "question": "How does the mean education-num for income '>50K' compare between males and females?",
+     "label": "Females earning >50K have a mean education-num of 11.79, while males have a mean of 11.58, indicating females have a higher average education level.",
+     "statistic": "Female=2.24 Male=2.41"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "validate",
+     "question": "Is the observed difference in income share between males and females consistent across all education levels?"
+    },
+    {
+     "slot": 2,
+     "action": "compare",
+     "question": "How does the share of individuals earning >50K differ between those with a Doctorate and those with a Bachelors across different occupations?"
+    },
+    {
+     "slot": 3,
+     "action": "filter",
+     "question": "What is the share of individuals earning >50K among different education levels for those working in the 'Private' workclass?"
+    },
+    {
+     "slot": 4,
+     "action": "segment",
+     "question": "Which occupations have the highest share of individuals earning >50K among females compared to males?"
+    },
+    {
+     "slot": 5,
      "action": "contribution",
-     "question": "Which brands account for the highest percentage of total sales from 2007 to 2011?",
-     "label": "From 2007 to 2011, Ford and Toyota accounted for the largest shares of total sales, with 25.04% and 24.09% respectively, out of a total of 21,921,768 units sold.",
-     "statistic": "total_sales=2.19e+07"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "carsales-easy#7a321b94",
-   "run": "carsales-easy",
-   "node": "7a321b94",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
-   "columns": [
-    "year (Time)",
-    "brand (Dimension)",
-    "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "Sales by category reveal a very strong difference, with 'Midsize' leading at a mean of 149148.974 units sold, while 'Sporty' has the lowest mean at 26794.0, against a grand mean of 87124.787 (Cohen's d=1.364).",
-     "statistic": "p=2.62e-07 eff=1.36 stat=9.74"
+     "question": "Which education levels contribute most to the share of individuals earning >50K among those in the 'Craft-repair' occupation?"
     },
     {
-     "depth": 1,
-     "action": "trend",
-     "question": "How have the sales of Midsize and Sporty vehicles evolved from 2007 to 2011?",
-     "label": "From 2007 to 2011, Midsize vehicle sales totaled 5,800,310 units, while Sporty vehicle sales totaled 1,000,000 units, indicating a consistent disparity in sales favoring Midsize vehicles.",
-     "statistic": "stat \u2014"
+     "slot": 6,
+     "action": "relationship",
+     "question": "What is the relationship between education and income for individuals in the 'Exec-managerial' occupation?"
     }
-   ],
-   "ask_stop": true,
-   "candidates": []
+   ]
   }
  ]
 }
