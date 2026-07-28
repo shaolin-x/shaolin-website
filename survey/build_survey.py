@@ -112,6 +112,10 @@ def main() -> None:
     p.add_argument("--no-reveal", dest="reveal", action="store_false",
                    help="do not write truth.json — the closing screen then reports how much "
                         "was answered but not how well, and no answer key is ever published")
+    p.add_argument("--no-feedback", dest="feedback", action="store_false",
+                   help="hold the model's answer back until the whole survey is done. The "
+                        "picks are then independent samples, which is the cleaner measurement; "
+                        "by default each decision is revealed as soon as it is answered")
     p.add_argument("--title", default="Would you have asked the same question?",
                    help="headline shown on the survey's landing screen")
     p.add_argument("--out", type=Path, default=HERE,
@@ -137,6 +141,12 @@ def main() -> None:
     with_cands = sum(1 for d in decisions if d["candidates"])
     built_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
+    # Per-decision feedback needs an answer key in the browser, so it cannot outlive
+    # --no-reveal. Silently showing nothing would be worse than saying so.
+    feedback = args.feedback and args.reveal
+    if args.feedback and not args.reveal:
+        print("--no-reveal publishes no answer key, so per-decision feedback is off too")
+
     bundle = {
         "meta": {
             "title": args.title,
@@ -150,6 +160,7 @@ def main() -> None:
             "min_candidates": args.min_candidates,
             "drop_unanswerable": args.drop_unanswerable,
             "reveal": args.reveal,
+            "feedback": feedback,
         },
         "decisions": [public_decision(d) for d in decisions],
     }
@@ -164,9 +175,11 @@ def main() -> None:
         "n_requested": args.n,
         "min_candidates": args.min_candidates,
         "drop_unanswerable": args.drop_unanswerable,
-        # The survey never reveals mid-run, so the picks stay independent samples — this is
-        # the flag report() reads to decide whether to caveat the rates.
-        "feedback": False,
+        # report() reads this to decide whether to caveat the rates. With feedback on, a
+        # respondent has seen the model's ranking before their later picks, so those picks
+        # are not independent samples and the caveat has to be printed — recording it as
+        # False here would quietly overstate the result.
+        "feedback": feedback,
         "seed": args.seed,
         "notes": notes,
         "decisions": decisions,
@@ -195,9 +208,13 @@ def main() -> None:
           f"({(data_dir / 'survey.json').stat().st_size / 1024:.0f} KB)")
     if args.reveal:
         print(f"  key     {truth_path}  ({truth_path.stat().st_size / 1024:.0f} KB)"
-              "   — published; a determined respondent can read it early")
+              + ("   — read by the page from the start, to reveal each answer"
+                 if feedback else
+                 "   — published; a determined respondent can read it early"))
     else:
         print("  key     not written (--no-reveal)")
+    print(f"  feedback {'after every decision — report() will caveat the rates as dependent'
+                       if feedback else 'held back until the end — picks stay independent'}")
     print(f"  private {priv_dir / 'decisions.json'}   — keep this out of the deploy")
 
 

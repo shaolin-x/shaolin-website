@@ -1,5 +1,5 @@
 {
- "carsales-easy#a5e43eb6": {
+ "data-47#1cecbfd4": {
   "terms": [
    "llm",
    "sem",
@@ -15,11 +15,11 @@
    "traj": 0.4
   },
   "model_terminate": true,
-  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 While the trajectory has identified Ford and Toyota as dominant players in the market, there remains an opportunity to explore the performance of other brands and categories, which could yield new insights. However, the existing repository already contains substantial findings regarding brand performance, suggesting that further exploration may lead to redundancy rather than significant new understanding.",
+  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 While the trajectory identifies significant declines in incident counts for the Network and Software categories, which raises valid concerns, the insights already present in the repository indicate that this decline has been well-documented. Further exploration may yield some new insights into the reasons behind these declines, but the redundancy of findings and the trajectory's drift from the user's primary goal of quantifying and analyzing distribution suggest that the value of continuing is limited.",
   "n": 0,
   "rows": []
  },
- "carsales-easy#878589a6": {
+ "data-55#374c0ad1": {
   "terms": [
    "llm",
    "sem",
@@ -34,118 +34,12 @@
    "imp": 0.2,
    "traj": 0.4
   },
-  "model_terminate": null,
-  "terminate_reason": "",
-  "n": 7,
-  "rows": [
-   {
-    "rank": 1,
-    "slot": 6,
-    "score": 0.8979704650852928,
-    "answered": false,
-    "action": "contribution",
-    "question": "Which categories account for the largest share of total sales across all brands from 2007 to 2011?",
-    "terms": [
-     0.5,
-     0.789560376220985,
-     0.4,
-     1.0,
-     0.6764509275751163
-    ]
-   },
-   {
-    "rank": 2,
-    "slot": 4,
-    "score": 0.8629384070580621,
-    "answered": false,
-    "action": "compare",
-    "question": "How do total sales figures for GMC and Hyundai differ from those of Toyota over the 2007-2011 period?",
-    "terms": [
-     0.6,
-     0.5294321441120625,
-     0.4,
-     1.0,
-     0.6764509275751163
-    ]
-   },
-   {
-    "rank": 3,
-    "slot": 1,
-    "score": 0.857616611180775,
-    "answered": false,
-    "action": "filter",
-    "question": "How do sales trends for BMW compare to Ford when focusing only on the SUV category?",
-    "terms": [
-     0.8,
-     0.6681449606029138,
-     0.5,
-     0.4,
-     0.6764509275751163
-    ]
-   },
-   {
-    "rank": 4,
-    "slot": 2,
-    "score": 0.7602188733222341,
-    "answered": false,
-    "action": "segment",
-    "question": "Which brands, besides Ford, show significant sales in the Compact category during the 2007-2011 period?",
-    "terms": [
-     0.7,
-     0.7229176455323867,
-     0.4,
-     0.09454545454545454,
-     0.6764509275751163
-    ]
-   },
-   {
-    "rank": 5,
-    "slot": 7,
-    "score": 0.7016357173078247,
-    "answered": false,
-    "action": "trend",
-    "question": "What are the annual sales trends for the Midsize category from 2007 to 2011?",
-    "terms": [
-     0.5,
-     0.6907668396565673,
-     0.4,
-     0.14181818181818182,
-     0.6764509275751163
-    ]
-   },
-   {
-    "rank": 6,
-    "slot": 5,
-    "score": 0.6870272045470203,
-    "answered": false,
-    "action": "relationship",
-    "question": "Is there a correlation between sales of SUVs and sales of Compact vehicles across different brands during the 2007-2011 period?",
-    "terms": [
-     0.3,
-     0.9857873340678946,
-     0.4,
-     0.0,
-     0.6764509275751163
-    ]
-   },
-   {
-    "rank": 7,
-    "slot": 3,
-    "score": 0.6270241331421342,
-    "answered": false,
-    "action": "validate",
-    "question": "Do the sales trends observed for Ford hold true when analyzing only the top three selling models from 2007 to 2011?",
-    "terms": [
-     0.4,
-     0.5021386848119872,
-     0.5,
-     0.05454545454545454,
-     0.6764509275751163
-    ]
-   }
-  ]
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.20 < 0.35 \u2014 The trajectory shows that while there is a slight upward trend for Bud Richman, it is not statistically significant, and similar findings exist for other callers, indicating redundancy. Additionally, the repository already highlights a significant upward trend for 'ITIL User', which is more relevant to the user's goal, suggesting that further exploration of Bud Richman's trend is unlikely to yield new insights.",
+  "n": 0,
+  "rows": []
  },
- "carsales-easy#f85515d1": {
+ "data-59#0e89ba46": {
   "terms": [
    "llm",
    "sem",
@@ -160,118 +54,152 @@
    "imp": 0.2,
    "traj": 0.4
   },
-  "model_terminate": null,
-  "terminate_reason": "",
-  "n": 7,
-  "rows": [
-   {
-    "rank": 1,
-    "slot": 7,
-    "score": 0.9295187036530022,
-    "answered": false,
-    "action": "compare",
-    "question": "How does the sales volume of SUVs compare to that of Compact vehicles over the years 2007 to 2011?",
-    "terms": [
-     0.6,
-     0.814074814612009,
-     0.75,
-     1.0,
-     0.48999999999999994
-    ]
-   },
-   {
-    "rank": 2,
-    "slot": 6,
-    "score": 0.9265376396823715,
-    "answered": false,
-    "action": "trend",
-    "question": "How has the share of SUV sales changed from 2007 to 2011 compared to other categories?",
-    "terms": [
-     0.9,
-     0.442150558729486,
-     0.75,
-     1.0,
-     0.48999999999999994
-    ]
-   },
-   {
-    "rank": 3,
-    "slot": 2,
-    "score": 0.8465376396823714,
-    "answered": false,
-    "action": "contribution",
-    "question": "What percentage of total sales do SUVs account for compared to other categories during the 2007-2011 period?",
-    "terms": [
-     0.8,
-     0.442150558729486,
-     0.5,
-     1.0,
-     0.48999999999999994
-    ]
-   },
-   {
-    "rank": 4,
-    "slot": 1,
-    "score": 0.8053122510987729,
-    "answered": false,
-    "action": "relationship",
-    "question": "What is the relationship between the sales of SUVs and the sales of all vehicle categories?",
-    "terms": [
-     0.6,
-     0.9972490043950915,
-     0.5,
-     0.4,
-     0.48999999999999994
-    ]
-   },
-   {
-    "rank": 5,
-    "slot": 3,
-    "score": 0.7940076262596596,
-    "answered": false,
-    "action": "segment",
-    "question": "Which brands are most associated with the SUV category, given its dominance in the overall category distribution?",
-    "terms": [
-     0.8,
-     0.7120305050386386,
-     0.5,
-     0.4,
-     0.48999999999999994
-    ]
-   },
-   {
-    "rank": 6,
-    "slot": 5,
-    "score": 0.710737591031568,
-    "answered": false,
-    "action": "filter",
-    "question": "How does the category distribution of vehicles change when focusing only on sales from 2009 to 2011?",
-    "terms": [
-     0.5,
-     0.578950364126272,
-     0.5,
-     0.6,
-     0.48999999999999994
-    ]
-   },
-   {
-    "rank": 7,
-    "slot": 4,
-    "score": 0.6810126071629716,
-    "answered": false,
-    "action": "validate",
-    "question": "Is the dominance of SUVs in the category distribution consistent across different brands?",
-    "terms": [
-     0.5,
-     0.6200504286518866,
-     0.5,
-     0.4,
-     0.48999999999999994
-    ]
-   }
-  ]
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 While there is some potential for uncovering new insights regarding the reasons behind the trends in incident distribution, the existing repository already contains substantial findings that closely mirror the current trajectory's conclusions. The high redundancy and overlap with previous analyses suggest that further exploration may not significantly advance the user's analysis goal of identifying workload imbalances.",
+  "n": 0,
+  "rows": []
  },
- "carsales-easy#938cfc49": {
+ "data-58#7540892e": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 While the trajectory reveals a significant decline in 'Network' incidents, the existing repository insights already cover this trend extensively, indicating high redundancy. Additionally, the focus on the 'Database' category's increasing resolution times presents a more relevant and promising avenue for exploration, aligning better with the user's analysis goal.",
+  "n": 0,
+  "rows": []
+ },
+ "data-54#8ec67a57": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 While the trajectory identifies a decline in the 'Network' group and suggests further investigation into underlying factors, much of this has already been established in the repository, indicating a high level of redundancy. The potential for new insights exists, but the overlap with existing findings and the lack of significant new directions suggest that further exploration may not substantially advance the user's goal.",
+  "n": 0,
+  "rows": []
+ },
+ "data-47#51f2d843": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.10 < 0.35 \u2014 The trajectory has revealed a significant absence of records for the 'assignement_group' and 'closed_at' combination, but this finding is already well-documented in the repository, indicating high redundancy. While there may be some potential for further exploration into the reasons behind the declines, the lack of actionable data suggests that additional analysis is unlikely to yield meaningful insights that advance the user's goal.",
+  "n": 0,
+  "rows": []
+ },
+ "data-59#879db0dd": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 While the trajectory has identified a significant decline in 'Network' incidents, the insights are largely redundant with existing findings in the repository, which detail similar trends. However, exploring the underlying reasons for these trends could still provide valuable information relevant to the user's goal of identifying workload imbalances, justifying a moderate score for goal relevance despite high redundancy.",
+  "n": 0,
+  "rows": []
+ },
+ "data-61#f7c12182": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 The trajectory has identified a significant decline in incident resolution counts for the Network group, which raises important questions about the underlying causes, suggesting some potential for further exploration. However, the redundancy of findings in the repository indicates that while there may be some new insights to uncover, the likelihood of producing substantially novel or actionable information is low, making further exploration less valuable.",
+  "n": 0,
+  "rows": []
+ },
+ "data-60#9bab91ef": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 The trajectory has identified a decline in incident counts for the Network group, but the redundancy of findings in the repository suggests that further exploration may largely restate existing conclusions. However, there is still potential for deeper analysis into the reasons behind the decline in closed incidents for specific agents, which aligns with the user's goal of understanding workload impacts, justifying a moderate score for goal relevance and analytical depth.",
+  "n": 0,
+  "rows": []
+ },
+ "data-49#f76e67b4": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 While the trajectory has identified a significant decline in incidents for the 'Network' group, the redundancy of this finding across multiple insights suggests that further exploration may not yield new information. However, there is still potential for deeper analysis into the causes of this decline and its implications for agent workload distribution, which aligns with the user's goal, albeit with diminishing returns.",
+  "n": 0,
+  "rows": []
+ },
+ "data-57#66f123e2": {
   "terms": [
    "llm",
    "sem",
@@ -292,238 +220,112 @@
   "rows": [
    {
     "rank": 1,
-    "slot": 6,
-    "score": 1.0358639538550503,
+    "slot": 2,
+    "score": 0.8271032646806136,
     "answered": true,
-    "action": "segment",
-    "question": "Which specific models of 'Ford' and 'BMW' contribute most significantly to the overall sales difference observed between these two brands?",
+    "action": "validate",
+    "question": "Is the declining trend in record count for the 'Network' assignment group still significant when controlling for the location of incidents?",
     "terms": [
      0.8,
-     0.8874558154202009,
-     0.75,
+     0.9631414275678575,
+     0.5,
      1.0,
-     0.5599999999999999
+     0.11579476947162323
     ]
    },
    {
     "rank": 2,
-    "slot": 5,
-    "score": 1.0019120953760126,
+    "slot": 6,
+    "score": 0.7762608290899486,
     "answered": true,
-    "action": "trend",
-    "question": "How have the sales figures for 'Ford' and 'BMW' evolved over the years from 2007 to 2011?",
-    "terms": [
-     0.9,
-     0.6316483815040498,
-     0.75,
-     1.0,
-     0.5599999999999999
-    ]
-   },
-   {
-    "rank": 3,
-    "slot": 2,
-    "score": 0.9520778181287646,
-    "answered": true,
-    "action": "relationship",
-    "question": "What is the relationship between the sales of 'Ford' and the sales of 'BMW' across different categories?",
+    "action": "segment",
+    "question": "Which assignment groups show a different trend in record count compared to the declining trend observed in the 'Network' assignment group?",
     "terms": [
      0.6,
-     0.9923112725150584,
+     0.9997716852051974,
      0.5,
      1.0,
-     0.5599999999999999
-    ]
-   },
-   {
-    "rank": 4,
-    "slot": 1,
-    "score": 0.9473670639259963,
-    "answered": false,
-    "action": "validate",
-    "question": "Is the observed difference in sales between 'Ford' and 'BMW' consistent when analyzing only the top-selling models from each brand?",
-    "terms": [
-     0.7,
-     0.653468255703985,
-     0.75,
-     1.0,
-     0.5599999999999999
-    ]
-   },
-   {
-    "rank": 5,
-    "slot": 7,
-    "score": 0.8042246917447204,
-    "answered": false,
-    "action": "filter",
-    "question": "How does the sales distribution between 'Ford' and 'BMW' change when focusing only on SUV category vehicles?",
-    "terms": [
-     0.7,
-     0.760898766978882,
-     0.5,
-     0.4,
-     0.5599999999999999
-    ]
-   },
-   {
-    "rank": 6,
-    "slot": 3,
-    "score": 0.8040789738158869,
-    "answered": false,
-    "action": "contribution",
-    "question": "Which categories account for the largest share of sales for 'Ford' compared to 'BMW'?",
-    "terms": [
-     0.8,
-     0.6694068043544568,
-     0.5,
-     0.36363636363636365,
-     0.5599999999999999
-    ]
-   },
-   {
-    "rank": 7,
-    "slot": 4,
-    "score": 0.7062187505625661,
-    "answered": false,
-    "action": "compare",
-    "question": "How do the sales figures of 'Ford' and 'BMW' compare across different vehicle categories?",
-    "terms": [
-     0.5,
-     0.6379659113411735,
-     0.5,
-     0.36363636363636365,
-     0.5599999999999999
-    ]
-   }
-  ]
- },
- "carsales-easy#947b6025": {
-  "terms": [
-   "llm",
-   "sem",
-   "cov",
-   "imp",
-   "traj"
-  ],
-  "lambdas": {
-   "llm": 0.3,
-   "sem": 0.25,
-   "cov": 0.2,
-   "imp": 0.2,
-   "traj": 0.4
-  },
-  "model_terminate": false,
-  "terminate_reason": "",
-  "n": 7,
-  "rows": [
-   {
-    "rank": 1,
-    "slot": 1,
-    "score": 0.9164758401077893,
-    "answered": true,
-    "action": "contribution",
-    "question": "Which categories account for the largest share of sales for Toyota and Honda compared to Ford and BMW?",
-    "terms": [
-     0.7,
-     0.9204488149766122,
-     0.4,
-     0.5818181818181818,
-     0.7
-    ]
-   },
-   {
-    "rank": 2,
-    "slot": 3,
-    "score": 0.903600576605029,
-    "answered": true,
-    "action": "segment",
-    "question": "Which vehicle categories are driving sales for Honda compared to Ford and BMW?",
-    "terms": [
-     0.7,
-     0.9707659427837522,
-     0.4,
-     0.45454545454545453,
-     0.7
+     0.11579476947162323
     ]
    },
    {
     "rank": 3,
     "slot": 5,
-    "score": 0.8979410519322055,
-    "answered": false,
-    "action": "compare",
-    "question": "How do total sales for Toyota and Honda differ from Ford and BMW over the years 2007 to 2011?",
+    "score": 0.7211489417298484,
+    "answered": true,
+    "action": "trend",
+    "question": "How has the overall record count for all assignment groups changed over the same time period as the declining trend for the 'Network' assignment group?",
     "terms": [
-     0.9,
-     0.6063096622742765,
-     0.4,
-     0.5818181818181818,
-     0.7
+     0.5,
+     0.8993241357647962,
+     0.5,
+     1.0,
+     0.11579476947162323
     ]
    },
    {
     "rank": 4,
-    "slot": 7,
-    "score": 0.8916250854350052,
-    "answered": false,
-    "action": "filter",
-    "question": "How do total sales for Toyota compare to Ford and BMW when focusing only on the SUV category?",
-    "terms": [
-     0.8,
-     0.7665003417400205,
-     0.5,
-     0.4,
-     0.7
-    ]
-   },
-   {
-    "rank": 5,
     "slot": 4,
-    "score": 0.8883088978368661,
+    "score": 0.6672048224988434,
     "answered": false,
     "action": "relationship",
-    "question": "What is the relationship between vehicle category and total sales for brands other than Ford and BMW?",
+    "question": "Is there a relationship between the priority of incidents and the record count trend for the 'Network' assignment group?",
     "terms": [
-     0.6,
-     0.884144682256555,
-     0.4,
-     0.6363636363636364,
-     0.7
-    ]
-   },
-   {
-    "rank": 6,
-    "slot": 6,
-    "score": 0.8743920826127625,
-    "answered": false,
-    "action": "trend",
-    "question": "What are the sales trends for the SUV category from 2007 to 2011 for brands other than Ford and BMW?",
-    "terms": [
-     0.7,
-     0.9993865122692316,
-     0.4,
-     0.2727272727272727,
-     0.7
-    ]
-   },
-   {
-    "rank": 7,
-    "slot": 2,
-    "score": 0.7045141434377376,
-    "answered": false,
-    "action": "validate",
-    "question": "Is the observed sales trend for Ford consistent across different vehicle categories from 2007 to 2011?",
-    "terms": [
-     0.5,
-     0.5380565737509501,
+     0.9,
+     0.8435476588407761,
      0.5,
      0.2,
-     0.7
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 1,
+    "score": 0.6653536260094939,
+    "answered": false,
+    "action": "compare",
+    "question": "How does the record count trend for the 'Network' assignment group compare to the trend for the 'Database' assignment group over the same time period?",
+    "terms": [
+     0.7,
+     0.9161428728833784,
+     0.5,
+     0.4,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 3,
+    "score": 0.6563958969996302,
+    "answered": false,
+    "action": "filter",
+    "question": "Does the declining trend in the record count for the 'Network' assignment group persist when focusing only on incidents with a priority of '2 - High'?",
+    "terms": [
+     0.8,
+     0.8803119568439233,
+     0.5,
+     0.25,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 7,
+    "score": 0.4395736743223819,
+    "answered": false,
+    "action": "contribution",
+    "question": "What proportion of the total incidents in the 'Network' assignment group are classified as '1 - Critical' compared to other priority levels?",
+    "terms": [
+     0.4,
+     0.5330230661349304,
+     0.5,
+     0.2,
+     0.11579476947162323
     ]
    }
   ]
  },
- "carsales-easy#5db92c25": {
+ "data-60#ab2c5b58": {
   "terms": [
    "llm",
    "sem",
@@ -538,118 +340,985 @@
    "imp": 0.2,
    "traj": 0.4
   },
-  "model_terminate": null,
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 6,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 3,
+    "score": 0.803152305223503,
+    "answered": true,
+    "action": "compare",
+    "question": "How does the decline in incident counts for the Network group compare to the trend in incident counts for the Database group over the same time period?",
+    "terms": [
+     0.9,
+     0.7473375897394146,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 1,
+    "score": 0.7413002809969496,
+    "answered": true,
+    "action": "segment",
+    "question": "Which assignment groups show a more significant decline in incident counts compared to the Network group over the same period?",
+    "terms": [
+     0.7,
+     0.7399294928332011,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 6,
+    "score": 0.5819940675717061,
+    "answered": false,
+    "action": "filter",
+    "question": "Does the declining trend in incident counts for the Network group persist when analyzing only incidents closed by Fred Luddy?",
+    "terms": [
+     0.8,
+     0.6227046391322274,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 5,
+    "score": 0.5422012433744224,
+    "answered": false,
+    "action": "trend",
+    "question": "How has the overall count of incidents assigned to the Network group changed over the last year?",
+    "terms": [
+     0.6,
+     0.7035333423430924,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 2,
+    "score": 0.49113524489251525,
+    "answered": false,
+    "action": "validate",
+    "question": "Is the observed decline in incident counts for the Network group consistent across different priority levels?",
+    "terms": [
+     0.6,
+     0.4992693484154635,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 4,
+    "score": 0.45419762498483585,
+    "answered": false,
+    "action": "contribution",
+    "question": "What proportion of the total incidents closed in the last quarter were assigned to the Network group, and how does this compare to previous quarters?",
+    "terms": [
+     0.5,
+     0.42991886878474606,
+     0.5,
+     0.252,
+     0.11579476947162323
+    ]
+   }
+  ]
+ },
+ "data-50#57c87caf": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 2,
+    "score": 0.7896025728745031,
+    "answered": true,
+    "action": "compare",
+    "question": "How does the declining trend in the 'Network' assignment group compare to the trends in other assignment groups over the same period?",
+    "terms": [
+     0.7,
+     0.9331386603434151,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 6,
+    "score": 0.6654211369268204,
+    "answered": true,
+    "action": "trend",
+    "question": "How has the record count for the 'Network' assignment group changed month over month in the last year?",
+    "terms": [
+     0.8,
+     0.9564129165526841,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 7,
+    "score": 0.6519569501617872,
+    "answered": false,
+    "action": "segment",
+    "question": "Which agents are primarily responsible for the declining trend in incidents for the 'Network' assignment group?",
+    "terms": [
+     0.9,
+     0.7825561694925517,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 5,
+    "score": 0.6102376318801983,
+    "answered": false,
+    "action": "filter",
+    "question": "Does the declining trend in incidents for the 'Network' assignment group persist when focusing only on incidents that were closed in the last three months?",
+    "terms": [
+     0.8,
+     0.7388788963661962,
+     0.5,
+     0.196,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 4,
+    "score": 0.5607905967737147,
+    "answered": false,
+    "action": "relationship",
+    "question": "Is there a relationship between the priority of incidents and the declining trend in the 'Network' assignment group?",
+    "terms": [
+     0.6,
+     0.7778907559402612,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 1,
+    "score": 0.4909799077043311,
+    "answered": false,
+    "action": "contribution",
+    "question": "What proportion of the total incidents in the 'Network' assignment group are attributed to each priority level?",
+    "terms": [
+     0.5,
+     0.6186479996627269,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 3,
+    "score": 0.4901038167346776,
+    "answered": false,
+    "action": "validate",
+    "question": "Does the declining trend in the 'Network' assignment group hold true when considering only incidents that were opened in the last six months?",
+    "terms": [
+     0.4,
+     0.8071436357841131,
+     0.5,
+     0.11,
+     0.11579476947162323
+    ]
+   }
+  ]
+ },
+ "data-54#46488739": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 1,
+    "score": 0.724140997109192,
+    "answered": true,
+    "action": "compare",
+    "question": "How does the trend in critical incidents compare to high-priority incidents over the same time period?",
+    "terms": [
+     0.7,
+     0.6815798162049624,
+     0.5,
+     1.0,
+     0.1093651076448784
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 6,
+    "score": 0.656490470965822,
+    "answered": false,
+    "action": "segment",
+    "question": "Which agents are contributing most to the rising trend in critical incidents?",
+    "terms": [
+     0.9,
+     0.7709777116314824,
+     0.5,
+     0.25,
+     0.1093651076448784
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 7,
+    "score": 0.6083368957522665,
+    "answered": false,
+    "action": "filter",
+    "question": "Among incidents opened in the last month, is the rising trend in critical incidents still present?",
+    "terms": [
+     0.8,
+     0.8423634107772603,
+     0.5,
+     0.07,
+     0.1093651076448784
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 2,
+    "score": 0.5832783997227967,
+    "answered": false,
+    "action": "relationship",
+    "question": "Is there a relationship between the priority of incidents and the workload of agents based on the number of incidents assigned?",
+    "terms": [
+     0.6,
+     0.2381294266593816,
+     0.5,
+     1.0,
+     0.1093651076448784
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 3,
+    "score": 0.5412373111276995,
+    "answered": false,
+    "action": "trend",
+    "question": "How has the count of critical incidents changed on a monthly basis over the past year?",
+    "terms": [
+     0.7,
+     0.5499650722789928,
+     0.5,
+     0.25,
+     0.1093651076448784
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 4,
+    "score": 0.4442281755602954,
+    "answered": false,
+    "action": "validate",
+    "question": "Does the rising trend in critical incidents hold true when considering only incidents closed in the last month?",
+    "terms": [
+     0.4,
+     0.7043285300093762,
+     0.5,
+     0.022,
+     0.1093651076448784
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 5,
+    "score": 0.37696142285709633,
+    "answered": false,
+    "action": "contribution",
+    "question": "Which categories of incidents are most frequently assigned as critical?",
+    "terms": [
+     0.5,
+     0.13286151919657987,
+     0.5,
+     0.25,
+     0.1093651076448784
+    ]
+   }
+  ]
+ },
+ "data-58#d598e474": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 2,
+    "score": 0.8234394200786783,
+    "answered": true,
+    "action": "compare",
+    "question": "How does the declining record count for the 'Network' assignment group compare to the trends observed in the 'Database' assignment group over the same period?",
+    "terms": [
+     0.8,
+     0.9484860491601165,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 3,
+    "score": 0.8089248054853966,
+    "answered": true,
+    "action": "trend",
+    "question": "How has the record count for the 'Network' assignment group changed over the last six months compared to the previous six months?",
+    "terms": [
+     0.9,
+     0.770427590786989,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 7,
+    "score": 0.6981106875855456,
+    "answered": false,
+    "action": "validate",
+    "question": "Does the declining trend in the record count for the 'Network' assignment group remain significant when controlling for the location of incidents?",
+    "terms": [
+     0.4,
+     0.9271711191875855,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 4,
+    "score": 0.5983726902356109,
+    "answered": false,
+    "action": "segment",
+    "question": "Which personnel assigned to the 'Network' assignment group are associated with the declining record count over time?",
+    "terms": [
+     0.6,
+     0.9282191297878462,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 1,
+    "score": 0.5811634408342918,
+    "answered": false,
+    "action": "contribution",
+    "question": "Which categories of incidents are most prevalent in the declining record count for the 'Network' assignment group?",
+    "terms": [
+     0.5,
+     0.9793821321825699,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 5,
+    "score": 0.5782157138430607,
+    "answered": false,
+    "action": "filter",
+    "question": "Does the declining trend in the record count for the 'Network' assignment group persist when analyzing only incidents with priority '4 - Low'?",
+    "terms": [
+     0.5,
+     0.9275912242176453,
+     0.5,
+     0.25,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 6,
+    "score": 0.5719097996250192,
+    "answered": false,
+    "action": "relationship",
+    "question": "Is there a correlation between the priority level of incidents and the declining record count for the 'Network' assignment group?",
+    "terms": [
+     0.6,
+     0.8223675673454794,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   }
+  ]
+ },
+ "data-59#f15142bb": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 5,
+    "score": 0.7899028512491411,
+    "answered": true,
+    "action": "segment",
+    "question": "Which categories of incidents are contributing to the decline in the record count for 'Network' incidents over time?",
+    "terms": [
+     0.7,
+     0.934339773841967,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 3,
+    "score": 0.7736275437246201,
+    "answered": true,
+    "action": "compare",
+    "question": "How does the declining trend in the record count for 'Network' incidents compare to the trend for 'Database' incidents over the same period?",
+    "terms": [
+     0.6,
+     0.9892385437438834,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 2,
+    "score": 0.7019097804652699,
+    "answered": true,
+    "action": "trend",
+    "question": "How has the record count for 'Network' incidents changed over the last year compared to the previous year?",
+    "terms": [
+     0.5,
+     0.8223674907064819,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 4,
+    "score": 0.6853893548298529,
+    "answered": false,
+    "action": "relationship",
+    "question": "Is there a relationship between the priority level of 'Network' incidents and the declining record count over time?",
+    "terms": [
+     0.4,
+     0.8762857881648142,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 1,
+    "score": 0.6599028640772644,
+    "answered": false,
+    "action": "filter",
+    "question": "Does the declining trend in the record count for 'Network' incidents persist when analyzing only incidents closed by Fred Luddy?",
+    "terms": [
+     0.8,
+     0.9343398251544603,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 6,
+    "score": 0.5697370207243184,
+    "answered": false,
+    "action": "validate",
+    "question": "Is the observed decline in 'Network' incidents statistically significant when controlling for the total number of incidents closed?",
+    "terms": [
+     0.4,
+     0.41367645174267664,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 7,
+    "score": 0.37503844615085796,
+    "answered": false,
+    "action": "contribution",
+    "question": "What proportion of the total incidents closed in the last quarter were 'Network' incidents, and how does this compare to previous quarters?",
+    "terms": [
+     0.3,
+     0.3532821534488346,
+     0.5,
+     0.252,
+     0.11579476947162323
+    ]
+   }
+  ]
+ },
+ "data-48#b6d6107e": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 7,
+    "score": 0.8571032646806136,
+    "answered": true,
+    "action": "validate",
+    "question": "Is the declining trend in record count for the 'Network' assignment group still significant when controlling for the location of incidents?",
+    "terms": [
+     0.9,
+     0.9631414275678575,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 5,
+    "score": 0.8284282279259669,
+    "answered": true,
+    "action": "compare",
+    "question": "How does the declining trend in record count for the 'Network' assignment group compare to the trend for the 'Database' assignment group over the same time period?",
+    "terms": [
+     0.8,
+     0.9684412805492708,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 3,
+    "score": 0.7986262164077353,
+    "answered": true,
+    "action": "segment",
+    "question": "Which assignment groups show a more significant decline in record count compared to the 'Network' group over the same time period?",
+    "terms": [
+     0.7,
+     0.969233234476344,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 1,
+    "score": 0.7343475857094952,
+    "answered": true,
+    "action": "trend",
+    "question": "How has the record count for the 'Network' assignment group changed over the last year compared to the previous year?",
+    "terms": [
+     0.6,
+     0.8321187116833832,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 6,
+    "score": 0.6163179053382535,
+    "answered": false,
+    "action": "contribution",
+    "question": "Which priorities contribute most to the declining record count in the 'Network' assignment group?",
+    "terms": [
+     0.6,
+     0.9999999901984165,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 4,
+    "score": 0.6019097804652698,
+    "answered": false,
+    "action": "relationship",
+    "question": "Is there a relationship between the priority of incidents and the record count for the 'Network' assignment group over time?",
+    "terms": [
+     0.7,
+     0.8223674907064819,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 2,
+    "score": 0.5572048224988434,
+    "answered": false,
+    "action": "filter",
+    "question": "Does the declining trend in record count for the 'Network' assignment group persist when only considering incidents with a priority of '2 - High'?",
+    "terms": [
+     0.5,
+     0.8435476588407761,
+     0.5,
+     0.25,
+     0.11579476947162323
+    ]
+   }
+  ]
+ },
+ "carsales-easy#b97ac3bc": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
   "terminate_reason": "",
   "n": 7,
   "rows": [
    {
     "rank": 1,
     "slot": 4,
-    "score": 0.9471365458427758,
-    "answered": false,
-    "action": "trend",
-    "question": "What is the trend in sales for Midsize vehicles from 2007 to 2011?",
+    "score": 0.9997135134093851,
+    "answered": true,
+    "action": "contribution",
+    "question": "Which brands account for the highest percentage of total sales, highlighting the skew?",
     "terms": [
      0.9,
-     0.843091637916558,
+     0.8788540536375405,
+     0.5,
      1.0,
-     0.14181818181818182,
-     0.595
+     0.5249999999999999
     ]
    },
    {
     "rank": 2,
-    "slot": 1,
-    "score": 0.8510003893230395,
+    "slot": 5,
+    "score": 0.9373047595713124,
     "answered": false,
-    "action": "segment",
-    "question": "Which brands are driving the higher sales of Midsize vehicles compared to Sporty vehicles?",
+    "action": "trend",
+    "question": "How has the sales skew changed from 2007 to 2011 across different brands?",
     "terms": [
      0.8,
-     0.9203651936557945,
-     0.5,
-     0.21454545454545454,
-     0.595
+     0.34921903828525,
+     1.0,
+     1.0,
+     0.5249999999999999
     ]
    },
    {
     "rank": 3,
-    "slot": 6,
-    "score": 0.8062300921829268,
+    "slot": 1,
+    "score": 0.8353272260978343,
     "answered": false,
-    "action": "validate",
-    "question": "Do Midsize vehicles consistently outperform Sporty vehicles in sales across all years from 2007 to 2011?",
+    "action": "segment",
+    "question": "Which categories are driving the most sales among the top 3 brands?",
     "terms": [
-     0.7,
-     0.6612840050953438,
-     0.75,
-     0.21454545454545454,
-     0.595
+     0.8,
+     0.7485816316640649,
+     0.5,
+     0.4909090909090909,
+     0.5249999999999999
     ]
    },
    {
     "rank": 4,
-    "slot": 7,
-    "score": 0.7490508800679708,
+    "slot": 6,
+    "score": 0.7814030095733497,
     "answered": false,
-    "action": "compare",
-    "question": "How do the sales of Midsize vehicles in 2011 compare to those in 2007?",
+    "action": "relationship",
+    "question": "What is the relationship between brand and sales volume in terms of skewness?",
     "terms": [
-     0.6,
-     0.6107489748173379,
-     0.75,
-     0.14181818181818182,
-     0.595
+     0.5,
+     0.48561203829339933,
+     0.5,
+     1.0,
+     0.5249999999999999
     ]
    },
    {
     "rank": 5,
-    "slot": 5,
-    "score": 0.7393990998859629,
+    "slot": 7,
+    "score": 0.7785098311712519,
     "answered": false,
-    "action": "contribution",
-    "question": "What percentage of total sales do Midsize vehicles account for compared to Sporty vehicles?",
+    "action": "compare",
+    "question": "How does the sales skew differ between SUVs and other categories?",
     "terms": [
+     0.6,
+     0.35403932468500804,
      0.5,
-     0.8339600359074879,
-     0.5,
-     0.21454545454545454,
-     0.595
+     1.0,
+     0.5249999999999999
     ]
    },
    {
     "rank": 6,
-    "slot": 3,
-    "score": 0.7324048015962072,
+    "slot": 2,
+    "score": 0.7506211387035207,
     "answered": false,
-    "action": "relationship",
-    "question": "Is there a relationship between the sales of Midsize vehicles and the overall sales across all categories?",
+    "action": "filter",
+    "question": "How does the right-skew in sales data persist when focusing only on the top 5 brands?",
     "terms": [
-     0.4,
-     0.9841646609302834,
      0.5,
-     0.14181818181818182,
-     0.595
+     0.580666372995901,
+     0.5,
+     0.7272727272727273,
+     0.5249999999999999
     ]
    },
    {
     "rank": 7,
-    "slot": 2,
-    "score": 0.7039227231276363,
+    "slot": 3,
+    "score": 0.616157246245445,
     "answered": false,
-    "action": "filter",
-    "question": "How do sales of Midsize vehicles compare to Sporty vehicles when filtered for the year 2009?",
+    "action": "validate",
+    "question": "Is the observed sales skew consistent when analyzing only the top-selling category?",
     "terms": [
+     0.4,
+     0.4246289849817799,
      0.5,
-     0.8636908925105451,
-     0.5,
-     0.0,
-     0.595
+     0.4,
+     0.5249999999999999
     ]
    }
   ]
  },
- "carsales-easy#21acb32f": {
+ "data-47#2bc00fa5": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 6,
+    "score": 0.841914629829394,
+    "answered": true,
+    "action": "compare",
+    "question": "How does the decline in incident counts for the Network category compare to the decline in counts for the Software category over the closed_at period?",
+    "terms": [
+     0.9,
+     0.9023868881629792,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 7,
+    "score": 0.8308228844859586,
+    "answered": true,
+    "action": "segment",
+    "question": "Which assignment groups show a significant decline in incident counts for the Network category over the closed_at period?",
+    "terms": [
+     0.8,
+     0.9780199067892372,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 1,
+    "score": 0.8058719304020099,
+    "answered": true,
+    "action": "contribution",
+    "question": "Which categories account for the overall decline in incident counts observed in the Network category over the closed_at period?",
+    "terms": [
+     0.7,
+     0.9982160904534422,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 3,
+    "score": 0.7310510999324846,
+    "answered": false,
+    "action": "trend",
+    "question": "How has the overall incident count for the Network category changed over the last year compared to the first six months?",
+    "terms": [
+     0.6,
+     0.8189327685753409,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 2,
+    "score": 0.7252830836872051,
+    "answered": false,
+    "action": "relationship",
+    "question": "Is there a relationship between the priority level of incidents and the decline in counts for the Network category over the closed_at period?",
+    "terms": [
+     0.5,
+     0.9158607035942234,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 5,
+    "score": 0.6779176924328343,
+    "answered": false,
+    "action": "validate",
+    "question": "Is the observed decline in incident counts for the Network category robust when controlling for the assigned_to dimension?",
+    "terms": [
+     0.6,
+     0.6063991385767398,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 4,
+    "score": 0.5065303269947679,
+    "answered": false,
+    "action": "filter",
+    "question": "Does the declining trend in incident counts for the Network category persist when analyzing only incidents assigned to the Database group?",
+    "terms": [
+     0.5,
+     0.6808496768244742,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   }
+  ]
+ },
+ "data-54#fcc04d12": {
   "terms": [
    "llm",
    "sem",
@@ -671,232 +1340,106 @@
    {
     "rank": 1,
     "slot": 3,
-    "score": 0.916334048633799,
+    "score": 0.7649693739688128,
     "answered": true,
-    "action": "relationship",
-    "question": "Is there a correlation between the sales of SUVs and the sales of other categories across different brands during the 2007-2011 period?",
-    "terms": [
-     0.4,
-     0.9453361945351955,
-     0.4,
-     1.0,
-     0.7
-    ]
-   },
-   {
-    "rank": 2,
-    "slot": 7,
-    "score": 0.9053431251463329,
-    "answered": true,
-    "action": "trend",
-    "question": "What are the sales trends for the Compact category from 2007 to 2011, and how do they compare across different brands?",
-    "terms": [
-     0.5,
-     0.7813725005853311,
-     0.4,
-     1.0,
-     0.7
-    ]
-   },
-   {
-    "rank": 3,
-    "slot": 1,
-    "score": 0.8895278150898351,
-    "answered": false,
-    "action": "contribution",
-    "question": "Which vehicle categories contributed the most to the overall sales growth from 2007 to 2011, excluding Ford and BMW?",
-    "terms": [
-     0.5,
-     0.7181112603593408,
-     0.4,
-     1.0,
-     0.7
-    ]
-   },
-   {
-    "rank": 4,
-    "slot": 2,
-    "score": 0.8792495494194668,
-    "answered": false,
-    "action": "segment",
-    "question": "Which brands, besides Ford and BMW, showed significant sales growth in the SUV category from 2007 to 2011?",
-    "terms": [
-     0.8,
-     0.7969981976778666,
-     0.4,
-     0.4,
-     0.7
-    ]
-   },
-   {
-    "rank": 5,
-    "slot": 4,
-    "score": 0.8639326647768035,
-    "answered": false,
-    "action": "filter",
-    "question": "How do sales for Toyota compare to Ford when focusing only on the SUV category during the 2007-2011 period?",
-    "terms": [
-     0.8,
-     0.6557306591072144,
-     0.5,
-     0.4,
-     0.7
-    ]
-   },
-   {
-    "rank": 6,
-    "slot": 5,
-    "score": 0.8199896593079905,
-    "answered": false,
-    "action": "validate",
-    "question": "How robust are the sales trends observed for Ford and BMW when considering economic factors such as average income levels during the 2007-2011 period?",
-    "terms": [
-     0.3,
-     0.599958637231962,
-     0.5,
-     1.0,
-     0.7
-    ]
-   },
-   {
-    "rank": 7,
-    "slot": 6,
-    "score": 0.7902893249031622,
-    "answered": false,
     "action": "compare",
-    "question": "How do the total sales figures for Volkswagen and GMC in the Midsize category compare to those of Ford and BMW during the 2007-2011 period?",
-    "terms": [
-     0.6,
-     0.8877027541581036,
-     0.4,
-     0.14181818181818182,
-     0.7
-    ]
-   }
-  ]
- },
- "carsales-easy#efcc1416": {
-  "terms": [
-   "llm",
-   "sem",
-   "cov",
-   "imp",
-   "traj"
-  ],
-  "lambdas": {
-   "llm": 0.3,
-   "sem": 0.25,
-   "cov": 0.2,
-   "imp": 0.2,
-   "traj": 0.4
-  },
-  "model_terminate": null,
-  "terminate_reason": "",
-  "n": 7,
-  "rows": [
-   {
-    "rank": 1,
-    "slot": 3,
-    "score": 0.8866761493211948,
-    "answered": false,
-    "action": "filter",
-    "question": "How do total sales figures for Toyota in the SUV category compare to those of Ford and BMW from 2007 to 2011?",
-    "terms": [
-     0.8,
-     0.9603774409805628,
-     0.5,
-     0.2,
-     0.6664544726901351
-    ]
-   },
-   {
-    "rank": 2,
-    "slot": 2,
-    "score": 0.8557540068403735,
-    "answered": false,
-    "action": "validate",
-    "question": "Is the observed dominance of Ford in total sales robust when excluding the SUV category?",
-    "terms": [
-     0.4,
-     0.9966888710572774,
-     0.5,
-     0.6,
-     0.6664544726901351
-    ]
-   },
-   {
-    "rank": 3,
-    "slot": 6,
-    "score": 0.8371628082053195,
-    "answered": false,
-    "action": "trend",
-    "question": "What are the sales trends for the Pickup category from 2007 to 2011, and how do they compare to the SUV category?",
-    "terms": [
-     0.5,
-     0.9986877128806979,
-     0.4,
-     0.45454545454545453,
-     0.6664544726901351
-    ]
-   },
-   {
-    "rank": 4,
-    "slot": 4,
-    "score": 0.8239962090764832,
-    "answered": false,
-    "action": "compare",
-    "question": "How do total sales figures for Toyota and Honda compare across all categories from 2007 to 2011?",
-    "terms": [
-     0.6,
-     0.3896576800017166,
-     0.4,
-     1.0,
-     0.6664544726901351
-    ]
-   },
-   {
-    "rank": 5,
-    "slot": 1,
-    "score": 0.8213227260429146,
-    "answered": false,
-    "action": "relationship",
-    "question": "What is the relationship between vehicle category and total sales across all brands from 2007 to 2011?",
-    "terms": [
-     0.4,
-     0.6189637478674422,
-     0.4,
-     1.0,
-     0.6664544726901351
-    ]
-   },
-   {
-    "rank": 6,
-    "slot": 7,
-    "score": 0.7728051575081396,
-    "answered": false,
-    "action": "segment",
-    "question": "Which vehicle categories are driving sales for Honda compared to Ford and BMW from 2007 to 2011?",
+    "question": "How does the decline in incident counts for the 'Network' category compare to the trend in incident counts for the 'Database' category over the same time period?",
     "terms": [
      0.7,
-     0.5012571100919786,
-     0.4,
-     0.45454545454545453,
-     0.6664544726901351
+     0.8346058647206543,
+     0.5,
+     1.0,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 1,
+    "score": 0.6792324271826776,
+    "answered": false,
+    "action": "trend",
+    "question": "How has the count of incidents in the 'Network' category changed on a monthly basis over the past year?",
+    "terms": [
+     0.9,
+     0.8916580775761133,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 6,
+    "score": 0.6678626043652891,
+    "answered": false,
+    "action": "contribution",
+    "question": "Which categories account for the overall decline in incident counts, particularly focusing on the 'Network' category?",
+    "terms": [
+     0.5,
+     0.7037787863065593,
+     0.5,
+     0.978,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 7,
+    "score": 0.6291020436020586,
+    "answered": false,
+    "action": "segment",
+    "question": "Which agents are contributing to the decline in incident counts for the 'Network' category over time?",
+    "terms": [
+     0.8,
+     0.8111365432536368,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 5,
+    "score": 0.5754314353986817,
+    "answered": false,
+    "action": "relationship",
+    "question": "Is there a relationship between the priority level of incidents and the declining trend in the 'Network' category?",
+    "terms": [
+     0.6,
+     0.8364541104401294,
+     0.5,
+     0.2,
+     0.11579476947162323
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 2,
+    "score": 0.5134965982810328,
+    "answered": false,
+    "action": "validate",
+    "question": "Is the observed decline in incident counts for the 'Network' category consistent across different assignment groups?",
+    "terms": [
+     0.6,
+     0.5887147619695338,
+     0.5,
+     0.2,
+     0.11579476947162323
     ]
    },
    {
     "rank": 7,
-    "slot": 5,
-    "score": 0.7654863731642145,
+    "slot": 4,
+    "score": 0.5046214614793706,
     "answered": false,
-    "action": "contribution",
-    "question": "Which brands account for the largest share of sales in the Midsize category from 2007 to 2011?",
+    "action": "filter",
+    "question": "Does the declining trend in incident counts for the 'Network' category persist when focusing only on incidents closed by 'Fred Luddy'?",
     "terms": [
      0.5,
-     0.9621637908980961,
-     0.4,
-     0.14181818181818182,
-     0.6664544726901351
+     0.6732142147628851,
+     0.5,
+     0.2,
+     0.11579476947162323
     ]
    }
   ]

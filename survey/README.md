@@ -32,11 +32,69 @@ Opening `index.html` straight off disk will not work — the browser blocks `fet
 Deploying is just committing `survey/index.html` and `survey/data/`. `runs/` and
 `survey/private/` are gitignored and are not needed at serve time.
 
+## The Submit button
+
+Out of the box the closing screen offers only a download, because `ENDPOINT` at the top of
+`index.html` is empty. Fill it in and a **Submit my answers** button appears, posting each
+response to a Google Apps Script that appends it to a Sheet and emails it to
+`shaolinx@usc.edu` with the `.json` attached.
+
+Set it up once — the steps are also at the top of [`apps_script/Code.gs`](apps_script/Code.gs):
+
+1. `sheets.new`, name it something like *D2I survey responses*.
+2. **Extensions → Apps Script**; replace the stub with `apps_script/Code.gs`; Save.
+3. **Deploy → New deployment → Web app**, *Execute as* **Me**, *Who has access* **Anyone**.
+   It must be "Anyone", not "Anyone with a Google account" — respondents are not signed in.
+4. Authorise (it asks for Sheets and Gmail: it writes rows and sends mail).
+5. Open the `/exec` URL in a browser. It should answer `ready — 0 response(s) received so far`.
+6. Paste that `/exec` URL into `const ENDPOINT` in `index.html`, then commit and push.
+
+Two sheets fill up: **responses**, one row per person including the whole response as
+`raw_json`, and **answers**, one row per answer — the shape to pivot on.
+
+After editing `Code.gs`, **Deploy → Manage deployments → edit → New version**. Saving alone
+changes nothing at the existing URL, which is the usual reason a fix appears not to work.
+
+Nothing about this weakens the blinding: a response still only names slots, so the Sheet is
+no more revealing than the download was.
+
+### Why the submit path looks the way it does
+
+The POST goes out as `text/plain`, not `application/json`. That keeps it a CORS *simple
+request*; `application/json` would trigger an `OPTIONS` preflight, which an Apps Script web
+app cannot answer, and the submission would fail before it was sent.
+
+Apps Script also answers from a redirect whose CORS headers are not guaranteed, so the
+browser sometimes refuses to let the page *read* a reply that did arrive. Reporting that as
+a failure would be wrong, so the page retries once with `mode: "no-cors"` and reports "sent,
+but we could not confirm it". That retry is why every response carries a `id` and why
+`doPost` ignores an id it has already stored — otherwise the occasional response would be
+counted twice.
+
+If a submission genuinely fails, the page says so and falls back to the download plus the
+mailto, so no one is left with nothing.
+
+### Quotas and consent
+
+Gmail sending caps at 100 emails/day on a consumer account, 1500/day on Workspace. Sheet
+writes are effectively unlimited at survey scale. If you expect a burst past the mail quota,
+set `NOTIFY = ''` in `Code.gs` — the Sheet keeps working and stops being email-bound.
+
+The intro screen tells respondents their answers stay in the browser until they choose to
+send, and marks the "about you" fields optional. That wording is now load-bearing: with a
+live endpoint, pressing Submit does transmit a name and email if they entered them. If this
+feeds a publication, check whether your USC IRB determination covers it before recruiting.
+
 ## Scoring what comes back
+
+Save the `.json` attachments into `survey/responses/`, then:
 
 ```bash
 python3 survey/score_survey.py survey/responses/ --per-respondent -o survey/results/
 ```
+
+The `raw_json` column of the responses sheet holds the same thing, if you would rather
+export from there than from the mailbox.
 
 The tables are `human_trajectory_eval.report()` — the same function the CLI prints, not a
 second implementation of the metrics — plus a pooled report over all respondents,
@@ -61,6 +119,39 @@ python3 survey/build_survey.py --no-reveal
 
 and no key is published at all. The page then closes with a plain thank-you, and
 `score_survey.py` is unaffected — it never reads `truth.json`.
+
+## Feedback after each decision
+
+By default, answering a decision reveals what the agent did there — its ranking of every
+candidate, the per-term score breakdown, where your pick landed — and a **Next** button
+carries on. Both halves land together, after the candidate pick rather than between the two
+questions: knowing the agent continued here would imply it answered one of the candidates,
+which would tilt the pick that follows.
+
+**This costs you statistical independence, and the tooling says so.** A respondent who has
+seen the ranking eight times starts predicting the scorer, so their later picks are no
+longer independent samples. `build_survey.py` records `feedback: true` in the private
+bundle, and `human_trajectory_eval.report()` therefore prints:
+
+> (D2I's rank was revealed after each pick, so later picks are not independent samples —
+> rerun with --no-feedback for a clean rate.)
+
+That is the CLI's own caveat, not something added here. For a headline agreement number in
+a paper, build the clean version:
+
+```bash
+python3 survey/build_survey.py --no-feedback     # reveal only at the very end
+python3 survey/build_survey.py --no-reveal       # never reveal, no key published
+```
+
+The trade is real in both directions: feedback makes the survey far more engaging to sit
+through — respondents get something back at every step — and engagement is what gets a
+survey finished. A reasonable split is `--no-feedback` for the run you cite, feedback on for
+the public-facing version.
+
+One consequence worth knowing: with feedback on, `truth.json` is fetched when the page
+loads rather than at the close, so the answer key is in the tab from the start. It was
+already a public URL either way; what changes is only how early it is there.
 
 ## What each build is
 

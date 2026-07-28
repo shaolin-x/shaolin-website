@@ -1,24 +1,920 @@
 {
  "meta": {
   "title": "Would you have asked the same question?",
-  "built_at": "2026-07-28T06:13:41+00:00",
+  "built_at": "2026-07-28T06:48:29+00:00",
   "seed": 20260727,
   "n_requested": 20,
-  "n_decisions": 8,
-  "n_runs": 1,
-  "n_early_stopped": 1,
-  "n_with_candidates": 7,
+  "n_decisions": 20,
+  "n_runs": 12,
+  "n_early_stopped": 10,
+  "n_with_candidates": 10,
   "min_candidates": 2,
   "drop_unanswerable": false,
-  "reveal": true
+  "reveal": true,
+  "feedback": true
  },
  "decisions": [
   {
-   "id": "carsales-easy#a5e43eb6",
-   "run": "carsales-easy",
-   "node": "a5e43eb6",
+   "id": "data-47#1cecbfd4",
+   "run": "data-47",
+   "node": "1cecbfd4",
    "depth": 1,
    "child_depth": 2,
+   "goal": "Quantify and analyze the distribution of incidents across categories by calculating incident counts per category and identifying significant discrepancies or imbalances in these counts.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    },
+    {
+     "depth": 1,
+     "action": "compare",
+     "question": "How does the decline in incident counts for the Network category compare to the decline in counts for the Software category over the closed_at period?",
+     "label": "The Network category experienced an infinite percentage decline in incident counts, while the Software category also saw an infinite percentage decline over the closed_at period.",
+     "statistic": "Network_decline_percentage=inf Software_decline_percentage=inf"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-55#374c0ad1",
+   "run": "data-55",
+   "node": "374c0ad1",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Analyze incident ticket distribution by caller by aggregating the incident counts over time using the 'caller_id' and 'opened_at' columns, and identify the caller whose incident frequency exhibits a statistically significant upward trend.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by state, sys_updated_on: 'Closed' record count is declining over sys_updated_on \u2014 strong trend: 29 in the first period \u2192 22 in the last (peak 3",
+     "statistic": "p=0.109 eff=0.538 stat=-0.824"
+    },
+    {
+     "depth": 1,
+     "action": "trend",
+     "question": "How has the frequency of closed incidents changed over the past year for each caller?",
+     "label": "The caller 'Bud Richman' exhibited an upward trend in closed incident frequency with a slope of 0.000251, but the trend is not statistically significant (p-value = 0.7416).",
+     "statistic": "p=0.742"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-59#0e89ba46",
+   "run": "data-59",
+   "node": "0e89ba46",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Examine the distribution of incidents across both individual assignees and assignment groups to identify any significant imbalances or discrepancies, such as unequal workload distribution or deviations from expected assignment patterns.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    },
+    {
+     "depth": 1,
+     "action": "compare",
+     "question": "How does the declining trend in the record count for 'Network' incidents compare to the trend for 'Database' incidents over the same period?",
+     "label": "The trend for 'Network' incidents shows a slight decline with a slope of -0.0012, while 'Database' incidents exhibit a slight increase with a slope of 0.0014.",
+     "statistic": "Network.slope=-0.00116 Database.slope=0.00145"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-58#7540892e",
+   "run": "data-58",
+   "node": "7540892e",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Compute the resolution time for each incident using the difference between closed_at and opened_at. Analyze resolution time trends over the period captured, categorizing the incidents by category, priority, and assignment group, while also inspecting factors like location and the personnel involved. Identify which incident categories show increasing resolution times and explore potential correlations or underlying causes related to these incident attributes.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    },
+    {
+     "depth": 1,
+     "action": "trend",
+     "question": "How has the record count for the 'Network' category changed over the last year compared to the previous year?",
+     "label": "The record count for the 'Network' category dropped from 94 incidents in 2023 to just 6 incidents in 2024, indicating a significant decline.",
+     "statistic": "last_year_count=94 previous_year_count=0"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-54#8ec67a57",
+   "run": "data-54",
+   "node": "8ec67a57",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Perform a time-series analysis of incident assignments by aggregating counts from the 'assigned_to' column over defined time periods (e.g., weekly or monthly) to identify and quantify agents experiencing an increasing trend in workload, which may indicate an overload situation.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    },
+    {
+     "depth": 1,
+     "action": "segment",
+     "question": "Which assignment groups show a different trend in incident counts compared to the declining trend observed in the 'Network' group?",
+     "label": "The 'Hardware', 'Inquiry / Help', and 'Software' assignment groups have stable trends with slopes of 0.0, contrasting with the declining trend of the 'Network' group, which has a slope of approximately -1.09e-13.",
+     "statistic": "Network.slope=-1.09e-13"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-47#51f2d843",
+   "run": "data-47",
+   "node": "51f2d843",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Quantify and analyze the distribution of incidents across categories by calculating incident counts per category and identifying significant discrepancies or imbalances in these counts.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    },
+    {
+     "depth": 1,
+     "action": "segment",
+     "question": "Which assignment groups show a significant decline in incident counts for the Network category over the closed_at period?",
+     "label": "No records for assignement_group, closed_at within [the full dataset]",
+     "statistic": "significant_declines_count=0"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-59#879db0dd",
+   "run": "data-59",
+   "node": "879db0dd",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Examine the distribution of incidents across both individual assignees and assignment groups to identify any significant imbalances or discrepancies, such as unequal workload distribution or deviations from expected assignment patterns.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    },
+    {
+     "depth": 1,
+     "action": "segment",
+     "question": "Which categories of incidents are contributing to the decline in the record count for 'Network' incidents over time?",
+     "label": "The 'Network' category incidents showed a decline from 9 incidents in January 2023 to just 1 incident by February 2024, with fluctuations in between.",
+     "statistic": "stat \u2014"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-61#f7c12182",
+   "run": "data-61",
+   "node": "f7c12182",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Analyze incident resolution performance for human agents by calculating their average resolution times (using the opened_at and closed_at data) and incident volumes, with a focused case study on a specific agent. Additionally, investigate potential correlations between performance dips and the agent's absence periods inferred from their schedule information, to propose optimized workload management strategies during such absences.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    },
+    {
+     "depth": 1,
+     "action": "trend",
+     "question": "How has the resolution count for the Network group changed over the last year compared to the previous year?",
+     "label": "The resolution count for the Network group decreased from 94 in 2023 to 6 in 2024, a drop of 88 incidents.",
+     "statistic": "change=-88"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-60#9bab91ef",
+   "run": "data-60",
+   "node": "9bab91ef",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Analyze trends over time in incident assignment volumes by examining counts of incidents assigned to both assignment groups and individual agents (assigned_to), and assess their potential correlation with workload indicators such as resolution time (derived from opened_at and closed_at) to understand impacts on user agents.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    },
+    {
+     "depth": 1,
+     "action": "compare",
+     "question": "How does the decline in incident counts for the Network group compare to the trend in incident counts for the Database group over the same time period?",
+     "label": "Incident counts for the Network group declined to 1 incident on 2023-01-06, while the Database group had 0 incidents on the same date, with both groups showing no significant difference in trends (p-value = 1.0).",
+     "statistic": "p=1"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-49#f76e67b4",
+   "run": "data-49",
+   "node": "f76e67b4",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Analyze the distribution of incidents among agents by quantifying the number of tasks assigned to each agent using the \"assigned_to\" column. Identify any imbalances or overburdened agents, and propose strategies to more evenly distribute incident assignments to reduce workload disparities.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    },
+    {
+     "depth": 1,
+     "action": "trend",
+     "question": "How has the record count for the 'Network' assignment group changed over the last year compared to the previous year?",
+     "label": "The record count for the 'Network' assignment group dropped from 94 incidents in 2023 to 6 incidents in 2024, indicating a decrease of 88 incidents.",
+     "statistic": "change=-88"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "data-57#66f123e2",
+   "run": "data-57",
+   "node": "66f123e2",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Analyze how key incident attributes, including incident category, priority, assignment group, personnel, location, and the duration between opened_at and closed_at, correlate with and potentially drive increases in time-to-resolution (TTR) for ServiceNow incidents.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "compare",
+     "question": "How does the record count trend for the 'Network' assignment group compare to the trend for the 'Database' assignment group over the same time period?"
+    },
+    {
+     "slot": 2,
+     "action": "validate",
+     "question": "Is the declining trend in record count for the 'Network' assignment group still significant when controlling for the location of incidents?"
+    },
+    {
+     "slot": 3,
+     "action": "filter",
+     "question": "Does the declining trend in the record count for the 'Network' assignment group persist when focusing only on incidents with a priority of '2 - High'?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "Is there a relationship between the priority of incidents and the record count trend for the 'Network' assignment group?"
+    },
+    {
+     "slot": 5,
+     "action": "trend",
+     "question": "How has the overall record count for all assignment groups changed over the same time period as the declining trend for the 'Network' assignment group?"
+    },
+    {
+     "slot": 6,
+     "action": "segment",
+     "question": "Which assignment groups show a different trend in record count compared to the declining trend observed in the 'Network' assignment group?"
+    },
+    {
+     "slot": 7,
+     "action": "contribution",
+     "question": "What proportion of the total incidents in the 'Network' assignment group are classified as '1 - Critical' compared to other priority levels?"
+    }
+   ]
+  },
+  {
+   "id": "data-60#ab2c5b58",
+   "run": "data-60",
+   "node": "ab2c5b58",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Analyze trends over time in incident assignment volumes by examining counts of incidents assigned to both assignment groups and individual agents (assigned_to), and assess their potential correlation with workload indicators such as resolution time (derived from opened_at and closed_at) to understand impacts on user agents.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "segment",
+     "question": "Which assignment groups show a more significant decline in incident counts compared to the Network group over the same period?"
+    },
+    {
+     "slot": 2,
+     "action": "validate",
+     "question": "Is the observed decline in incident counts for the Network group consistent across different priority levels?"
+    },
+    {
+     "slot": 3,
+     "action": "compare",
+     "question": "How does the decline in incident counts for the Network group compare to the trend in incident counts for the Database group over the same time period?"
+    },
+    {
+     "slot": 4,
+     "action": "contribution",
+     "question": "What proportion of the total incidents closed in the last quarter were assigned to the Network group, and how does this compare to previous quarters?"
+    },
+    {
+     "slot": 5,
+     "action": "trend",
+     "question": "How has the overall count of incidents assigned to the Network group changed over the last year?"
+    },
+    {
+     "slot": 6,
+     "action": "filter",
+     "question": "Does the declining trend in incident counts for the Network group persist when analyzing only incidents closed by Fred Luddy?"
+    }
+   ]
+  },
+  {
+   "id": "data-50#57c87caf",
+   "run": "data-50",
+   "node": "57c87caf",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Investigate the temporal trends in incidents assigned to agents by analyzing incident counts per agent over uniform time intervals (such as monthly) using the 'opened_at' and 'assigned_to' columns. Additionally, assess the potential impact on agents' workload and efficiency by evaluating related metrics like resolution time (calculated from 'opened_at' and 'closed_at').",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "contribution",
+     "question": "What proportion of the total incidents in the 'Network' assignment group are attributed to each priority level?"
+    },
+    {
+     "slot": 2,
+     "action": "compare",
+     "question": "How does the declining trend in the 'Network' assignment group compare to the trends in other assignment groups over the same period?"
+    },
+    {
+     "slot": 3,
+     "action": "validate",
+     "question": "Does the declining trend in the 'Network' assignment group hold true when considering only incidents that were opened in the last six months?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "Is there a relationship between the priority of incidents and the declining trend in the 'Network' assignment group?"
+    },
+    {
+     "slot": 5,
+     "action": "filter",
+     "question": "Does the declining trend in incidents for the 'Network' assignment group persist when focusing only on incidents that were closed in the last three months?"
+    },
+    {
+     "slot": 6,
+     "action": "trend",
+     "question": "How has the record count for the 'Network' assignment group changed month over month in the last year?"
+    },
+    {
+     "slot": 7,
+     "action": "segment",
+     "question": "Which agents are primarily responsible for the declining trend in incidents for the 'Network' assignment group?"
+    }
+   ]
+  },
+  {
+   "id": "data-54#46488739",
+   "run": "data-54",
+   "node": "46488739",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Perform a time-series analysis of incident assignments by aggregating counts from the 'assigned_to' column over defined time periods (e.g., weekly or monthly) to identify and quantify agents experiencing an increasing trend in workload, which may indicate an overload situation.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by priority, opened_at: '1 - Critical' record count is rising over opened_at \u2014 strong trend: 12 in the first period \u2192 15 in the last (peak 17, 1",
+     "statistic": "p=0.0995 eff=0.55 stat=0.697"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "compare",
+     "question": "How does the trend in critical incidents compare to high-priority incidents over the same time period?"
+    },
+    {
+     "slot": 2,
+     "action": "relationship",
+     "question": "Is there a relationship between the priority of incidents and the workload of agents based on the number of incidents assigned?"
+    },
+    {
+     "slot": 3,
+     "action": "trend",
+     "question": "How has the count of critical incidents changed on a monthly basis over the past year?"
+    },
+    {
+     "slot": 4,
+     "action": "validate",
+     "question": "Does the rising trend in critical incidents hold true when considering only incidents closed in the last month?"
+    },
+    {
+     "slot": 5,
+     "action": "contribution",
+     "question": "Which categories of incidents are most frequently assigned as critical?"
+    },
+    {
+     "slot": 6,
+     "action": "segment",
+     "question": "Which agents are contributing most to the rising trend in critical incidents?"
+    },
+    {
+     "slot": 7,
+     "action": "filter",
+     "question": "Among incidents opened in the last month, is the rising trend in critical incidents still present?"
+    }
+   ]
+  },
+  {
+   "id": "data-58#d598e474",
+   "run": "data-58",
+   "node": "d598e474",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Compute the resolution time for each incident using the difference between closed_at and opened_at. Analyze resolution time trends over the period captured, categorizing the incidents by category, priority, and assignment group, while also inspecting factors like location and the personnel involved. Identify which incident categories show increasing resolution times and explore potential correlations or underlying causes related to these incident attributes.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "contribution",
+     "question": "Which categories of incidents are most prevalent in the declining record count for the 'Network' assignment group?"
+    },
+    {
+     "slot": 2,
+     "action": "compare",
+     "question": "How does the declining record count for the 'Network' assignment group compare to the trends observed in the 'Database' assignment group over the same period?"
+    },
+    {
+     "slot": 3,
+     "action": "trend",
+     "question": "How has the record count for the 'Network' assignment group changed over the last six months compared to the previous six months?"
+    },
+    {
+     "slot": 4,
+     "action": "segment",
+     "question": "Which personnel assigned to the 'Network' assignment group are associated with the declining record count over time?"
+    },
+    {
+     "slot": 5,
+     "action": "filter",
+     "question": "Does the declining trend in the record count for the 'Network' assignment group persist when analyzing only incidents with priority '4 - Low'?"
+    },
+    {
+     "slot": 6,
+     "action": "relationship",
+     "question": "Is there a correlation between the priority level of incidents and the declining record count for the 'Network' assignment group?"
+    },
+    {
+     "slot": 7,
+     "action": "validate",
+     "question": "Does the declining trend in the record count for the 'Network' assignment group remain significant when controlling for the location of incidents?"
+    }
+   ]
+  },
+  {
+   "id": "data-59#f15142bb",
+   "run": "data-59",
+   "node": "f15142bb",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Examine the distribution of incidents across both individual assignees and assignment groups to identify any significant imbalances or discrepancies, such as unequal workload distribution or deviations from expected assignment patterns.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "filter",
+     "question": "Does the declining trend in the record count for 'Network' incidents persist when analyzing only incidents closed by Fred Luddy?"
+    },
+    {
+     "slot": 2,
+     "action": "trend",
+     "question": "How has the record count for 'Network' incidents changed over the last year compared to the previous year?"
+    },
+    {
+     "slot": 3,
+     "action": "compare",
+     "question": "How does the declining trend in the record count for 'Network' incidents compare to the trend for 'Database' incidents over the same period?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "Is there a relationship between the priority level of 'Network' incidents and the declining record count over time?"
+    },
+    {
+     "slot": 5,
+     "action": "segment",
+     "question": "Which categories of incidents are contributing to the decline in the record count for 'Network' incidents over time?"
+    },
+    {
+     "slot": 6,
+     "action": "validate",
+     "question": "Is the observed decline in 'Network' incidents statistically significant when controlling for the total number of incidents closed?"
+    },
+    {
+     "slot": 7,
+     "action": "contribution",
+     "question": "What proportion of the total incidents closed in the last quarter were 'Network' incidents, and how does this compare to previous quarters?"
+    }
+   ]
+  },
+  {
+   "id": "data-48#b6d6107e",
+   "run": "data-48",
+   "node": "b6d6107e",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Analyze the trend of incident resolution times by calculating the time difference between opened_at and closed_at, then segmenting these times by incident category, priority, and location to identify specific factors\u2014such as assignment groups or workload peaks\u2014that may explain variations.",
+   "columns": [
+    "category (Dimension)",
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "trend",
+     "question": "How has the record count for the 'Network' assignment group changed over the last year compared to the previous year?"
+    },
+    {
+     "slot": 2,
+     "action": "filter",
+     "question": "Does the declining trend in record count for the 'Network' assignment group persist when only considering incidents with a priority of '2 - High'?"
+    },
+    {
+     "slot": 3,
+     "action": "segment",
+     "question": "Which assignment groups show a more significant decline in record count compared to the 'Network' group over the same time period?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "Is there a relationship between the priority of incidents and the record count for the 'Network' assignment group over time?"
+    },
+    {
+     "slot": 5,
+     "action": "compare",
+     "question": "How does the declining trend in record count for the 'Network' assignment group compare to the trend for the 'Database' assignment group over the same time period?"
+    },
+    {
+     "slot": 6,
+     "action": "contribution",
+     "question": "Which priorities contribute most to the declining record count in the 'Network' assignment group?"
+    },
+    {
+     "slot": 7,
+     "action": "validate",
+     "question": "Is the declining trend in record count for the 'Network' assignment group still significant when controlling for the location of incidents?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#b97ac3bc",
+   "run": "carsales-easy",
+   "node": "b97ac3bc",
+   "depth": 0,
+   "child_depth": 1,
    "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
    "columns": [
     "year (Time)",
@@ -34,477 +930,184 @@
      "question": "",
      "label": "The sales data exhibits a strong right-skew, with a mean of 79,715.52 significantly higher than the median of 46,531.0, indicating that a small number of brands or categories are driving the majority of sales.",
      "statistic": "p=9e-19 eff=1.81 stat=1.81"
-    },
-    {
-     "depth": 1,
-     "action": "contribution",
-     "question": "Which brands account for the highest percentage of total sales, highlighting the skew?",
-     "label": "Ford accounts for 25.04% of total sales, followed by Toyota at 24.09%, indicating a skew towards these brands.",
-     "statistic": "skewness=0.512"
     }
    ],
    "ask_stop": true,
-   "candidates": []
-  },
-  {
-   "id": "carsales-easy#878589a6",
-   "run": "carsales-easy",
-   "node": "878589a6",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
-   "columns": [
-    "year (Time)",
-    "brand (Dimension)",
-    "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "Sales data reveals a significant disparity among brands, with 'Honda' leading in sales (mean 177,257.04) and 'Volkswagen' trailing (mean 16,060.26), indicating a strong difference in consumer preference across brands.",
-     "statistic": "p=1.27e-21 eff=2.12 stat=20.1"
-    },
-    {
-     "depth": 1,
-     "action": "compare",
-     "question": "How do the sales figures of Honda compare to those of Toyota and Ford over the years?",
-     "label": "Over the 2007-2011 period, Ford sold 5,489,641 units, Toyota sold 5,282,029 units, and Honda sold 4,431,426 units, with Ford leading in total sales.",
-     "statistic": "Honda_sales=4.43e+06 Toyota_sales=5.28e+06"
-    }
-   ],
-   "ask_stop": false,
    "candidates": [
     {
      "slot": 1,
-     "action": "filter",
-     "question": "How do sales trends for BMW compare to Ford when focusing only on the SUV category?"
+     "action": "segment",
+     "question": "Which categories are driving the most sales among the top 3 brands?"
     },
     {
      "slot": 2,
-     "action": "segment",
-     "question": "Which brands, besides Ford, show significant sales in the Compact category during the 2007-2011 period?"
+     "action": "filter",
+     "question": "How does the right-skew in sales data persist when focusing only on the top 5 brands?"
     },
     {
      "slot": 3,
      "action": "validate",
-     "question": "Do the sales trends observed for Ford hold true when analyzing only the top three selling models from 2007 to 2011?"
+     "question": "Is the observed sales skew consistent when analyzing only the top-selling category?"
     },
     {
      "slot": 4,
-     "action": "compare",
-     "question": "How do total sales figures for GMC and Hyundai differ from those of Toyota over the 2007-2011 period?"
+     "action": "contribution",
+     "question": "Which brands account for the highest percentage of total sales, highlighting the skew?"
     },
     {
      "slot": 5,
-     "action": "relationship",
-     "question": "Is there a correlation between sales of SUVs and sales of Compact vehicles across different brands during the 2007-2011 period?"
+     "action": "trend",
+     "question": "How has the sales skew changed from 2007 to 2011 across different brands?"
     },
     {
      "slot": 6,
-     "action": "contribution",
-     "question": "Which categories account for the largest share of total sales across all brands from 2007 to 2011?"
+     "action": "relationship",
+     "question": "What is the relationship between brand and sales volume in terms of skewness?"
     },
     {
      "slot": 7,
-     "action": "trend",
-     "question": "What are the annual sales trends for the Midsize category from 2007 to 2011?"
+     "action": "compare",
+     "question": "How does the sales skew differ between SUVs and other categories?"
     }
    ]
   },
   {
-   "id": "carsales-easy#f85515d1",
-   "run": "carsales-easy",
-   "node": "f85515d1",
+   "id": "data-47#2bc00fa5",
+   "run": "data-47",
+   "node": "2bc00fa5",
    "depth": 0,
    "child_depth": 1,
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "goal": "Quantify and analyze the distribution of incidents across categories by calculating incident counts per category and identifying significant discrepancies or imbalances in these counts.",
    "columns": [
-    "year (Time)",
-    "brand (Dimension)",
     "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
    ],
    "path": [
     {
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "The category distribution is heavily imbalanced, with 'SUV' vehicles comprising 40% of total records, indicating a strong consumer preference for this category over others.",
-     "statistic": "p=5e-45 eff=0.342 stat=225"
+     "label": "[exploratory] [temporal_group_trend] record count by assignement_group, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
     }
    ],
-   "ask_stop": false,
+   "ask_stop": true,
    "candidates": [
     {
      "slot": 1,
-     "action": "relationship",
-     "question": "What is the relationship between the sales of SUVs and the sales of all vehicle categories?"
+     "action": "contribution",
+     "question": "Which categories account for the overall decline in incident counts observed in the Network category over the closed_at period?"
     },
     {
      "slot": 2,
-     "action": "contribution",
-     "question": "What percentage of total sales do SUVs account for compared to other categories during the 2007-2011 period?"
+     "action": "relationship",
+     "question": "Is there a relationship between the priority level of incidents and the decline in counts for the Network category over the closed_at period?"
     },
     {
      "slot": 3,
-     "action": "segment",
-     "question": "Which brands are most associated with the SUV category, given its dominance in the overall category distribution?"
+     "action": "trend",
+     "question": "How has the overall incident count for the Network category changed over the last year compared to the first six months?"
     },
     {
      "slot": 4,
-     "action": "validate",
-     "question": "Is the dominance of SUVs in the category distribution consistent across different brands?"
+     "action": "filter",
+     "question": "Does the declining trend in incident counts for the Network category persist when analyzing only incidents assigned to the Database group?"
     },
     {
      "slot": 5,
-     "action": "filter",
-     "question": "How does the category distribution of vehicles change when focusing only on sales from 2009 to 2011?"
+     "action": "validate",
+     "question": "Is the observed decline in incident counts for the Network category robust when controlling for the assigned_to dimension?"
     },
     {
      "slot": 6,
-     "action": "trend",
-     "question": "How has the share of SUV sales changed from 2007 to 2011 compared to other categories?"
+     "action": "compare",
+     "question": "How does the decline in incident counts for the Network category compare to the decline in counts for the Software category over the closed_at period?"
     },
     {
      "slot": 7,
-     "action": "compare",
-     "question": "How does the sales volume of SUVs compare to that of Compact vehicles over the years 2007 to 2011?"
+     "action": "segment",
+     "question": "Which assignment groups show a significant decline in incident counts for the Network category over the closed_at period?"
     }
    ]
   },
   {
-   "id": "carsales-easy#938cfc49",
-   "run": "carsales-easy",
-   "node": "938cfc49",
+   "id": "data-54#fcc04d12",
+   "run": "data-54",
+   "node": "fcc04d12",
    "depth": 0,
    "child_depth": 1,
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "goal": "Perform a time-series analysis of incident assignments by aggregating counts from the 'assigned_to' column over defined time periods (e.g., weekly or monthly) to identify and quantify agents experiencing an increasing trend in workload, which may indicate an overload situation.",
    "columns": [
-    "year (Time)",
-    "brand (Dimension)",
     "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
+    "state (Dimension)",
+    "closed_at (Time)",
+    "opened_at (Time)",
+    "closed_by (Dimension)",
+    "number (Dimension)",
+    "sys_updated_by (Dimension)",
+    "location (Dimension)",
+    "assigned_to (Dimension)",
+    "caller_id (Dimension)",
+    "sys_updated_on (Time)",
+    "priority (Dimension)",
+    "assignement_group (Dimension)"
    ],
    "path": [
     {
      "depth": 0,
      "action": "base",
      "question": "",
-     "label": "The distribution of sales between 'Ford' and 'BMW' indicates a notable difference in sales patterns, with 'Ford' having a higher median sales figure (72,711.0) compared to 'BMW' (12,018.0), suggesting differing market strategies or consumer appeal.",
-     "statistic": "p=7.76e-11 eff=0.663 stat=0.663"
+     "label": "[exploratory] [temporal_group_trend] record count by category, closed_at: 'Network' record count is declining over closed_at \u2014 strong trend: 12 in the first period \u2192 6 in the last (peak 13, 100 ",
+     "statistic": "p=0.0824 eff=0.574 stat=-0.4"
     }
    ],
    "ask_stop": true,
    "candidates": [
     {
      "slot": 1,
-     "action": "validate",
-     "question": "Is the observed difference in sales between 'Ford' and 'BMW' consistent when analyzing only the top-selling models from each brand?"
-    },
-    {
-     "slot": 2,
-     "action": "relationship",
-     "question": "What is the relationship between the sales of 'Ford' and the sales of 'BMW' across different categories?"
-    },
-    {
-     "slot": 3,
-     "action": "contribution",
-     "question": "Which categories account for the largest share of sales for 'Ford' compared to 'BMW'?"
-    },
-    {
-     "slot": 4,
-     "action": "compare",
-     "question": "How do the sales figures of 'Ford' and 'BMW' compare across different vehicle categories?"
-    },
-    {
-     "slot": 5,
      "action": "trend",
-     "question": "How have the sales figures for 'Ford' and 'BMW' evolved over the years from 2007 to 2011?"
-    },
-    {
-     "slot": 6,
-     "action": "segment",
-     "question": "Which specific models of 'Ford' and 'BMW' contribute most significantly to the overall sales difference observed between these two brands?"
-    },
-    {
-     "slot": 7,
-     "action": "filter",
-     "question": "How does the sales distribution between 'Ford' and 'BMW' change when focusing only on SUV category vehicles?"
-    }
-   ]
-  },
-  {
-   "id": "carsales-easy#947b6025",
-   "run": "carsales-easy",
-   "node": "947b6025",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
-   "columns": [
-    "year (Time)",
-    "brand (Dimension)",
-    "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "The distribution of sales between 'Ford' and 'BMW' indicates a notable difference in sales patterns, with 'Ford' having a higher median sales figure (72,711.0) compared to 'BMW' (12,018.0), suggesting differing market strategies or consumer appeal.",
-     "statistic": "p=7.76e-11 eff=0.663 stat=0.663"
-    },
-    {
-     "depth": 1,
-     "action": "segment",
-     "question": "Which specific models of 'Ford' and 'BMW' contribute most significantly to the overall sales difference observed between these two brands?",
-     "label": "Ford's top three models (Fusion, Escape, Focus) sold a total of 2,863,188 units, significantly outpacing BMW's best-selling model (BMW 3-Series) at 595,337 units.",
-     "statistic": "stat \u2014"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "contribution",
-     "question": "Which categories account for the largest share of sales for Toyota and Honda compared to Ford and BMW?"
+     "question": "How has the count of incidents in the 'Network' category changed on a monthly basis over the past year?"
     },
     {
      "slot": 2,
      "action": "validate",
-     "question": "Is the observed sales trend for Ford consistent across different vehicle categories from 2007 to 2011?"
+     "question": "Is the observed decline in incident counts for the 'Network' category consistent across different assignment groups?"
     },
     {
      "slot": 3,
-     "action": "segment",
-     "question": "Which vehicle categories are driving sales for Honda compared to Ford and BMW?"
+     "action": "compare",
+     "question": "How does the decline in incident counts for the 'Network' category compare to the trend in incident counts for the 'Database' category over the same time period?"
     },
     {
      "slot": 4,
-     "action": "relationship",
-     "question": "What is the relationship between vehicle category and total sales for brands other than Ford and BMW?"
+     "action": "filter",
+     "question": "Does the declining trend in incident counts for the 'Network' category persist when focusing only on incidents closed by 'Fred Luddy'?"
     },
     {
      "slot": 5,
-     "action": "compare",
-     "question": "How do total sales for Toyota and Honda differ from Ford and BMW over the years 2007 to 2011?"
+     "action": "relationship",
+     "question": "Is there a relationship between the priority level of incidents and the declining trend in the 'Network' category?"
     },
     {
      "slot": 6,
-     "action": "trend",
-     "question": "What are the sales trends for the SUV category from 2007 to 2011 for brands other than Ford and BMW?"
-    },
-    {
-     "slot": 7,
-     "action": "filter",
-     "question": "How do total sales for Toyota compare to Ford and BMW when focusing only on the SUV category?"
-    }
-   ]
-  },
-  {
-   "id": "carsales-easy#5db92c25",
-   "run": "carsales-easy",
-   "node": "5db92c25",
-   "depth": 0,
-   "child_depth": 1,
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
-   "columns": [
-    "year (Time)",
-    "brand (Dimension)",
-    "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "Sales by category show a pronounced difference, with 'Midsize' vehicles achieving the highest mean sales (149,148.97) compared to 'Sporty' vehicles at the lowest (26,794.00), suggesting distinct consumer preferences for vehicle types.",
-     "statistic": "p=2.62e-07 eff=1.36 stat=9.74"
-    }
-   ],
-   "ask_stop": false,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "segment",
-     "question": "Which brands are driving the higher sales of Midsize vehicles compared to Sporty vehicles?"
-    },
-    {
-     "slot": 2,
-     "action": "filter",
-     "question": "How do sales of Midsize vehicles compare to Sporty vehicles when filtered for the year 2009?"
-    },
-    {
-     "slot": 3,
-     "action": "relationship",
-     "question": "Is there a relationship between the sales of Midsize vehicles and the overall sales across all categories?"
-    },
-    {
-     "slot": 4,
-     "action": "trend",
-     "question": "What is the trend in sales for Midsize vehicles from 2007 to 2011?"
-    },
-    {
-     "slot": 5,
      "action": "contribution",
-     "question": "What percentage of total sales do Midsize vehicles account for compared to Sporty vehicles?"
-    },
-    {
-     "slot": 6,
-     "action": "validate",
-     "question": "Do Midsize vehicles consistently outperform Sporty vehicles in sales across all years from 2007 to 2011?"
-    },
-    {
-     "slot": 7,
-     "action": "compare",
-     "question": "How do the sales of Midsize vehicles in 2011 compare to those in 2007?"
-    }
-   ]
-  },
-  {
-   "id": "carsales-easy#21acb32f",
-   "run": "carsales-easy",
-   "node": "21acb32f",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
-   "columns": [
-    "year (Time)",
-    "brand (Dimension)",
-    "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "The distribution of sales between 'Ford' and 'BMW' indicates a notable difference in sales patterns, with 'Ford' having a higher median sales figure (72,711.0) compared to 'BMW' (12,018.0), suggesting differing market strategies or consumer appeal.",
-     "statistic": "p=7.76e-11 eff=0.663 stat=0.663"
-    },
-    {
-     "depth": 1,
-     "action": "trend",
-     "question": "How have the sales figures for 'Ford' and 'BMW' evolved over the years from 2007 to 2011?",
-     "label": "From 2007 to 2011, Ford consistently dominated sales with 79-83% market share, while BMW's share declined from 20% to 16%.",
-     "statistic": "stat \u2014"
-    }
-   ],
-   "ask_stop": true,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "contribution",
-     "question": "Which vehicle categories contributed the most to the overall sales growth from 2007 to 2011, excluding Ford and BMW?"
-    },
-    {
-     "slot": 2,
-     "action": "segment",
-     "question": "Which brands, besides Ford and BMW, showed significant sales growth in the SUV category from 2007 to 2011?"
-    },
-    {
-     "slot": 3,
-     "action": "relationship",
-     "question": "Is there a correlation between the sales of SUVs and the sales of other categories across different brands during the 2007-2011 period?"
-    },
-    {
-     "slot": 4,
-     "action": "filter",
-     "question": "How do sales for Toyota compare to Ford when focusing only on the SUV category during the 2007-2011 period?"
-    },
-    {
-     "slot": 5,
-     "action": "validate",
-     "question": "How robust are the sales trends observed for Ford and BMW when considering economic factors such as average income levels during the 2007-2011 period?"
-    },
-    {
-     "slot": 6,
-     "action": "compare",
-     "question": "How do the total sales figures for Volkswagen and GMC in the Midsize category compare to those of Ford and BMW during the 2007-2011 period?"
-    },
-    {
-     "slot": 7,
-     "action": "trend",
-     "question": "What are the sales trends for the Compact category from 2007 to 2011, and how do they compare across different brands?"
-    }
-   ]
-  },
-  {
-   "id": "carsales-easy#efcc1416",
-   "run": "carsales-easy",
-   "node": "efcc1416",
-   "depth": 1,
-   "child_depth": 2,
-   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
-   "columns": [
-    "year (Time)",
-    "brand (Dimension)",
-    "category (Dimension)",
-    "model (Dimension)",
-    "sales (Measure)"
-   ],
-   "path": [
-    {
-     "depth": 0,
-     "action": "base",
-     "question": "",
-     "label": "The distribution of sales between 'Ford' and 'BMW' indicates a notable difference in sales patterns, with 'Ford' having a higher median sales figure (72,711.0) compared to 'BMW' (12,018.0), suggesting differing market strategies or consumer appeal.",
-     "statistic": "p=7.76e-11 eff=0.663 stat=0.663"
-    },
-    {
-     "depth": 1,
-     "action": "relationship",
-     "question": "What is the relationship between the sales of 'Ford' and the sales of 'BMW' across different categories?",
-     "label": "In the sales data from 2007 to 2011, Ford sold 2,230,050 units in the SUV category, while BMW sold 595,337 units in the same category, indicating a clear dominance of Ford in this segment.",
-     "statistic": "p=nan"
-    }
-   ],
-   "ask_stop": false,
-   "candidates": [
-    {
-     "slot": 1,
-     "action": "relationship",
-     "question": "What is the relationship between vehicle category and total sales across all brands from 2007 to 2011?"
-    },
-    {
-     "slot": 2,
-     "action": "validate",
-     "question": "Is the observed dominance of Ford in total sales robust when excluding the SUV category?"
-    },
-    {
-     "slot": 3,
-     "action": "filter",
-     "question": "How do total sales figures for Toyota in the SUV category compare to those of Ford and BMW from 2007 to 2011?"
-    },
-    {
-     "slot": 4,
-     "action": "compare",
-     "question": "How do total sales figures for Toyota and Honda compare across all categories from 2007 to 2011?"
-    },
-    {
-     "slot": 5,
-     "action": "contribution",
-     "question": "Which brands account for the largest share of sales in the Midsize category from 2007 to 2011?"
-    },
-    {
-     "slot": 6,
-     "action": "trend",
-     "question": "What are the sales trends for the Pickup category from 2007 to 2011, and how do they compare to the SUV category?"
+     "question": "Which categories account for the overall decline in incident counts, particularly focusing on the 'Network' category?"
     },
     {
      "slot": 7,
      "action": "segment",
-     "question": "Which vehicle categories are driving sales for Honda compared to Ford and BMW from 2007 to 2011?"
+     "question": "Which agents are contributing to the decline in incident counts for the 'Network' category over time?"
     }
    ]
   }

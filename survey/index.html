@@ -141,7 +141,7 @@ ol.steps { padding-left: 20px; } ol.steps li { margin-bottom: 6px; }
 <div class="wrap">
   <header class="top">
     <h1 id="title">D2I human evaluation</h1>
-    <span class="home"><a href="../index.html">← Shaolin Xie</a></span>
+    <span class="home" id="nav"></span>          <!-- filled by navLink(), which depends on the screen -->
   </header>
   <div class="counter" id="counter"></div>
   <div class="bar" id="barwrap" style="visibility:hidden"><i id="prog" style="width:0"></i></div>
@@ -156,6 +156,13 @@ const app = document.getElementById("app");
 
 const KEY = "d2i-survey-v1";          // one saved response per browser, bumped if the schema moves
 
+/* Where Submit posts: the /exec URL of the Apps Script in survey/apps_script/, which appends
+   to a Google Sheet and mails the response on. Left empty the button does not appear at all
+   and the closing screen offers only the download — so the page is correct both before the
+   script is deployed and after, and a half-configured endpoint can never silently eat a
+   response. */
+const ENDPOINT = "";
+
 /* ------------------------------------------------------------------ state
    `survey` is the public bundle; `truth` is fetched only once the last decision is locked in,
    so the answer key is not sitting in the tab while the questions are still being answered.
@@ -163,6 +170,8 @@ const KEY = "d2i-survey-v1";          // one saved response per browser, bumped 
    which is what makes a reload or a closed laptop non-fatal. */
 let survey = null, truth = null, R = null;
 let stage = "stop", sel = null, screen = "intro", lastStop = null, err = "";
+/* Set while the model's answer to the decision just judged is on screen; cleared by Next. */
+let revealed = null;
 
 const decisions = () => survey.decisions;
 const judged = () => new Set(R.verdicts.map(v => v.decision));
@@ -170,12 +179,22 @@ const nextIndex = () => decisions().findIndex(d => !judged().has(d.id));
 
 function save() { try { localStorage.setItem(KEY, JSON.stringify(R)); } catch (e) {} }
 
+/* A submission id, minted once per response. The submit path can legitimately send the same
+   response twice — see submit() — so the receiving script needs something stable to
+   recognise the second copy by. */
+function uuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "r-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+}
+
 function fresh(respondent) {
   return {
+    id: uuid(),
     survey: {built_at: survey.meta.built_at, seed: survey.meta.seed, n_decisions: survey.meta.n_decisions},
     respondent,
     started_at: new Date().toISOString(),
     finished_at: null,
+    submitted_at: null,
     user_agent: navigator.userAgent,
     verdicts: [],
   };
@@ -185,24 +204,63 @@ function fresh(respondent) {
    this page genuinely cannot compute: the shuffle that maps a slot back to a candidate is
    only in the private bundle. score_survey.py resolves it at scoring time. */
 function record(decision, terminate, slot, choice, note) {
-  R.verdicts.push({
+  const v = {
     decision: decision.id,
     terminate: terminate === undefined ? null : terminate,
     slot: slot === undefined ? null : slot,
     choice: choice,
     note: (note || "").trim(),
     ts: new Date().toISOString(),
-  });
+  };
+  R.verdicts.push(v);
   save();
+  return v;
+}
+
+/* Answer one decision and move on: to the model's verdict on it if this build reveals as it
+   goes, otherwise straight to the next question. Every path that records a verdict goes
+   through here, so the two modes cannot diverge. */
+function advance(decision, verdict) {
+  if (!survey.meta.feedback) return begin();
+  // Feedback is on, so a reveal is always shown — even when the key is missing, where the
+  // screen says so. Skipping silently is indistinguishable from a broken Submit button.
+  revealed = {d: decision, v: verdict, missing: !(truth && truth[decision.id])};
+  return render();
 }
 
 /* ------------------------------------------------------------------ chrome */
+
+/* The header link. The opening screen is the survey's front page, so from anywhere else the
+   link goes back to it — never discarding an answer, since everything is already saved and
+   that screen offers Resume. On the opening screen itself there is nothing to go back to,
+   so it becomes the way out to the rest of the site. */
+function navLink() {
+  const nav = document.getElementById("nav");
+  if (!nav) return;
+  if (screen === "intro" || !R) {
+    nav.innerHTML = `<a href="../index.html">← Shaolin Xie</a>`;
+    return;
+  }
+  nav.innerHTML = `<a href="#" id="back">← Back to the start</a>`;
+  document.getElementById("back").onclick = (e) => {
+    e.preventDefault();
+    screen = "intro";
+    render();
+  };
+}
+
 function chrome() {
+  navLink();
   const c = document.getElementById("counter"), bar = document.getElementById("barwrap");
   if (screen !== "judge" || !R) { c.textContent = ""; bar.style.visibility = "hidden"; return; }
   const done = R.verdicts.length, total = decisions().length, i = nextIndex();
   bar.style.visibility = "visible";
-  c.textContent = i >= 0 ? `Decision ${i + 1} of ${total}` : `${done} of ${total} answered`;
+  // While a reveal is up, `nextIndex` already points past it — the header should still name
+  // the decision on screen, which is the one just answered.
+  const shown = revealed ? decisions().findIndex(x => x.id === revealed.d.id) : i;
+  c.textContent = revealed ? `Decision ${shown + 1} of ${total} — answered`
+                : i >= 0 ? `Decision ${i + 1} of ${total}`
+                : `${done} of ${total} answered`;
   document.getElementById("prog").style.width = (100 * done / Math.max(1, total)) + "%";
 }
 
@@ -236,6 +294,8 @@ function renderIntro() {
               candidate, because that is the position the agent's own judge is in.</li>
           <li>If you continue, pick the question you would ask next from the pool that
               actually competed at that node, in a shuffled order.</li>
+          ${survey.meta.feedback ? `<li>You then see what the agent did — how it ranked every
+              candidate and where your pick landed — and click <em>Next</em> to carry on.</li>` : ""}
         </ol>
         <p class="hint">There is no trick and no single right answer — the point is to measure
         how often a person and the agent agree, so please answer as you would if the analysis
@@ -360,8 +420,7 @@ function renderDecision(d) {
   const s = document.getElementById("submit");
   if (s) s.onclick = () => {
     if (sel === null) return;
-    record(d, lastStop, sel, String(sel), noteValue());
-    begin();
+    advance(d, record(d, lastStop, sel, String(sel), noteValue()));
   };
   window.scrollTo({top: 0, behavior: "instant"});
 }
@@ -380,15 +439,15 @@ function act(what, d) {
     if (d.ask_stop) { stage = "stop"; sel = null; return render(); }
     return act("undo", d);
   }
-  if (what === "skip") { record(d, stage === "pick" ? lastStop : null, null, "s", noteValue()); return begin(); }
+  if (what === "skip") return advance(d, record(d, stage === "pick" ? lastStop : null, null, "s", noteValue()));
   if (what === "continue") {
     lastStop = false;
     // An early-stopped node carries no candidates by construction: "continue" is the whole
     // answer there, so the decision ends rather than showing an empty pool.
-    if (!d.candidates.length) { record(d, false, null, "c", ""); return begin(); }
+    if (!d.candidates.length) return advance(d, record(d, false, null, "c", ""));
     stage = "pick"; sel = null; return render();
   }
-  if (what === "terminate") { record(d, true, null, "t", ""); return begin(); }
+  if (what === "terminate") return advance(d, record(d, true, null, "t", ""));
 }
 
 /* ------------------------------------------------------------------ the close */
@@ -429,6 +488,38 @@ function tally() {
     }
   }
   return {picks, top1, rankSum, actionHit, stops, stopAgree, skipped, rows};
+}
+
+/* Send the response to the Apps Script endpoint.
+   `{ok, confirmed, error}` — `confirmed` false means it was sent but the browser would not
+   let us read the reply, so we cannot prove it landed.
+
+   Two details make this work against Apps Script specifically. The content type is
+   text/plain, which keeps the POST a CORS "simple request": application/json would trigger
+   an OPTIONS preflight, and an Apps Script web app has no way to answer one. And the whole
+   thing is wrapped in a fallback to mode:"no-cors", because Apps Script serves the reply
+   from a redirect whose CORS headers are not guaranteed — when the read is blocked the POST
+   itself has still arrived, so retrying opaquely is right and reporting failure would be
+   wrong. That retry is why every response carries an `id` the script dedupes on. */
+async function submit() {
+  R.finished_at = R.finished_at || new Date().toISOString();
+  save();
+  const body = JSON.stringify(R);
+  const headers = {"Content-Type": "text/plain;charset=utf-8"};
+  try {
+    const r = await fetch(ENDPOINT, {method: "POST", headers, body, redirect: "follow"});
+    if (!r.ok) return {ok: false, error: `the server answered ${r.status}`};
+    const j = await r.json().catch(() => null);
+    if (j && j.ok === false) return {ok: false, error: j.error || "rejected"};
+    return {ok: true, confirmed: true};
+  } catch (e) {
+    try {
+      await fetch(ENDPOINT, {method: "POST", mode: "no-cors", headers, body});
+      return {ok: true, confirmed: false};
+    } catch (e2) {
+      return {ok: false, error: e2.message || "could not reach the server"};
+    }
+  }
 }
 
 function download() {
@@ -478,6 +569,107 @@ function reviewRow(x) {
   </details>`;
 }
 
+/* What the model did at the decision just judged — the port of human_trajectory_eval.reveal.
+
+   Both halves land together, after the candidate pick rather than between the two prompts:
+   knowing the model continued here would imply it answered one of the candidates, which
+   would tilt the pick that follows. */
+function renderReveal() {
+  const {d, v} = revealed;
+
+  // The answer key could not be read, but the answer is already saved. Say what happened
+  // instead of showing a blank card or skipping straight past it.
+  if (revealed.missing) {
+    app.innerHTML = "";
+    app.append($(`
+      <div><div class="card">
+        <div class="eyebrow">Answer recorded</div>
+        <p>Your answer to decision ${decisions().findIndex(x => x.id === d.id) + 1} is saved, but
+        this page could not load <span class="mono">data/truth.json</span>, so it cannot show
+        you what the model did here.</p>
+        <p class="hint">If you are running the survey locally, rebuild it with
+        <span class="mono">python3 survey/build_survey.py</span> and reload. The survey itself
+        is unaffected — every answer is still being recorded.</p>
+        <div class="row" style="margin-top:16px">
+          <button class="primary" data-act="next"><kbd>↵</kbd>${
+            nextIndex() < 0 ? "See my results" : "Next decision"}</button>
+          <button class="ghost" data-act="undo"><kbd>U</kbd>Change my answer</button>
+        </div>
+      </div></div>`));
+    wireReveal();
+    return;
+  }
+
+  const t = truth[d.id];
+  let head = "";
+
+  if (t.model_terminate !== null && v.terminate !== null) {
+    const agree = t.model_terminate === v.terminate;
+    head += `<p><strong class="${agree ? "ok" : "warn"}">${agree ? "✓ You agreed" : "✗ You disagreed"}</strong>
+      — the model ${t.model_terminate ? "stopped this line here" : "kept exploring this line"}.</p>`;
+    if (t.model_terminate && t.terminate_reason) {
+      head += `<p class="hint">Its judge said: ${esc(t.terminate_reason)}</p>`;
+    }
+  }
+
+  const mine = v.slot === null ? null : t.rows.find(r => r.slot === v.slot);
+  if (mine) {
+    const top = t.rows.find(r => r.rank === 1);
+    head += `<p>Your pick ranked <strong class="${mine.rank === 1 ? "ok" : ""}">${mine.rank}</strong>
+      of ${t.n}${mine.rank === 1 ? " — the model's own top choice." :
+      `, ${(top.score - mine.score).toFixed(4)} below its top choice.`}</p>`;
+  } else if (v.slot === null && v.terminate !== true) {
+    head += `<p class="muted">You skipped this one — here is what the model did anyway.</p>`;
+  }
+
+  const rows = t.rows.slice().sort((a, b) => a.rank - b.rank).map(r => `
+    <tr class="${r.slot === v.slot ? "picked" : ""} ${r.rank === 1 ? "top" : ""}">
+      <td>${r.rank}</td>
+      <td>${r.answered ? "✓" : ""}${r.slot === v.slot ? " ←" : ""}</td>
+      <td class="mono">${r.score.toFixed(4)}</td>
+      ${r.terms.map(x => `<td class="mono">${x === null ? "—" : x.toFixed(2)}</td>`).join("")}
+      <td class="q"><span class="tag">${esc(r.action)}</span>${esc(r.question)}</td>
+    </tr>`).join("");
+  const w = t.lambdas;
+
+  app.innerHTML = "";
+  app.append($(`
+    <div>
+      <div class="card">
+        <div class="eyebrow">What the model did</div>
+        ${head}
+        ${t.rows.length ? `
+          <div class="scroll"><table>
+            <thead><tr><th>#</th><th></th><th>score</th>
+              ${t.terms.map(x => `<th>${x}</th>`).join("")}<th class="q">question</th></tr></thead>
+            <tbody>${rows}</tbody></table></div>
+          <div class="hint">✓ = the model went on to answer it${v.slot === null ? "" : ", ← = your pick"}${
+            w ? `<br><span class="mono">score = ${t.terms.map(x => `${w[x]}·${x}`).join(" + ")}</span>` : ""}</div>`
+          : `<p class="hint">There is no ranking to show here: the search stopped at this node,
+             so it never proposed any follow-up question to score. The stop/continue call above
+             is the whole of this decision.</p>`}
+        <div class="row" style="margin-top:16px">
+          <button class="primary" data-act="next"><kbd>↵</kbd>${
+            nextIndex() < 0 ? "See my results" : "Next decision"}</button>
+          <button class="ghost" data-act="undo"><kbd>U</kbd>Change my answer</button>
+        </div>
+      </div>
+    </div>`));
+
+  wireReveal();
+}
+
+/* Next and Change-my-answer, shared by both shapes of the reveal. */
+function wireReveal() {
+  app.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
+    const was = revealed;
+    revealed = null;
+    if (b.dataset.act === "undo") return act("undo", was.d);
+    begin();
+  });
+  window.scrollTo({top: 0, behavior: "instant"});
+}
+
 async function renderDone() {
   await loadTruth();
   const total = decisions().length;
@@ -511,18 +703,7 @@ async function renderDone() {
           respondents cannot be influenced by them. The results will be reported in aggregate.</p>` : ""}
       </div>
 
-      <div class="card">
-        <div class="eyebrow">Send your answers</div>
-        <p>Nothing has left your browser. Download the file and email it to
-        <a href="mailto:shaolinx@usc.edu?subject=D2I%20survey%20response">shaolinx@usc.edu</a>,
-        or attach it wherever you were asked to.</p>
-        <div class="row">
-          <button class="primary" id="dl">Download my answers (.json)</button>
-          <button class="ghost" id="again">Take it again</button>
-        </div>
-        <p class="hint">The file holds your answers, the slot numbers you chose and your notes —
-        no page contents and nothing about your machine beyond the browser string.</p>
-      </div>
+      <div class="card" id="send"></div>          <!-- filled by wireSend, which owns its states -->
 
       ${scored ? `<div class="card">
         <div class="eyebrow">Decision by decision</div>
@@ -531,18 +712,84 @@ async function renderDone() {
       </div>` : ""}
     </div>`));
 
+  wireSend();
+  window.scrollTo({top: 0, behavior: "instant"});
+}
+
+/* The closing card has three shapes: already sent, ready to send, or — with no ENDPOINT
+   configured — download only. Rendered on its own so submitting can redraw just this card
+   and leave the score tiles and the review list untouched. */
+function sendCard(state) {
+  const dl = `<button class="${ENDPOINT && !R.submitted_at ? "ghost" : "primary"}" id="dl">Download a copy (.json)</button>`;
+  const again = `<button class="ghost" id="again">Take it again</button>`;
+
+  if (R.submitted_at) {
+    return `
+      <div class="eyebrow">Sent</div>
+      <p><strong class="ok">✓ Your answers have been submitted.</strong>${
+        state === "unconfirmed"
+          ? " Your browser would not let this page read the reply, so if you would like to be\
+              certain it arrived, download a copy and send it on as well."
+          : " Thank you — nothing else is needed."}</p>
+      <div class="row">${dl}${again}</div>`;
+  }
+
+  if (!ENDPOINT) {
+    return `
+      <div class="eyebrow">Send your answers</div>
+      <p>Nothing has left your browser. Download the file and email it to
+      <a href="mailto:shaolinx@usc.edu?subject=D2I%20survey%20response">shaolinx@usc.edu</a>,
+      or attach it wherever you were asked to.</p>
+      <div class="row">${dl}${again}</div>
+      <p class="hint">The file holds your answers, the slot numbers you chose and your notes —
+      no page contents and nothing about your machine beyond the browser string.</p>`;
+  }
+
+  return `
+    <div class="eyebrow">Send your answers</div>
+    <p>Nothing has left your browser yet. Submitting sends the answers you gave, your notes,
+    and whatever you typed in the "about you" fields — no page contents and nothing about
+    your machine beyond the browser string.</p>
+    ${state && state.startsWith("error:")
+      ? `<div class="err">Submitting failed — ${esc(state.slice(6))}.<br>
+         Please download a copy and email it to
+         <a href="mailto:shaolinx@usc.edu?subject=D2I%20survey%20response">shaolinx@usc.edu</a>,
+         or try again.</div>` : ""}
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="send-btn"${state === "sending" ? " disabled" : ""}>${
+        state === "sending" ? "Sending…" : state && state.startsWith("error:") ? "Try again" : "Submit my answers"}</button>
+      ${dl}${again}
+    </div>`;
+}
+
+function wireSend(state) {
+  const card = document.getElementById("send");
+  if (!card) return;
+  card.innerHTML = sendCard(state);
+
+  const b = document.getElementById("send-btn");
+  if (b) b.onclick = async () => {
+    wireSend("sending");
+    const res = await submit();
+    if (!res.ok) return wireSend("error:" + res.error);
+    R.submitted_at = new Date().toISOString();
+    save();
+    wireSend(res.confirmed ? "confirmed" : "unconfirmed");
+  };
   document.getElementById("dl").onclick = download;
   document.getElementById("again").onclick = () => {
     if (!confirm("Clear your answers and start the survey again?")) return;
     R = null; localStorage.removeItem(KEY); screen = "intro"; render();
   };
-  window.scrollTo({top: 0, behavior: "instant"});
 }
 
 /* ------------------------------------------------------------------ router */
 function render() {
   chrome();
   if (screen === "intro" || !R) return renderIntro();
+  // The reveal outranks the "everything is answered" check: after the last decision it is
+  // still on screen, and only Next leads on to the results.
+  if (revealed) return renderReveal();
   const i = nextIndex();
   if (i < 0) { screen = "done"; chrome(); return renderDone(); }
   renderDecision(decisions()[i]);
@@ -555,6 +802,11 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   const k = e.key.toLowerCase();
+  if (revealed) {
+    if (k === "enter" || k === "n") app.querySelector('[data-act="next"]')?.click();
+    else if (k === "u") app.querySelector('[data-act="undo"]')?.click();
+    return;
+  }
   if (stage === "stop") {
     if (k === "c") app.querySelector('[data-act="continue"]')?.click();
     else if (k === "t") app.querySelector('[data-act="terminate"]')?.click();
@@ -589,6 +841,11 @@ document.addEventListener("keydown", (e) => {
     // A rebuilt survey invalidates saved answers: the ids and the shuffle have moved.
     if (saved && saved.survey && saved.survey.built_at === survey.meta.built_at) R = saved;
   } catch (e) {}
+
+  // With feedback on, the key is needed from the first answer, so it is fetched up front
+  // rather than at the close. It is a published file either way; what changes is only how
+  // early it is in the tab.
+  if (survey.meta.feedback) await loadTruth();
 
   // A finished response reopens on its own summary rather than back at the intro.
   if (R && nextIndex() < 0 && R.verdicts.length) screen = "done";
