@@ -1,0 +1,13 @@
+.DS_Store
+__pycache__/
+
+# Raw D2I run artifacts — hundreds of MB of traces and figures, and the survey needs none
+# of them at serve time. survey/build_survey.py distils what it needs into survey/data/.
+runs/
+
+# The answer key in resolvable form: the candidate order behind each slot. Publishing it
+# would make every returned response self-scoring and the blinding decorative.
+survey/private/
+
+# Responses people send back.
+survey/responses/

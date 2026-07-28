@@ -1,0 +1,904 @@
+{
+ "carsales-easy#a5e43eb6": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": true,
+  "terminate_reason": "continuation utility 0.30 < 0.35 \u2014 While the trajectory has identified Ford and Toyota as dominant players in the market, there remains an opportunity to explore the performance of other brands and categories, which could yield new insights. However, the existing repository already contains substantial findings regarding brand performance, suggesting that further exploration may lead to redundancy rather than significant new understanding.",
+  "n": 0,
+  "rows": []
+ },
+ "carsales-easy#878589a6": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": null,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 6,
+    "score": 0.8979704650852928,
+    "answered": false,
+    "action": "contribution",
+    "question": "Which categories account for the largest share of total sales across all brands from 2007 to 2011?",
+    "terms": [
+     0.5,
+     0.789560376220985,
+     0.4,
+     1.0,
+     0.6764509275751163
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 4,
+    "score": 0.8629384070580621,
+    "answered": false,
+    "action": "compare",
+    "question": "How do total sales figures for GMC and Hyundai differ from those of Toyota over the 2007-2011 period?",
+    "terms": [
+     0.6,
+     0.5294321441120625,
+     0.4,
+     1.0,
+     0.6764509275751163
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 1,
+    "score": 0.857616611180775,
+    "answered": false,
+    "action": "filter",
+    "question": "How do sales trends for BMW compare to Ford when focusing only on the SUV category?",
+    "terms": [
+     0.8,
+     0.6681449606029138,
+     0.5,
+     0.4,
+     0.6764509275751163
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 2,
+    "score": 0.7602188733222341,
+    "answered": false,
+    "action": "segment",
+    "question": "Which brands, besides Ford, show significant sales in the Compact category during the 2007-2011 period?",
+    "terms": [
+     0.7,
+     0.7229176455323867,
+     0.4,
+     0.09454545454545454,
+     0.6764509275751163
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 7,
+    "score": 0.7016357173078247,
+    "answered": false,
+    "action": "trend",
+    "question": "What are the annual sales trends for the Midsize category from 2007 to 2011?",
+    "terms": [
+     0.5,
+     0.6907668396565673,
+     0.4,
+     0.14181818181818182,
+     0.6764509275751163
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 5,
+    "score": 0.6870272045470203,
+    "answered": false,
+    "action": "relationship",
+    "question": "Is there a correlation between sales of SUVs and sales of Compact vehicles across different brands during the 2007-2011 period?",
+    "terms": [
+     0.3,
+     0.9857873340678946,
+     0.4,
+     0.0,
+     0.6764509275751163
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 3,
+    "score": 0.6270241331421342,
+    "answered": false,
+    "action": "validate",
+    "question": "Do the sales trends observed for Ford hold true when analyzing only the top three selling models from 2007 to 2011?",
+    "terms": [
+     0.4,
+     0.5021386848119872,
+     0.5,
+     0.05454545454545454,
+     0.6764509275751163
+    ]
+   }
+  ]
+ },
+ "carsales-easy#f85515d1": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": null,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 7,
+    "score": 0.9295187036530022,
+    "answered": false,
+    "action": "compare",
+    "question": "How does the sales volume of SUVs compare to that of Compact vehicles over the years 2007 to 2011?",
+    "terms": [
+     0.6,
+     0.814074814612009,
+     0.75,
+     1.0,
+     0.48999999999999994
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 6,
+    "score": 0.9265376396823715,
+    "answered": false,
+    "action": "trend",
+    "question": "How has the share of SUV sales changed from 2007 to 2011 compared to other categories?",
+    "terms": [
+     0.9,
+     0.442150558729486,
+     0.75,
+     1.0,
+     0.48999999999999994
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 2,
+    "score": 0.8465376396823714,
+    "answered": false,
+    "action": "contribution",
+    "question": "What percentage of total sales do SUVs account for compared to other categories during the 2007-2011 period?",
+    "terms": [
+     0.8,
+     0.442150558729486,
+     0.5,
+     1.0,
+     0.48999999999999994
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 1,
+    "score": 0.8053122510987729,
+    "answered": false,
+    "action": "relationship",
+    "question": "What is the relationship between the sales of SUVs and the sales of all vehicle categories?",
+    "terms": [
+     0.6,
+     0.9972490043950915,
+     0.5,
+     0.4,
+     0.48999999999999994
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 3,
+    "score": 0.7940076262596596,
+    "answered": false,
+    "action": "segment",
+    "question": "Which brands are most associated with the SUV category, given its dominance in the overall category distribution?",
+    "terms": [
+     0.8,
+     0.7120305050386386,
+     0.5,
+     0.4,
+     0.48999999999999994
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 5,
+    "score": 0.710737591031568,
+    "answered": false,
+    "action": "filter",
+    "question": "How does the category distribution of vehicles change when focusing only on sales from 2009 to 2011?",
+    "terms": [
+     0.5,
+     0.578950364126272,
+     0.5,
+     0.6,
+     0.48999999999999994
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 4,
+    "score": 0.6810126071629716,
+    "answered": false,
+    "action": "validate",
+    "question": "Is the dominance of SUVs in the category distribution consistent across different brands?",
+    "terms": [
+     0.5,
+     0.6200504286518866,
+     0.5,
+     0.4,
+     0.48999999999999994
+    ]
+   }
+  ]
+ },
+ "carsales-easy#938cfc49": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 6,
+    "score": 1.0358639538550503,
+    "answered": true,
+    "action": "segment",
+    "question": "Which specific models of 'Ford' and 'BMW' contribute most significantly to the overall sales difference observed between these two brands?",
+    "terms": [
+     0.8,
+     0.8874558154202009,
+     0.75,
+     1.0,
+     0.5599999999999999
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 5,
+    "score": 1.0019120953760126,
+    "answered": true,
+    "action": "trend",
+    "question": "How have the sales figures for 'Ford' and 'BMW' evolved over the years from 2007 to 2011?",
+    "terms": [
+     0.9,
+     0.6316483815040498,
+     0.75,
+     1.0,
+     0.5599999999999999
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 2,
+    "score": 0.9520778181287646,
+    "answered": true,
+    "action": "relationship",
+    "question": "What is the relationship between the sales of 'Ford' and the sales of 'BMW' across different categories?",
+    "terms": [
+     0.6,
+     0.9923112725150584,
+     0.5,
+     1.0,
+     0.5599999999999999
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 1,
+    "score": 0.9473670639259963,
+    "answered": false,
+    "action": "validate",
+    "question": "Is the observed difference in sales between 'Ford' and 'BMW' consistent when analyzing only the top-selling models from each brand?",
+    "terms": [
+     0.7,
+     0.653468255703985,
+     0.75,
+     1.0,
+     0.5599999999999999
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 7,
+    "score": 0.8042246917447204,
+    "answered": false,
+    "action": "filter",
+    "question": "How does the sales distribution between 'Ford' and 'BMW' change when focusing only on SUV category vehicles?",
+    "terms": [
+     0.7,
+     0.760898766978882,
+     0.5,
+     0.4,
+     0.5599999999999999
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 3,
+    "score": 0.8040789738158869,
+    "answered": false,
+    "action": "contribution",
+    "question": "Which categories account for the largest share of sales for 'Ford' compared to 'BMW'?",
+    "terms": [
+     0.8,
+     0.6694068043544568,
+     0.5,
+     0.36363636363636365,
+     0.5599999999999999
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 4,
+    "score": 0.7062187505625661,
+    "answered": false,
+    "action": "compare",
+    "question": "How do the sales figures of 'Ford' and 'BMW' compare across different vehicle categories?",
+    "terms": [
+     0.5,
+     0.6379659113411735,
+     0.5,
+     0.36363636363636365,
+     0.5599999999999999
+    ]
+   }
+  ]
+ },
+ "carsales-easy#947b6025": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 1,
+    "score": 0.9164758401077893,
+    "answered": true,
+    "action": "contribution",
+    "question": "Which categories account for the largest share of sales for Toyota and Honda compared to Ford and BMW?",
+    "terms": [
+     0.7,
+     0.9204488149766122,
+     0.4,
+     0.5818181818181818,
+     0.7
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 3,
+    "score": 0.903600576605029,
+    "answered": true,
+    "action": "segment",
+    "question": "Which vehicle categories are driving sales for Honda compared to Ford and BMW?",
+    "terms": [
+     0.7,
+     0.9707659427837522,
+     0.4,
+     0.45454545454545453,
+     0.7
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 5,
+    "score": 0.8979410519322055,
+    "answered": false,
+    "action": "compare",
+    "question": "How do total sales for Toyota and Honda differ from Ford and BMW over the years 2007 to 2011?",
+    "terms": [
+     0.9,
+     0.6063096622742765,
+     0.4,
+     0.5818181818181818,
+     0.7
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 7,
+    "score": 0.8916250854350052,
+    "answered": false,
+    "action": "filter",
+    "question": "How do total sales for Toyota compare to Ford and BMW when focusing only on the SUV category?",
+    "terms": [
+     0.8,
+     0.7665003417400205,
+     0.5,
+     0.4,
+     0.7
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 4,
+    "score": 0.8883088978368661,
+    "answered": false,
+    "action": "relationship",
+    "question": "What is the relationship between vehicle category and total sales for brands other than Ford and BMW?",
+    "terms": [
+     0.6,
+     0.884144682256555,
+     0.4,
+     0.6363636363636364,
+     0.7
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 6,
+    "score": 0.8743920826127625,
+    "answered": false,
+    "action": "trend",
+    "question": "What are the sales trends for the SUV category from 2007 to 2011 for brands other than Ford and BMW?",
+    "terms": [
+     0.7,
+     0.9993865122692316,
+     0.4,
+     0.2727272727272727,
+     0.7
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 2,
+    "score": 0.7045141434377376,
+    "answered": false,
+    "action": "validate",
+    "question": "Is the observed sales trend for Ford consistent across different vehicle categories from 2007 to 2011?",
+    "terms": [
+     0.5,
+     0.5380565737509501,
+     0.5,
+     0.2,
+     0.7
+    ]
+   }
+  ]
+ },
+ "carsales-easy#5db92c25": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": null,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 4,
+    "score": 0.9471365458427758,
+    "answered": false,
+    "action": "trend",
+    "question": "What is the trend in sales for Midsize vehicles from 2007 to 2011?",
+    "terms": [
+     0.9,
+     0.843091637916558,
+     1.0,
+     0.14181818181818182,
+     0.595
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 1,
+    "score": 0.8510003893230395,
+    "answered": false,
+    "action": "segment",
+    "question": "Which brands are driving the higher sales of Midsize vehicles compared to Sporty vehicles?",
+    "terms": [
+     0.8,
+     0.9203651936557945,
+     0.5,
+     0.21454545454545454,
+     0.595
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 6,
+    "score": 0.8062300921829268,
+    "answered": false,
+    "action": "validate",
+    "question": "Do Midsize vehicles consistently outperform Sporty vehicles in sales across all years from 2007 to 2011?",
+    "terms": [
+     0.7,
+     0.6612840050953438,
+     0.75,
+     0.21454545454545454,
+     0.595
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 7,
+    "score": 0.7490508800679708,
+    "answered": false,
+    "action": "compare",
+    "question": "How do the sales of Midsize vehicles in 2011 compare to those in 2007?",
+    "terms": [
+     0.6,
+     0.6107489748173379,
+     0.75,
+     0.14181818181818182,
+     0.595
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 5,
+    "score": 0.7393990998859629,
+    "answered": false,
+    "action": "contribution",
+    "question": "What percentage of total sales do Midsize vehicles account for compared to Sporty vehicles?",
+    "terms": [
+     0.5,
+     0.8339600359074879,
+     0.5,
+     0.21454545454545454,
+     0.595
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 3,
+    "score": 0.7324048015962072,
+    "answered": false,
+    "action": "relationship",
+    "question": "Is there a relationship between the sales of Midsize vehicles and the overall sales across all categories?",
+    "terms": [
+     0.4,
+     0.9841646609302834,
+     0.5,
+     0.14181818181818182,
+     0.595
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 2,
+    "score": 0.7039227231276363,
+    "answered": false,
+    "action": "filter",
+    "question": "How do sales of Midsize vehicles compare to Sporty vehicles when filtered for the year 2009?",
+    "terms": [
+     0.5,
+     0.8636908925105451,
+     0.5,
+     0.0,
+     0.595
+    ]
+   }
+  ]
+ },
+ "carsales-easy#21acb32f": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": false,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 3,
+    "score": 0.916334048633799,
+    "answered": true,
+    "action": "relationship",
+    "question": "Is there a correlation between the sales of SUVs and the sales of other categories across different brands during the 2007-2011 period?",
+    "terms": [
+     0.4,
+     0.9453361945351955,
+     0.4,
+     1.0,
+     0.7
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 7,
+    "score": 0.9053431251463329,
+    "answered": true,
+    "action": "trend",
+    "question": "What are the sales trends for the Compact category from 2007 to 2011, and how do they compare across different brands?",
+    "terms": [
+     0.5,
+     0.7813725005853311,
+     0.4,
+     1.0,
+     0.7
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 1,
+    "score": 0.8895278150898351,
+    "answered": false,
+    "action": "contribution",
+    "question": "Which vehicle categories contributed the most to the overall sales growth from 2007 to 2011, excluding Ford and BMW?",
+    "terms": [
+     0.5,
+     0.7181112603593408,
+     0.4,
+     1.0,
+     0.7
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 2,
+    "score": 0.8792495494194668,
+    "answered": false,
+    "action": "segment",
+    "question": "Which brands, besides Ford and BMW, showed significant sales growth in the SUV category from 2007 to 2011?",
+    "terms": [
+     0.8,
+     0.7969981976778666,
+     0.4,
+     0.4,
+     0.7
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 4,
+    "score": 0.8639326647768035,
+    "answered": false,
+    "action": "filter",
+    "question": "How do sales for Toyota compare to Ford when focusing only on the SUV category during the 2007-2011 period?",
+    "terms": [
+     0.8,
+     0.6557306591072144,
+     0.5,
+     0.4,
+     0.7
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 5,
+    "score": 0.8199896593079905,
+    "answered": false,
+    "action": "validate",
+    "question": "How robust are the sales trends observed for Ford and BMW when considering economic factors such as average income levels during the 2007-2011 period?",
+    "terms": [
+     0.3,
+     0.599958637231962,
+     0.5,
+     1.0,
+     0.7
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 6,
+    "score": 0.7902893249031622,
+    "answered": false,
+    "action": "compare",
+    "question": "How do the total sales figures for Volkswagen and GMC in the Midsize category compare to those of Ford and BMW during the 2007-2011 period?",
+    "terms": [
+     0.6,
+     0.8877027541581036,
+     0.4,
+     0.14181818181818182,
+     0.7
+    ]
+   }
+  ]
+ },
+ "carsales-easy#efcc1416": {
+  "terms": [
+   "llm",
+   "sem",
+   "cov",
+   "imp",
+   "traj"
+  ],
+  "lambdas": {
+   "llm": 0.3,
+   "sem": 0.25,
+   "cov": 0.2,
+   "imp": 0.2,
+   "traj": 0.4
+  },
+  "model_terminate": null,
+  "terminate_reason": "",
+  "n": 7,
+  "rows": [
+   {
+    "rank": 1,
+    "slot": 3,
+    "score": 0.8866761493211948,
+    "answered": false,
+    "action": "filter",
+    "question": "How do total sales figures for Toyota in the SUV category compare to those of Ford and BMW from 2007 to 2011?",
+    "terms": [
+     0.8,
+     0.9603774409805628,
+     0.5,
+     0.2,
+     0.6664544726901351
+    ]
+   },
+   {
+    "rank": 2,
+    "slot": 2,
+    "score": 0.8557540068403735,
+    "answered": false,
+    "action": "validate",
+    "question": "Is the observed dominance of Ford in total sales robust when excluding the SUV category?",
+    "terms": [
+     0.4,
+     0.9966888710572774,
+     0.5,
+     0.6,
+     0.6664544726901351
+    ]
+   },
+   {
+    "rank": 3,
+    "slot": 6,
+    "score": 0.8371628082053195,
+    "answered": false,
+    "action": "trend",
+    "question": "What are the sales trends for the Pickup category from 2007 to 2011, and how do they compare to the SUV category?",
+    "terms": [
+     0.5,
+     0.9986877128806979,
+     0.4,
+     0.45454545454545453,
+     0.6664544726901351
+    ]
+   },
+   {
+    "rank": 4,
+    "slot": 4,
+    "score": 0.8239962090764832,
+    "answered": false,
+    "action": "compare",
+    "question": "How do total sales figures for Toyota and Honda compare across all categories from 2007 to 2011?",
+    "terms": [
+     0.6,
+     0.3896576800017166,
+     0.4,
+     1.0,
+     0.6664544726901351
+    ]
+   },
+   {
+    "rank": 5,
+    "slot": 1,
+    "score": 0.8213227260429146,
+    "answered": false,
+    "action": "relationship",
+    "question": "What is the relationship between vehicle category and total sales across all brands from 2007 to 2011?",
+    "terms": [
+     0.4,
+     0.6189637478674422,
+     0.4,
+     1.0,
+     0.6664544726901351
+    ]
+   },
+   {
+    "rank": 6,
+    "slot": 7,
+    "score": 0.7728051575081396,
+    "answered": false,
+    "action": "segment",
+    "question": "Which vehicle categories are driving sales for Honda compared to Ford and BMW from 2007 to 2011?",
+    "terms": [
+     0.7,
+     0.5012571100919786,
+     0.4,
+     0.45454545454545453,
+     0.6664544726901351
+    ]
+   },
+   {
+    "rank": 7,
+    "slot": 5,
+    "score": 0.7654863731642145,
+    "answered": false,
+    "action": "contribution",
+    "question": "Which brands account for the largest share of sales in the Midsize category from 2007 to 2011?",
+    "terms": [
+     0.5,
+     0.9621637908980961,
+     0.4,
+     0.14181818181818182,
+     0.6664544726901351
+    ]
+   }
+  ]
+ }
+}

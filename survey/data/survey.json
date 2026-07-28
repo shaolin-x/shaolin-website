@@ -1,0 +1,512 @@
+{
+ "meta": {
+  "title": "Would you have asked the same question?",
+  "built_at": "2026-07-28T06:13:41+00:00",
+  "seed": 20260727,
+  "n_requested": 20,
+  "n_decisions": 8,
+  "n_runs": 1,
+  "n_early_stopped": 1,
+  "n_with_candidates": 7,
+  "min_candidates": 2,
+  "drop_unanswerable": false,
+  "reveal": true
+ },
+ "decisions": [
+  {
+   "id": "carsales-easy#a5e43eb6",
+   "run": "carsales-easy",
+   "node": "a5e43eb6",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "The sales data exhibits a strong right-skew, with a mean of 79,715.52 significantly higher than the median of 46,531.0, indicating that a small number of brands or categories are driving the majority of sales.",
+     "statistic": "p=9e-19 eff=1.81 stat=1.81"
+    },
+    {
+     "depth": 1,
+     "action": "contribution",
+     "question": "Which brands account for the highest percentage of total sales, highlighting the skew?",
+     "label": "Ford accounts for 25.04% of total sales, followed by Toyota at 24.09%, indicating a skew towards these brands.",
+     "statistic": "skewness=0.512"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": []
+  },
+  {
+   "id": "carsales-easy#878589a6",
+   "run": "carsales-easy",
+   "node": "878589a6",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Sales data reveals a significant disparity among brands, with 'Honda' leading in sales (mean 177,257.04) and 'Volkswagen' trailing (mean 16,060.26), indicating a strong difference in consumer preference across brands.",
+     "statistic": "p=1.27e-21 eff=2.12 stat=20.1"
+    },
+    {
+     "depth": 1,
+     "action": "compare",
+     "question": "How do the sales figures of Honda compare to those of Toyota and Ford over the years?",
+     "label": "Over the 2007-2011 period, Ford sold 5,489,641 units, Toyota sold 5,282,029 units, and Honda sold 4,431,426 units, with Ford leading in total sales.",
+     "statistic": "Honda_sales=4.43e+06 Toyota_sales=5.28e+06"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "filter",
+     "question": "How do sales trends for BMW compare to Ford when focusing only on the SUV category?"
+    },
+    {
+     "slot": 2,
+     "action": "segment",
+     "question": "Which brands, besides Ford, show significant sales in the Compact category during the 2007-2011 period?"
+    },
+    {
+     "slot": 3,
+     "action": "validate",
+     "question": "Do the sales trends observed for Ford hold true when analyzing only the top three selling models from 2007 to 2011?"
+    },
+    {
+     "slot": 4,
+     "action": "compare",
+     "question": "How do total sales figures for GMC and Hyundai differ from those of Toyota over the 2007-2011 period?"
+    },
+    {
+     "slot": 5,
+     "action": "relationship",
+     "question": "Is there a correlation between sales of SUVs and sales of Compact vehicles across different brands during the 2007-2011 period?"
+    },
+    {
+     "slot": 6,
+     "action": "contribution",
+     "question": "Which categories account for the largest share of total sales across all brands from 2007 to 2011?"
+    },
+    {
+     "slot": 7,
+     "action": "trend",
+     "question": "What are the annual sales trends for the Midsize category from 2007 to 2011?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#f85515d1",
+   "run": "carsales-easy",
+   "node": "f85515d1",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "The category distribution is heavily imbalanced, with 'SUV' vehicles comprising 40% of total records, indicating a strong consumer preference for this category over others.",
+     "statistic": "p=5e-45 eff=0.342 stat=225"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "relationship",
+     "question": "What is the relationship between the sales of SUVs and the sales of all vehicle categories?"
+    },
+    {
+     "slot": 2,
+     "action": "contribution",
+     "question": "What percentage of total sales do SUVs account for compared to other categories during the 2007-2011 period?"
+    },
+    {
+     "slot": 3,
+     "action": "segment",
+     "question": "Which brands are most associated with the SUV category, given its dominance in the overall category distribution?"
+    },
+    {
+     "slot": 4,
+     "action": "validate",
+     "question": "Is the dominance of SUVs in the category distribution consistent across different brands?"
+    },
+    {
+     "slot": 5,
+     "action": "filter",
+     "question": "How does the category distribution of vehicles change when focusing only on sales from 2009 to 2011?"
+    },
+    {
+     "slot": 6,
+     "action": "trend",
+     "question": "How has the share of SUV sales changed from 2007 to 2011 compared to other categories?"
+    },
+    {
+     "slot": 7,
+     "action": "compare",
+     "question": "How does the sales volume of SUVs compare to that of Compact vehicles over the years 2007 to 2011?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#938cfc49",
+   "run": "carsales-easy",
+   "node": "938cfc49",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "The distribution of sales between 'Ford' and 'BMW' indicates a notable difference in sales patterns, with 'Ford' having a higher median sales figure (72,711.0) compared to 'BMW' (12,018.0), suggesting differing market strategies or consumer appeal.",
+     "statistic": "p=7.76e-11 eff=0.663 stat=0.663"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "validate",
+     "question": "Is the observed difference in sales between 'Ford' and 'BMW' consistent when analyzing only the top-selling models from each brand?"
+    },
+    {
+     "slot": 2,
+     "action": "relationship",
+     "question": "What is the relationship between the sales of 'Ford' and the sales of 'BMW' across different categories?"
+    },
+    {
+     "slot": 3,
+     "action": "contribution",
+     "question": "Which categories account for the largest share of sales for 'Ford' compared to 'BMW'?"
+    },
+    {
+     "slot": 4,
+     "action": "compare",
+     "question": "How do the sales figures of 'Ford' and 'BMW' compare across different vehicle categories?"
+    },
+    {
+     "slot": 5,
+     "action": "trend",
+     "question": "How have the sales figures for 'Ford' and 'BMW' evolved over the years from 2007 to 2011?"
+    },
+    {
+     "slot": 6,
+     "action": "segment",
+     "question": "Which specific models of 'Ford' and 'BMW' contribute most significantly to the overall sales difference observed between these two brands?"
+    },
+    {
+     "slot": 7,
+     "action": "filter",
+     "question": "How does the sales distribution between 'Ford' and 'BMW' change when focusing only on SUV category vehicles?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#947b6025",
+   "run": "carsales-easy",
+   "node": "947b6025",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "The distribution of sales between 'Ford' and 'BMW' indicates a notable difference in sales patterns, with 'Ford' having a higher median sales figure (72,711.0) compared to 'BMW' (12,018.0), suggesting differing market strategies or consumer appeal.",
+     "statistic": "p=7.76e-11 eff=0.663 stat=0.663"
+    },
+    {
+     "depth": 1,
+     "action": "segment",
+     "question": "Which specific models of 'Ford' and 'BMW' contribute most significantly to the overall sales difference observed between these two brands?",
+     "label": "Ford's top three models (Fusion, Escape, Focus) sold a total of 2,863,188 units, significantly outpacing BMW's best-selling model (BMW 3-Series) at 595,337 units.",
+     "statistic": "stat \u2014"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "contribution",
+     "question": "Which categories account for the largest share of sales for Toyota and Honda compared to Ford and BMW?"
+    },
+    {
+     "slot": 2,
+     "action": "validate",
+     "question": "Is the observed sales trend for Ford consistent across different vehicle categories from 2007 to 2011?"
+    },
+    {
+     "slot": 3,
+     "action": "segment",
+     "question": "Which vehicle categories are driving sales for Honda compared to Ford and BMW?"
+    },
+    {
+     "slot": 4,
+     "action": "relationship",
+     "question": "What is the relationship between vehicle category and total sales for brands other than Ford and BMW?"
+    },
+    {
+     "slot": 5,
+     "action": "compare",
+     "question": "How do total sales for Toyota and Honda differ from Ford and BMW over the years 2007 to 2011?"
+    },
+    {
+     "slot": 6,
+     "action": "trend",
+     "question": "What are the sales trends for the SUV category from 2007 to 2011 for brands other than Ford and BMW?"
+    },
+    {
+     "slot": 7,
+     "action": "filter",
+     "question": "How do total sales for Toyota compare to Ford and BMW when focusing only on the SUV category?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#5db92c25",
+   "run": "carsales-easy",
+   "node": "5db92c25",
+   "depth": 0,
+   "child_depth": 1,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "Sales by category show a pronounced difference, with 'Midsize' vehicles achieving the highest mean sales (149,148.97) compared to 'Sporty' vehicles at the lowest (26,794.00), suggesting distinct consumer preferences for vehicle types.",
+     "statistic": "p=2.62e-07 eff=1.36 stat=9.74"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "segment",
+     "question": "Which brands are driving the higher sales of Midsize vehicles compared to Sporty vehicles?"
+    },
+    {
+     "slot": 2,
+     "action": "filter",
+     "question": "How do sales of Midsize vehicles compare to Sporty vehicles when filtered for the year 2009?"
+    },
+    {
+     "slot": 3,
+     "action": "relationship",
+     "question": "Is there a relationship between the sales of Midsize vehicles and the overall sales across all categories?"
+    },
+    {
+     "slot": 4,
+     "action": "trend",
+     "question": "What is the trend in sales for Midsize vehicles from 2007 to 2011?"
+    },
+    {
+     "slot": 5,
+     "action": "contribution",
+     "question": "What percentage of total sales do Midsize vehicles account for compared to Sporty vehicles?"
+    },
+    {
+     "slot": 6,
+     "action": "validate",
+     "question": "Do Midsize vehicles consistently outperform Sporty vehicles in sales across all years from 2007 to 2011?"
+    },
+    {
+     "slot": 7,
+     "action": "compare",
+     "question": "How do the sales of Midsize vehicles in 2011 compare to those in 2007?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#21acb32f",
+   "run": "carsales-easy",
+   "node": "21acb32f",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "The distribution of sales between 'Ford' and 'BMW' indicates a notable difference in sales patterns, with 'Ford' having a higher median sales figure (72,711.0) compared to 'BMW' (12,018.0), suggesting differing market strategies or consumer appeal.",
+     "statistic": "p=7.76e-11 eff=0.663 stat=0.663"
+    },
+    {
+     "depth": 1,
+     "action": "trend",
+     "question": "How have the sales figures for 'Ford' and 'BMW' evolved over the years from 2007 to 2011?",
+     "label": "From 2007 to 2011, Ford consistently dominated sales with 79-83% market share, while BMW's share declined from 20% to 16%.",
+     "statistic": "stat \u2014"
+    }
+   ],
+   "ask_stop": true,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "contribution",
+     "question": "Which vehicle categories contributed the most to the overall sales growth from 2007 to 2011, excluding Ford and BMW?"
+    },
+    {
+     "slot": 2,
+     "action": "segment",
+     "question": "Which brands, besides Ford and BMW, showed significant sales growth in the SUV category from 2007 to 2011?"
+    },
+    {
+     "slot": 3,
+     "action": "relationship",
+     "question": "Is there a correlation between the sales of SUVs and the sales of other categories across different brands during the 2007-2011 period?"
+    },
+    {
+     "slot": 4,
+     "action": "filter",
+     "question": "How do sales for Toyota compare to Ford when focusing only on the SUV category during the 2007-2011 period?"
+    },
+    {
+     "slot": 5,
+     "action": "validate",
+     "question": "How robust are the sales trends observed for Ford and BMW when considering economic factors such as average income levels during the 2007-2011 period?"
+    },
+    {
+     "slot": 6,
+     "action": "compare",
+     "question": "How do the total sales figures for Volkswagen and GMC in the Midsize category compare to those of Ford and BMW during the 2007-2011 period?"
+    },
+    {
+     "slot": 7,
+     "action": "trend",
+     "question": "What are the sales trends for the Compact category from 2007 to 2011, and how do they compare across different brands?"
+    }
+   ]
+  },
+  {
+   "id": "carsales-easy#efcc1416",
+   "run": "carsales-easy",
+   "node": "efcc1416",
+   "depth": 1,
+   "child_depth": 2,
+   "goal": "Summarise total sales by brand and by category over the 2007-2011 period, and identify which brands and categories account for the largest share of units sold.",
+   "columns": [
+    "year (Time)",
+    "brand (Dimension)",
+    "category (Dimension)",
+    "model (Dimension)",
+    "sales (Measure)"
+   ],
+   "path": [
+    {
+     "depth": 0,
+     "action": "base",
+     "question": "",
+     "label": "The distribution of sales between 'Ford' and 'BMW' indicates a notable difference in sales patterns, with 'Ford' having a higher median sales figure (72,711.0) compared to 'BMW' (12,018.0), suggesting differing market strategies or consumer appeal.",
+     "statistic": "p=7.76e-11 eff=0.663 stat=0.663"
+    },
+    {
+     "depth": 1,
+     "action": "relationship",
+     "question": "What is the relationship between the sales of 'Ford' and the sales of 'BMW' across different categories?",
+     "label": "In the sales data from 2007 to 2011, Ford sold 2,230,050 units in the SUV category, while BMW sold 595,337 units in the same category, indicating a clear dominance of Ford in this segment.",
+     "statistic": "p=nan"
+    }
+   ],
+   "ask_stop": false,
+   "candidates": [
+    {
+     "slot": 1,
+     "action": "relationship",
+     "question": "What is the relationship between vehicle category and total sales across all brands from 2007 to 2011?"
+    },
+    {
+     "slot": 2,
+     "action": "validate",
+     "question": "Is the observed dominance of Ford in total sales robust when excluding the SUV category?"
+    },
+    {
+     "slot": 3,
+     "action": "filter",
+     "question": "How do total sales figures for Toyota in the SUV category compare to those of Ford and BMW from 2007 to 2011?"
+    },
+    {
+     "slot": 4,
+     "action": "compare",
+     "question": "How do total sales figures for Toyota and Honda compare across all categories from 2007 to 2011?"
+    },
+    {
+     "slot": 5,
+     "action": "contribution",
+     "question": "Which brands account for the largest share of sales in the Midsize category from 2007 to 2011?"
+    },
+    {
+     "slot": 6,
+     "action": "trend",
+     "question": "What are the sales trends for the Pickup category from 2007 to 2011, and how do they compare to the SUV category?"
+    },
+    {
+     "slot": 7,
+     "action": "segment",
+     "question": "Which vehicle categories are driving sales for Honda compared to Ford and BMW from 2007 to 2011?"
+    }
+   ]
+  }
+ ]
+}

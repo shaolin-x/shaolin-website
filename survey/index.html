@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Would you have asked the same question? — D2I human evaluation</title>
+<meta name="description" content="A short survey: given a data-analysis trajectory, which question would you ask next? Your answers are compared against the D2I search agent.">
+<meta name="robots" content="noindex, follow">
+<style>
+/* The site's palette (css/style.css) — cardinal and gold, Arial — on a survey layout that
+   has to hold long questions and a scoring table, so it is narrower and quieter than the
+   home page. Self-contained: this page is served on its own, without the site nav. */
+:root {
+  --ink: #333; --head: #1a1a1a; --muted: #6b6b6b; --line: #e5e5e5; --soft: #f8f9fa;
+  --card: #fff; --bg: #fbfbfc; --accent: #990000; --accent-soft: #f6ecec; --gold: #FFCC00;
+  --ok: #1a7a4c; --warn: #a35a00; --radius: 8px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif; line-height: 1.6;
+}
+.wrap { max-width: 820px; margin: 0 auto; padding: 24px 20px 90px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3 { color: var(--head); margin-top: 0; margin-bottom: .5rem; font-weight: 600; }
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.1rem; }
+
+header.top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--accent); padding-bottom: 8px;
+}
+header.top .home { font-size: .85rem; }
+.counter { font-size: .85rem; color: var(--muted); }
+.bar { height: 5px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 14px 0 22px; }
+.bar > i { display: block; height: 100%; background: var(--accent); transition: width .25s ease; }
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; margin-bottom: 16px;
+}
+.eyebrow {
+  font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+.goal { font-size: 1rem; color: var(--head); }
+.cols { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.col {
+  font-size: .75rem; padding: 2px 9px; border-radius: 99px;
+  background: var(--accent-soft); color: var(--accent);
+}
+
+/* the trajectory: a vertical spine, the current node highlighted */
+.step { border-left: 2px solid var(--line); padding: 0 0 14px 16px; margin-left: 4px; position: relative; }
+.step:last-child { padding-bottom: 0; }
+.step::before {
+  content: ""; position: absolute; left: -5px; top: 9px; width: 8px; height: 8px;
+  border-radius: 99px; background: var(--line);
+}
+.step.head::before { background: var(--accent); }
+.step .meta { font-size: .78rem; color: var(--muted); }
+.step .q { color: var(--muted); font-style: italic; }
+.step .stat {
+  font-size: .75rem; color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.ask { font-weight: 600; color: var(--head); margin-bottom: 4px; font-size: 1.02rem; }
+.ask-sub { font-size: .85rem; color: var(--muted); margin-bottom: 14px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+button {
+  font: inherit; color: var(--ink); background: var(--card); border: 1px solid #ccc;
+  border-radius: 6px; padding: 9px 16px; cursor: pointer; transition: .12s;
+}
+button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover:not(:disabled) { background: #7a0000; color: #fff; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.ghost { color: var(--muted); border-color: transparent; }
+button.ghost:hover:not(:disabled) { border-color: #ccc; }
+kbd {
+  font: .7rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  border: 1px solid #ccc; border-bottom-width: 2px; border-radius: 4px;
+  padding: 1px 5px; color: var(--muted); margin-right: 6px;
+}
+
+/* one candidate question */
+.cand {
+  display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left;
+  padding: 11px 14px; margin-bottom: 7px; line-height: 1.5;
+}
+.cand:hover:not(:disabled) { background: var(--accent-soft); }
+.cand.sel { border-color: var(--accent); background: var(--accent-soft); }
+.cand .n {
+  flex: none; width: 23px; height: 23px; border-radius: 99px; background: var(--soft);
+  border: 1px solid var(--line); font-size: .78rem; display: grid; place-items: center; margin-top: 1px;
+}
+.cand.sel .n { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cand .grow { flex: 1; }
+.tag {
+  font-size: .7rem; padding: 1px 7px; border-radius: 99px; background: var(--soft);
+  border: 1px solid var(--line); color: var(--muted); margin-right: 8px; white-space: nowrap;
+}
+
+input[type=text], input[type=email], textarea, select {
+  font: inherit; color: var(--ink); background: #fff; border: 1px solid #ccc;
+  border-radius: 6px; padding: 9px 12px; margin: 4px 0 10px; width: 100%; max-width: 420px;
+}
+label.field { display: block; font-size: .82rem; color: var(--muted); font-weight: 600; }
+.hint { font-size: .8rem; color: var(--muted); margin-top: 12px; }
+.err { color: var(--accent); font-size: .85rem; margin-top: 10px; font-weight: 600; }
+
+table { border-collapse: collapse; width: 100%; font-size: .85rem; margin-top: 10px; }
+th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+th { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+td.q, th.q { text-align: left; }
+tr.picked td { background: #fffbe6; font-weight: 600; }
+tr.top td { color: var(--head); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.ok { color: var(--ok); font-weight: 600; }
+.warn { color: var(--warn); font-weight: 600; }
+.muted { color: var(--muted); }
+.scroll { overflow-x: auto; }
+
+.tiles { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 4px; }
+.tile {
+  flex: 1 1 150px; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; background: var(--soft);
+}
+.tile .big { font-size: 1.6rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
+.tile .lbl { font-size: .74rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+
+details { border-top: 1px solid var(--line); padding: 10px 0; }
+details summary { cursor: pointer; font-size: .9rem; color: var(--head); }
+ol.steps { padding-left: 20px; } ol.steps li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 id="title">D2I human evaluation</h1>
+    <span class="home"><a href="../index.html">← Shaolin Xie</a></span>
+  </header>
+  <div class="counter" id="counter"></div>
+  <div class="bar" id="barwrap" style="visibility:hidden"><i id="prog" style="width:0"></i></div>
+  <div id="app"><p class="muted">Loading the survey…</p></div>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ helpers */
+const $ = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content.firstChild; };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const app = document.getElementById("app");
+
+const KEY = "d2i-survey-v1";          // one saved response per browser, bumped if the schema moves
+
+/* ------------------------------------------------------------------ state
+   `survey` is the public bundle; `truth` is fetched only once the last decision is locked in,
+   so the answer key is not sitting in the tab while the questions are still being answered.
+   `R` is the response under construction — mirrored into localStorage after every verdict,
+   which is what makes a reload or a closed laptop non-fatal. */
+let survey = null, truth = null, R = null;
+let stage = "stop", sel = null, screen = "intro", lastStop = null, err = "";
+
+const decisions = () => survey.decisions;
+const judged = () => new Set(R.verdicts.map(v => v.decision));
+const nextIndex = () => decisions().findIndex(d => !judged().has(d.id));
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify(R)); } catch (e) {} }
+
+function fresh(respondent) {
+  return {
+    survey: {built_at: survey.meta.built_at, seed: survey.meta.seed, n_decisions: survey.meta.n_decisions},
+    respondent,
+    started_at: new Date().toISOString(),
+    finished_at: null,
+    user_agent: navigator.userAgent,
+    verdicts: [],
+  };
+}
+
+/* One verdict, shaped like human_trajectory_eval.make_verdict — minus `true_index`, which
+   this page genuinely cannot compute: the shuffle that maps a slot back to a candidate is
+   only in the private bundle. score_survey.py resolves it at scoring time. */
+function record(decision, terminate, slot, choice, note) {
+  R.verdicts.push({
+    decision: decision.id,
+    terminate: terminate === undefined ? null : terminate,
+    slot: slot === undefined ? null : slot,
+    choice: choice,
+    note: (note || "").trim(),
+    ts: new Date().toISOString(),
+  });
+  save();
+}
+
+/* ------------------------------------------------------------------ chrome */
+function chrome() {
+  const c = document.getElementById("counter"), bar = document.getElementById("barwrap");
+  if (screen !== "judge" || !R) { c.textContent = ""; bar.style.visibility = "hidden"; return; }
+  const done = R.verdicts.length, total = decisions().length, i = nextIndex();
+  bar.style.visibility = "visible";
+  c.textContent = i >= 0 ? `Decision ${i + 1} of ${total}` : `${done} of ${total} answered`;
+  document.getElementById("prog").style.width = (100 * done / Math.max(1, total)) + "%";
+}
+
+/* ------------------------------------------------------------------ intro */
+function renderIntro() {
+  const m = survey.meta;
+  const resume = R && R.verdicts.length && nextIndex() >= 0;
+  app.innerHTML = "";
+  app.append($(`
+    <div>
+      <div class="card">
+        <h2>${esc(m.title)}</h2>
+        <p>D2I is a search agent that explores a dataset by asking itself one question at a
+        time. At every step it makes two calls: <strong>is this line of enquiry still worth
+        following?</strong> and, if so, <strong>which question should come next?</strong></p>
+        <p>This survey replays ${m.n_decisions} of those moments from real runs and asks you
+        the same two things. You see the goal, the columns, and the trajectory so far —
+        exactly what the agent saw. You do not see its scores, its ranking, or which
+        candidate it went on to answer.</p>
+        <p class="muted">About ${Math.max(3, Math.round(m.n_decisions * 0.75))}–${Math.round(m.n_decisions * 1.5)} minutes.
+        Your progress is saved in this browser, so you can close the tab and come back.
+        Nothing is transmitted anywhere: at the end you download your answers as a file and
+        send them on if you choose to.</p>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">How it works</div>
+        <ol class="steps">
+          <li>Read the trajectory — the chain of findings the agent has built up so far.</li>
+          <li>Say whether it is worth continuing. This is asked <em>before</em> you see any
+              candidate, because that is the position the agent's own judge is in.</li>
+          <li>If you continue, pick the question you would ask next from the pool that
+              actually competed at that node, in a shuffled order.</li>
+        </ol>
+        <p class="hint">There is no trick and no single right answer — the point is to measure
+        how often a person and the agent agree, so please answer as you would if the analysis
+        were yours. Skip anything you cannot judge rather than guessing.</p>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">About you <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">— all optional</span></div>
+        <label class="field">Name or handle
+          <input type="text" id="name" placeholder="e.g. alex, or leave blank" autocomplete="off"></label>
+        <label class="field">Email <span class="muted" style="font-weight:400">— only if you would like the results sent to you</span>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="off"></label>
+        <label class="field">How familiar are you with exploratory data analysis?
+          <select id="background">
+            <option value="">— prefer not to say —</option>
+            <option value="daily">I do it regularly (analyst, data scientist, researcher)</option>
+            <option value="some">Some experience</option>
+            <option value="little">Little or none</option>
+          </select></label>
+        <div class="row" style="margin-top:8px">
+          <button class="primary" id="go">${resume ? "Resume" : "Start"}</button>
+          ${resume ? `<span class="muted">${R.verdicts.length} of ${decisions().length} already answered</span>
+                      <button class="ghost" id="restart">Start over</button>` : ""}
+        </div>
+        ${err ? `<div class="err">${esc(err)}</div>` : ""}
+      </div>
+    </div>`));
+
+  if (R && R.respondent) {
+    document.getElementById("name").value = R.respondent.name || "";
+    document.getElementById("email").value = R.respondent.email || "";
+    document.getElementById("background").value = R.respondent.background || "";
+  }
+  document.getElementById("go").onclick = () => {
+    const respondent = {
+      name: document.getElementById("name").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      background: document.getElementById("background").value,
+    };
+    if (!R || !R.verdicts.length) R = fresh(respondent);
+    else R.respondent = respondent;
+    save();
+    screen = "judge"; begin();
+  };
+  const rs = document.getElementById("restart");
+  if (rs) rs.onclick = () => {
+    if (!confirm("Discard your answers so far and start again?")) return;
+    R = null; localStorage.removeItem(KEY); render();
+  };
+}
+
+/* ------------------------------------------------------------------ judging */
+function begin() {
+  const d = decisions()[nextIndex()];
+  stage = d && d.ask_stop ? "stop" : "pick";
+  sel = null; lastStop = null;
+  render();
+}
+
+function trajectory(d) {
+  const steps = d.path.map((s, i) => `
+    <div class="step ${i === d.path.length - 1 ? "head" : ""}">
+      <div class="meta">step ${i} &nbsp;·&nbsp; depth ${s.depth} &nbsp;·&nbsp; ${esc(s.action)}</div>
+      ${s.question ? `<div class="q">${esc(s.question)}</div>` : ""}
+      ${s.label ? `<div>${esc(s.label)}</div>` : ""}
+      <div class="stat">${esc(s.statistic)}</div>
+    </div>`).join("");
+  return `
+    <div class="card">
+      <div class="eyebrow">The analyst's goal</div>
+      <div class="goal">${esc(d.goal)}</div>
+      <div class="cols">${d.columns.map(c => `<span class="col">${esc(c)}</span>`).join("")}</div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Trajectory so far &nbsp;·&nbsp; depth ${d.depth} → ${d.child_depth}</div>
+      ${steps}
+    </div>`;
+}
+
+function renderDecision(d) {
+  let body = trajectory(d);
+  if (stage === "stop") {
+    body += `
+      <div class="card">
+        <div class="ask">Is this line of enquiry worth continuing?</div>
+        <div class="ask-sub">Judge it on the trajectory alone — the candidate questions come next.</div>
+        <div class="row">
+          <button class="primary" data-act="continue"><kbd>C</kbd>Keep exploring</button>
+          <button data-act="terminate"><kbd>T</kbd>It is spent — stop here</button>
+          <button class="ghost" data-act="skip"><kbd>S</kbd>Skip</button>
+          ${R.verdicts.length ? `<button class="ghost" data-act="undo"><kbd>U</kbd>Back</button>` : ""}
+        </div>
+      </div>`;
+  } else {
+    body += `
+      <div class="card">
+        <div class="ask">Which question should be asked next?</div>
+        <div class="ask-sub">These are the ${d.candidates.length} candidates that competed at this
+          node, in a random order.</div>
+        ${d.candidates.map(c => `
+          <button class="cand" data-slot="${c.slot}">
+            <span class="n">${c.slot}</span>
+            <span class="grow"><span class="tag">${esc(c.action)}</span>${esc(c.question)}</span>
+          </button>`).join("")}
+        <label class="field" style="margin-top:12px">Why? <span class="muted" style="font-weight:400">— optional, one line</span>
+          <input type="text" id="note" placeholder="e.g. the only one that touches the second half of the goal"></label>
+        <div class="row">
+          <button class="primary" id="submit" disabled>Submit</button>
+          <button class="ghost" data-act="skip"><kbd>S</kbd>Skip — I cannot judge this</button>
+          <button class="ghost" data-act="back"><kbd>U</kbd>Back</button>
+        </div>
+        <div class="hint">Press <kbd>1</kbd>–<kbd>${d.candidates.length}</kbd> to select, <kbd>↵</kbd> to submit.</div>
+      </div>`;
+  }
+  app.innerHTML = ""; app.append($(`<div>${body}</div>`));
+  app.querySelectorAll("[data-act]").forEach(b => b.onclick = () => act(b.dataset.act, d));
+  app.querySelectorAll(".cand").forEach(b => b.onclick = () => {
+    sel = Number(b.dataset.slot);
+    app.querySelectorAll(".cand").forEach(x => x.classList.toggle("sel", Number(x.dataset.slot) === sel));
+    document.getElementById("submit").disabled = false;
+  });
+  const s = document.getElementById("submit");
+  if (s) s.onclick = () => {
+    if (sel === null) return;
+    record(d, lastStop, sel, String(sel), noteValue());
+    begin();
+  };
+  window.scrollTo({top: 0, behavior: "instant"});
+}
+
+const noteValue = () => { const n = document.getElementById("note"); return n ? n.value : ""; };
+
+/* The two stages produce ONE verdict, as in the CLI, so "back" from the candidate screen
+   rewinds to the stop question without anything having been written. */
+function act(what, d) {
+  if (what === "undo") {
+    if (!R.verdicts.length) return;
+    R.verdicts.pop(); save();
+    screen = "judge"; return begin();
+  }
+  if (what === "back") {
+    if (d.ask_stop) { stage = "stop"; sel = null; return render(); }
+    return act("undo", d);
+  }
+  if (what === "skip") { record(d, stage === "pick" ? lastStop : null, null, "s", noteValue()); return begin(); }
+  if (what === "continue") {
+    lastStop = false;
+    // An early-stopped node carries no candidates by construction: "continue" is the whole
+    // answer there, so the decision ends rather than showing an empty pool.
+    if (!d.candidates.length) { record(d, false, null, "c", ""); return begin(); }
+    stage = "pick"; sel = null; return render();
+  }
+  if (what === "terminate") { record(d, true, null, "t", ""); return begin(); }
+}
+
+/* ------------------------------------------------------------------ the close */
+
+/* Scored here, in the browser, only after the last decision is locked in — `truth.json` is
+   requested for the first time at this point. With --no-reveal it does not exist, the fetch
+   fails, and the page falls back to a plain thank-you. */
+async function loadTruth() {
+  if (truth !== null || !survey.meta.reveal) return;
+  try {
+    const r = await fetch("data/truth.json", {cache: "no-store"});
+    truth = r.ok ? await r.json() : false;
+  } catch (e) { truth = false; }
+}
+
+function tally() {
+  let picks = 0, top1 = 0, rankSum = 0, actionHit = 0;
+  let stops = 0, stopAgree = 0, skipped = 0;
+  const rows = [];
+  for (const v of R.verdicts) {
+    const t = truth && truth[v.decision];
+    const d = decisions().find(x => x.id === v.decision);
+    if (v.slot === null && v.terminate !== true) skipped++;
+    if (t && v.terminate !== null && t.model_terminate !== null) {
+      stops++; if (t.model_terminate === v.terminate) stopAgree++;
+    }
+    if (t && v.slot !== null) {
+      const mine = t.rows.find(r => r.slot === v.slot);
+      const top = t.rows.find(r => r.rank === 1);
+      if (mine) {
+        picks++; rankSum += mine.rank;
+        if (mine.rank === 1) top1++;
+        if (top && mine.action === top.action) actionHit++;
+        rows.push({d, v, t, mine, top});
+      }
+    } else if (t) {
+      rows.push({d, v, t, mine: null, top: null});
+    }
+  }
+  return {picks, top1, rankSum, actionHit, stops, stopAgree, skipped, rows};
+}
+
+function download() {
+  R.finished_at = R.finished_at || new Date().toISOString();
+  save();
+  const name = (R.respondent.name || "anonymous").replace(/[^A-Za-z0-9._-]+/g, "-");
+  const blob = new Blob([JSON.stringify(R, null, 2) + "\n"], {type: "application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `d2i-survey_${name}_${(R.started_at || "").slice(0, 10)}.json`;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function reviewRow(x) {
+  if (!x.mine) {
+    const said = x.v.terminate === true ? "stop here"
+               : x.v.terminate === false ? "keep exploring" : "skipped";
+    const model = x.t.model_terminate === null ? null
+                : x.t.model_terminate ? "stopped here" : "kept exploring";
+    return `<details>
+      <summary><span class="mono">${esc(x.d.id)}</span> — you said <strong>${said}</strong>${
+        model ? `, D2I <strong class="${(x.t.model_terminate === x.v.terminate) ? "ok" : "warn"}">${model}</strong>` : ""}</summary>
+      <p class="hint">${esc(x.d.goal)}</p>
+      ${x.t.terminate_reason ? `<p class="hint">D2I's judge: ${esc(x.t.terminate_reason)}</p>` : ""}
+    </details>`;
+  }
+  const body = x.t.rows.slice().sort((a, b) => a.rank - b.rank).map(r => `
+    <tr class="${r.slot === x.v.slot ? "picked" : ""} ${r.rank === 1 ? "top" : ""}">
+      <td>${r.rank}</td>
+      <td>${r.answered ? "✓" : ""}${r.slot === x.v.slot ? " ←" : ""}</td>
+      <td class="mono">${r.score.toFixed(4)}</td>
+      ${r.terms.map(t => `<td class="mono">${t === null ? "—" : t.toFixed(2)}</td>`).join("")}
+      <td class="q"><span class="tag">${esc(r.action)}</span>${esc(r.question)}</td>
+    </tr>`).join("");
+  const w = x.t.lambdas;
+  return `<details>
+    <summary><span class="mono">${esc(x.d.id)}</span> — your pick ranked
+      <strong class="${x.mine.rank === 1 ? "ok" : ""}">${x.mine.rank}</strong> of ${x.t.n}</summary>
+    <p class="hint">${esc(x.d.goal)}</p>
+    <div class="scroll"><table>
+      <thead><tr><th>#</th><th></th><th>score</th>
+        ${x.t.terms.map(t => `<th>${t}</th>`).join("")}<th class="q">question</th></tr></thead>
+      <tbody>${body}</tbody></table></div>
+    ${w ? `<div class="hint mono">score = ${x.t.terms.map(t => `${w[t]}·${t}`).join(" + ")}
+           &nbsp;·&nbsp; ✓ = D2I answered it</div>` : ""}
+  </details>`;
+}
+
+async function renderDone() {
+  await loadTruth();
+  const total = decisions().length;
+  const t = truth ? tally() : null;
+  const scored = t && t.picks;
+
+  const tiles = !scored ? "" : `
+    <div class="tiles">
+      <div class="tile"><div class="big">${Math.round(100 * t.top1 / t.picks)}%</div>
+        <div class="lbl">you picked D2I's top choice</div></div>
+      <div class="tile"><div class="big">${(t.rankSum / t.picks).toFixed(1)}</div>
+        <div class="lbl">mean rank of your pick</div></div>
+      <div class="tile"><div class="big">${Math.round(100 * t.actionHit / t.picks)}%</div>
+        <div class="lbl">same action type</div></div>
+      ${t.stops ? `<div class="tile"><div class="big">${Math.round(100 * t.stopAgree / t.stops)}%</div>
+        <div class="lbl">stop/continue agreement</div></div>` : ""}
+    </div>
+    <p class="hint">Across ${t.picks} pick${t.picks === 1 ? "" : "s"}${t.stops ? ` and ${t.stops} stop/continue call${t.stops === 1 ? "" : "s"}` : ""}.
+      Picking at random from these pools would land on the top choice about
+      ${Math.round(100 / (t.rows.filter(r => r.mine).reduce((a, r) => a + r.t.n, 0) / t.picks))}% of the time,
+      so that is the floor to beat — not 0%.</p>`;
+
+  app.innerHTML = "";
+  app.append($(`
+    <div>
+      <div class="card">
+        <h2>Done — thank you.</h2>
+        <p>You answered all ${total} decisions${t && t.skipped ? ` (${t.skipped} skipped)` : ""}.</p>
+        ${tiles}
+        ${!survey.meta.reveal ? `<p class="hint">Scores are withheld in this build, so that
+          respondents cannot be influenced by them. The results will be reported in aggregate.</p>` : ""}
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Send your answers</div>
+        <p>Nothing has left your browser. Download the file and email it to
+        <a href="mailto:shaolinx@usc.edu?subject=D2I%20survey%20response">shaolinx@usc.edu</a>,
+        or attach it wherever you were asked to.</p>
+        <div class="row">
+          <button class="primary" id="dl">Download my answers (.json)</button>
+          <button class="ghost" id="again">Take it again</button>
+        </div>
+        <p class="hint">The file holds your answers, the slot numbers you chose and your notes —
+        no page contents and nothing about your machine beyond the browser string.</p>
+      </div>
+
+      ${scored ? `<div class="card">
+        <div class="eyebrow">Decision by decision</div>
+        <p class="hint">Now that every answer is locked in, here is what D2I did at each node.</p>
+        ${t.rows.map(reviewRow).join("")}
+      </div>` : ""}
+    </div>`));
+
+  document.getElementById("dl").onclick = download;
+  document.getElementById("again").onclick = () => {
+    if (!confirm("Clear your answers and start the survey again?")) return;
+    R = null; localStorage.removeItem(KEY); screen = "intro"; render();
+  };
+  window.scrollTo({top: 0, behavior: "instant"});
+}
+
+/* ------------------------------------------------------------------ router */
+function render() {
+  chrome();
+  if (screen === "intro" || !R) return renderIntro();
+  const i = nextIndex();
+  if (i < 0) { screen = "done"; chrome(); return renderDone(); }
+  renderDecision(decisions()[i]);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (screen !== "judge" || !R) return;
+  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") {
+    if (e.key === "Enter") document.getElementById("submit")?.click();
+    return;
+  }
+  const k = e.key.toLowerCase();
+  if (stage === "stop") {
+    if (k === "c") app.querySelector('[data-act="continue"]')?.click();
+    else if (k === "t") app.querySelector('[data-act="terminate"]')?.click();
+    else if (k === "s") app.querySelector('[data-act="skip"]')?.click();
+    else if (k === "u") app.querySelector('[data-act="undo"]')?.click();
+    return;
+  }
+  if (/^[1-9]$/.test(k)) app.querySelector(`.cand[data-slot="${k}"]`)?.click();
+  else if (k === "enter") document.getElementById("submit")?.click();
+  else if (k === "s") app.querySelector('[data-act="skip"]')?.click();
+  else if (k === "u") app.querySelector('[data-act="back"]')?.click();
+});
+
+(async () => {
+  try {
+    const r = await fetch("data/survey.json", {cache: "no-store"});
+    if (!r.ok) throw new Error(`survey.json — HTTP ${r.status}`);
+    survey = await r.json();
+  } catch (e) {
+    app.innerHTML = `<div class="card"><h2>The survey could not be loaded.</h2>
+      <p class="muted">${esc(e.message)}</p>
+      <p class="hint">If you are opening this file directly from disk, the browser blocks the
+      fetch. Serve the folder instead — <span class="mono">python3 -m http.server</span> from
+      the site root, then open <span class="mono">/survey/</span>.</p></div>`;
+    return;
+  }
+  document.getElementById("title").textContent = survey.meta.title;
+  document.title = survey.meta.title + " — D2I human evaluation";
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    // A rebuilt survey invalidates saved answers: the ids and the shuffle have moved.
+    if (saved && saved.survey && saved.survey.built_at === survey.meta.built_at) R = saved;
+  } catch (e) {}
+
+  // A finished response reopens on its own summary rather than back at the intro.
+  if (R && nextIndex() < 0 && R.verdicts.length) screen = "done";
+  render();
+})();
+</script>
+</body>
+</html>
