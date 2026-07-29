@@ -136,6 +136,45 @@ header.top .home { font-size: .85rem; }
 }
 /* The answer controls are not part of the option list, so they are set apart from it. */
 .actions { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+/* The criteria to weigh. Set as a quiet inset rather than as body text: it is a checklist to
+   glance down, not another paragraph competing with the candidates for attention. */
+details.guide {
+  border: 1px solid var(--line); border-top: 1px solid var(--line);
+  background: var(--soft); border-radius: 6px; padding: 9px 13px; margin-bottom: 14px;
+}
+details.guide > summary {
+  cursor: pointer; list-style: none; color: var(--muted);
+  font-size: .76rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+}
+details.guide > summary::-webkit-details-marker { display: none; }
+/* A border triangle rather than a ▾ glyph: the arrow characters fall back inconsistently
+   across the fonts this page asks for, and one of them rendered as a dash. */
+details.guide > summary::after {
+  content: ""; display: inline-block; margin-left: 7px; vertical-align: middle;
+  border: 4px solid transparent; border-top-color: currentColor;
+  transform: translateY(2px); transition: transform .15s ease;
+}
+details.guide[open] > summary::after { transform: translateY(-2px) rotate(180deg); }
+details.guide > summary:hover { color: var(--accent); }
+details.guide ul { margin: 9px 0 1px; padding-left: 17px; }
+details.guide li {
+  font-size: .84rem; color: var(--ink); line-height: 1.45; margin-bottom: 5px;
+}
+details.guide li::marker { color: var(--muted); }
+
+/* The same criteria on the intro, laid out side by side so the two decisions are visibly
+   two different judgements rather than one long list. */
+.guides { display: grid; gap: 16px; margin-top: 12px; }
+@media (min-width: 720px) { .guides { grid-template-columns: 1fr 1fr; } }
+.guides > div {
+  background: var(--soft); border: 1px solid var(--line);
+  border-radius: 6px; padding: 12px 14px;
+}
+.guide-ask { font-weight: 600; color: var(--head); font-size: .93rem; }
+.guides ul { margin: 8px 0 0; padding-left: 17px; }
+.guides li { font-size: .84rem; line-height: 1.45; margin-bottom: 5px; }
+.guides li::marker { color: var(--muted); }
 .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
 button {
@@ -452,6 +491,20 @@ function renderIntro() {
       </div>
 
       <div class="card">
+        <div class="eyebrow">What to weigh</div>
+        <p class="hint" style="margin-top:0">Both questions are judgement calls. These are the
+        things to weigh — they are repeated on every screen, where you can fold them away once
+        they are familiar.</p>
+        <div class="guides">
+          ${["stop", "pick"].map(k => `
+            <div>
+              <div class="guide-ask">${esc(GUIDE[k].ask)}</div>
+              <ul>${GUIDE[k].points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+            </div>`).join("")}
+        </div>
+      </div>
+
+      <div class="card">
         <div class="eyebrow">About you <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">— all optional</span></div>
         <label class="field">Name or handle
           <input type="text" id="name" placeholder="e.g. alex, or leave blank" autocomplete="off"></label>
@@ -557,6 +610,48 @@ function dataSample(d) {
     </div>`;
 }
 
+/* What a respondent is asked to weigh, for each of the two decisions. Stated once here and
+   rendered both in the intro (in full, before anyone starts) and on every decision screen
+   (collapsible, as a reminder) — so the wording a respondent judges against cannot drift
+   between the two places. */
+const GUIDE = {
+  pick: {
+    ask: "Which candidate would you investigate next?",
+    points: [
+      "Does the question address one of the most important remaining unknowns?",
+      "Does it naturally follow from the current trajectory?",
+      "Will answering it substantially improve your understanding?",
+      "Is it directly relevant to the analytical goal?",
+      "Is it likely to produce genuinely new evidence rather than repeat previous analyses?",
+    ],
+  },
+  stop: {
+    ask: "Should exploration continue?",
+    points: [
+      "Are there still important unanswered questions?",
+      "Is further exploration likely to produce meaningful new understanding?",
+      "Has the current trajectory already explained the phenomenon sufficiently?",
+      "Would additional investigation mostly repeat existing findings?",
+      "Would you personally continue investigating if this were your own analysis?",
+    ],
+  },
+};
+
+/* The same five points are put on all 20 screens, so they are collapsible: open by default,
+   and once a respondent closes them they stay closed. Guidance that cannot be dismissed
+   stops being read and just adds to the wall of text it was meant to help with. */
+const GUIDE_KEY = "d2i-survey-guide-open";
+const guideOpen = () => localStorage.getItem(GUIDE_KEY) !== "0";
+
+function guide(kind) {
+  const g = GUIDE[kind];
+  return `
+    <details class="guide"${guideOpen() ? " open" : ""}>
+      <summary>When making your decision, consider…</summary>
+      <ul>${g.points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+    </details>`;
+}
+
 /* Everything the respondent consults but does not act on: the goal, the sample rows and the
    trajectory that led here. The left panel on a wide screen. */
 function trajectory(d) {
@@ -594,8 +689,9 @@ function renderDecision(d) {
     // recorded — which matters more here, since "stop here" ends the decision outright.
     body += `
       <div class="card">
-        <div class="ask">Is this line of enquiry worth continuing?</div>
+        <div class="ask">${esc(GUIDE.stop.ask)}</div>
         <div class="ask-sub">Judge it on the trajectory alone — the candidate questions come next.</div>
+        ${guide("stop")}
         ${[["continue", "Keep exploring", "this line still has somewhere useful to go"],
            ["terminate", "Stop here", "the line is spent — further questions would add little"]]
           .map(([act, label, why], i) => `
@@ -618,9 +714,10 @@ function renderDecision(d) {
   } else {
     body += `
       <div class="card">
-        <div class="ask">Which question should be asked next?</div>
+        <div class="ask">${esc(GUIDE.pick.ask)}</div>
         <div class="ask-sub">These are the ${d.candidates.length} candidates that competed at this
           node, in a random order.</div>
+        ${guide("pick")}
         ${d.candidates.map(c => `
           <button class="cand" data-slot="${c.slot}">
             <span class="n">${c.slot}</span>
@@ -644,6 +741,9 @@ function renderDecision(d) {
     <div class="col-ask">${body}</div>
   </div>`));
   app.querySelectorAll("[data-act]").forEach(b => b.onclick = () => act(b.dataset.act, d));
+  // Remember whether the guidance is wanted, so the choice survives the next 19 screens.
+  const g = app.querySelector("details.guide");
+  if (g) g.ontoggle = () => localStorage.setItem(GUIDE_KEY, g.open ? "1" : "0");
 
   // Both stages select the same way; `key` is the attribute that distinguishes them, so
   // `sel` means "slot" while picking a question and "0 = continue, 1 = terminate" while
