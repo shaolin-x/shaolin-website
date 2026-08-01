@@ -24,4 +24,8 @@ trajectory-survey/results/
 # per-file limit, and the site never needs them at serve time: build_survey.py reads them
 # from here and writes what the survey shows into trajectory-survey/data/, which IS
 # committed and deployed.
-data/
+#
+# Anchored with a leading slash ON PURPOSE: a bare `data/` matches a directory of that name
+# at ANY depth, which silently swallowed trajectory-survey/data/ — the deployed half — and
+# the survey 404'd on its own tables.
+/data/
