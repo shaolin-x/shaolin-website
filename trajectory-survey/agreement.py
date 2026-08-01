@@ -11,6 +11,7 @@ policy) are excluded and counted, never pooled.
 
 from __future__ import annotations
 
+import decimal
 import math
 from typing import Callable, Iterable, Optional, Sequence
 
@@ -288,16 +289,28 @@ def compute(cells: Sequence[dict], order: Optional[Sequence[str]] = None,
 
 # --------------------------------------------------------------------------- rendering
 
+def _to_fixed(x: float, d: int) -> str:
+    """JavaScript's `Number.prototype.toFixed`, which Python's `%.*f` is not.
+
+    Python rounds a tie to even, so 31.25 prints as "31.2"; JS splits the sign off and
+    formats the magnitude, rounding a tie up, so it prints "31.3". And 0.3125 is 5/16 —
+    exactly representable, and an agreement rate that really does come up with n = 16.
+    Every digit of these two files is required to match, so the formatter matches too.
+    """
+    q = decimal.Decimal(1).scaleb(-d)
+    return str(decimal.Decimal(x).quantize(q, rounding=decimal.ROUND_HALF_UP))
+
+
 def fmt(v, d: int = 3) -> str:
     if v is None or (isinstance(v, float) and math.isnan(v)):
         return "—"
-    return f"{v:.{d}f}"
+    return _to_fixed(v, d)
 
 
 def pct(v) -> str:
     if v is None or (isinstance(v, float) and math.isnan(v)):
         return "—"
-    return f"{100 * v:.1f}%"
+    return _to_fixed(100 * v, 1) + "%"
 
 
 COLUMNS: tuple[tuple[str, Callable[[dict], str]], ...] = (

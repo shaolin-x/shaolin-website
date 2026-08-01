@@ -19,3 +19,9 @@ survey/results/
 trajectory-survey/private/
 trajectory-survey/responses/
 trajectory-survey/results/
+
+# The benchmark tables themselves — covid.csv alone is 346 MB, past GitHub's 100 MB
+# per-file limit, and the site never needs them at serve time: build_survey.py reads them
+# from here and writes what the survey shows into trajectory-survey/data/, which IS
+# committed and deployed.
+data/

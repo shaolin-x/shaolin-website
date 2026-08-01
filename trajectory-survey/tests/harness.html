@@ -85,14 +85,30 @@ function checks(d) {
     const after = right.scrollTop;
     log.push("scroll after scoring: " + before + " -> " + after
              + (before === after ? "  (held)" : "  ** JUMPED **"));
-    const pcols = d.querySelectorAll(".pcol").length;
-    const first = d.querySelector(".pcol");
-    log.push("profile blocks: " + pcols);
-    if (first) log.push("profile first block: " + first.textContent.replace(/\s+/g, " ").trim().slice(0, 160));
+    // Open the data panel and let it fetch, then look at what it rendered.
+    const panel = d.querySelector("details.table-panel");
+    if (!panel) { log.push("** no data panel on the screen **"); }
+    else {
+      log.push("data panel: " + panel.querySelector("summary").textContent.trim()
+               + (panel.open ? "  (open on arrival)" : "  ** COLLAPSED **"));
+    }
     log.push("criterion counter: " + (d.getElementById("critcount") || {}).textContent);
     log.push("Previous on the first screen: "
              + (d.getElementById("prev").disabled ? "disabled (right)" : "** ENABLED **"));
-    setTimeout(tick, 40);
+    setTimeout(() => {
+      const t = d.querySelector("table.tbl");
+      if (!t) log.push("data table: ** NOT RENDERED **");
+      else {
+        const rows = t.querySelectorAll("tbody tr:not(.spacer)").length;
+        const spacers = t.querySelectorAll("tbody tr.spacer").length;
+        log.push("data table: " + t.querySelectorAll("thead th").length + " columns, "
+                 + rows + " rows in the DOM, " + spacers + " spacer(s) holding the scroll"
+                 + (d.querySelector(".tnote") ? ", truncation notice shown" : ""));
+        const cells = t.querySelectorAll("tbody tr:not(.spacer) td");
+        log.push("  first cells: " + [...cells].slice(0, 4).map(c => c.textContent).join(" | "));
+      }
+      setTimeout(tick, 40);
+    }, 900);
   }, 80);
 }
 
@@ -183,8 +199,9 @@ function finish(why) {
              + Math.round(JSON.stringify(full).length / 1024) + " KB");
     const sc = withScreen[0] && withScreen[0].screen;
     if (sc) {
-      log.push("  screen 1 holds: goal " + (sc.goal || "").length + " chars, profile "
-               + (sc.profile || "").length + " chars, " + (sc.steps || []).length
+      log.push("  screen 1 holds: goal " + (sc.goal || "").length + " chars, table "
+               + (sc.table ? sc.table.n_rows_shown + "/" + sc.table.n_rows_total + " rows" : "none")
+               + ", " + (sc.steps || []).length
                + " steps, " + (sc.criteria || []).length + " criteria with rubric text ("
                + (sc.criteria || []).filter(c => c.levels && Object.keys(c.levels).length === 5).length
                + " with all five levels, "

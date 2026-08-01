@@ -13,9 +13,14 @@ called, and the build refuses to proceed unless its prompt hash matches the hash
 in the scoring run's `meta.json`. A rubric edit therefore fails the build instead of
 silently producing a survey that measures a different instrument.
 
-    python3 trajectory-survey/build_survey.py                    # every dataset, 1 per system
-    python3 trajectory-survey/build_survey.py -d 2 -n 2          # 2 datasets, 2 per system per dataset
-    python3 trajectory-survey/build_survey.py --seed 7 --no-reveal
+    python3 trajectory-survey/build_survey.py -d 3 -n 2   # 3 datasets, 2 per system each
+    python3 trajectory-survey/build_survey.py --seed 7    # a different draw
+    python3 trajectory-survey/build_survey.py --judged    # pair with a scoring run as well
+
+A build COLLECTS ratings: it takes trajectories from runs/ and attaches no model scores, so
+runs/ can be replaced and put in front of people the same day. --judged pairs each item with
+its scores from a scoring run instead; --attach-scores writes that key for an already
+deployed bundle, once its runs have been judged.
 
 Sampling. Datasets are drawn first and are shared by all three systems -- every system is
 judged on the same datasets, so a system difference is never a dataset difference. Within
@@ -30,6 +35,7 @@ survey, `--no-reveal` withholds it entirely) and in `private/build.json`, which 
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import importlib.util
 import json
@@ -48,6 +54,23 @@ DEFAULT_RUNS_ROOT = SITE / "runs"
 
 # The directory name each system's runs live under in the site's runs/ copy.
 ARM_DIR = {"agentpoirot": "agentpoirot", "d2i": "d2i", "quis": "quis"}
+
+# The datasets a draw may use. Restricted on purpose: these are the ones whose tables are
+# in data/ and can be put in front of a respondent. --pool overrides, --all-datasets lifts.
+DATASET_POOL = ("covid", "carsales", "cases", "yelp_reviews")
+
+# Where each dataset's own table lives, tried in order. The site's data/ first, since that
+# is the copy that travels with this repository.
+TABLE_DIRS = (SITE / "data", Path("/Users/shaolinx/Desktop/D2I_repo/data/d2i_bench/csvs"))
+TABLE_ALIASES = {"yelp_reviews": ("Yelp_Reviews", "yelp_reviews")}
+
+# How many rows of the table to show. A sample, not the table: covid is 3.35 MILLION rows
+# and 363 MB, and even the small ones are no use as a wall of text. The page always prints
+# the true row count beside the sample, so what is shown is never mistaken for all there is.
+SAMPLE_ROWS = 20
+# Long free text -- a Yelp review, a Newick tree -- is cut here rather than in the browser,
+# so the bundle does not carry kilobytes per cell that nobody can read in a table anyway.
+MAX_CELL = 240
 
 TITLE = "How good is this analysis? — D2I trajectory rating"
 
@@ -154,6 +177,100 @@ def parse_rubric(rubric: str) -> tuple[dict, dict]:
             "notes": _unwrap("\n".join(notes)),
         }
     return preamble, blocks
+
+
+# --------------------------------------------------------------------------- the data
+
+def table_path(dataset: str) -> Path | None:
+    """The dataset's own CSV, wherever it lives. `yelp_reviews` is filed as
+    `Yelp_Reviews.csv`, so names are tried through an alias table rather than assumed."""
+    for directory in TABLE_DIRS:
+        for name in TABLE_ALIASES.get(dataset, (dataset,)):
+            candidate = directory / f"{name}.csv"
+            if candidate.is_file():
+                return candidate
+    return None
+
+
+def _row_count(path: Path, cache: Path) -> int:
+    """How many rows the table really has.
+
+    Counted with the csv reader, not by counting newlines: a Yelp review contains line
+    breaks inside its quotes, and a line count would report a third more rows than exist.
+    covid.csv is 363 MB, so the answer is cached against the file's size and mtime —
+    rebuilding a bundle should not re-read a third of a gigabyte.
+    """
+    key = f"{path}|{path.stat().st_size}|{int(path.stat().st_mtime)}"
+    try:
+        seen = json.loads(cache.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        seen = {}
+    if key in seen:
+        return seen[key]
+    print(f"  counting rows in {path.name} ({path.stat().st_size / 1e6:.0f} MB, once)…",
+          flush=True)
+    with path.open(newline="", encoding="utf-8", errors="replace") as fh:
+        reader = csv.reader(fh)
+        next(reader, None)                       # the header
+        n = sum(1 for _ in reader)
+    seen[key] = n
+    try:
+        cache.write_text(json.dumps(seen), encoding="utf-8")
+    except OSError:
+        pass
+    return n
+
+
+def write_table(dataset: str, out_dir: Path, cache: Path,
+                truncate_rows: int, budget_mb: float) -> dict | None:
+    """Write the dataset's table into the bundle, whole if it can be, truncated if it must.
+
+    `data/` is gitignored — covid.csv alone is 346 MB, past what GitHub will take — so the
+    CSVs never reach the deployed site. Anything a respondent is to see has to be written
+    into `trajectory-survey/data/`, which is committed. That is what this does.
+
+    Whole where it fits: carsales (275 rows), yelp_reviews (2 610) and cases (10 000 x 58)
+    all ship complete. covid does not — 3.35 million rows — so its first `truncate_rows`
+    are shipped and the page says so, beside the true count, every time it is opened.
+
+    A goal and a chain of findings read as abstractions without the data they are about,
+    and this is the data itself, not anything anyone concluded from it, so it costs no
+    blinding.
+    """
+    path = table_path(dataset)
+    if not path:
+        print(f"  note: no table found for {dataset} — its screens show no data")
+        return None
+
+    total = _row_count(path, cache)
+    fits = path.stat().st_size <= budget_mb * 1e6
+    limit = None if fits else truncate_rows
+
+    with path.open(newline="", encoding="utf-8", errors="replace") as fh:
+        reader = csv.reader(fh)
+        columns = next(reader, [])
+        rows = []
+        for row in reader:
+            if limit is not None and len(rows) >= limit:
+                break
+            # Long free text — a Yelp review, a Newick tree — is cut here rather than in
+            # the browser: the bundle should not carry kilobytes per cell that no table
+            # can display anyway.
+            rows.append([c if len(c) <= MAX_CELL else c[:MAX_CELL] + "…" for c in row])
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = out_dir / f"{dataset}.json"
+    payload = {"dataset": dataset, "columns": columns, "rows": rows,
+               "n_rows_total": total, "n_rows_shown": len(rows),
+               "truncated": len(rows) < total, "source": path.name}
+    out.write_text(json.dumps(payload), encoding="utf-8")
+    size = out.stat().st_size
+    print(f"  {dataset:24s} {len(rows):>7,} of {total:>9,} rows x {len(columns):>3} cols"
+          f"  -> {size / 1e6:5.1f} MB"
+          + ("  (whole table)" if len(rows) >= total else "  ** TRUNCATED **"))
+    return {"file": f"data/tables/{dataset}.json", "columns": len(columns),
+            "n_rows_total": total, "n_rows_shown": len(rows),
+            "truncated": len(rows) < total, "bytes": size}
 
 
 # --------------------------------------------------------------------------- runs
@@ -359,7 +476,8 @@ def item_id(run: dict, index: int, seed: int) -> str:
 # --------------------------------------------------------------------------- sampling
 
 def sample(runs: list[dict], n_datasets: int | None, per_system: int,
-           rng: random.Random) -> list[tuple[dict, int]]:
+           pool: tuple[str, ...] | None, rng: random.Random,
+           hint: str = "") -> list[tuple[dict, int]]:
     """(run record, trajectory index) pairs, grouped by dataset in a shuffled order.
 
     Datasets first, shared by every system: a comparison across systems is only a
@@ -367,9 +485,12 @@ def sample(runs: list[dict], n_datasets: int | None, per_system: int,
     dataset are then drawn per system and independently -- there is no reason for the
     third trajectory of one system to be paired with the third of another.
 
-    Items are presented grouped by dataset because each dataset carries a ~6 000-character
-    profile the respondent has to read; interleaving datasets would make them re-read it
-    on every screen, and that fatigue is worse than any order effect grouping introduces.
+    `pool` restricts which datasets may be drawn at all: the ones whose table is on hand to
+    show beside the trajectory.
+
+    Items are presented grouped by dataset because each dataset carries a table the
+    respondent has to get their bearings in; interleaving datasets would mean doing that on
+    every screen, and that fatigue is worse than any order effect grouping introduces.
     """
     by_dataset: dict[str, list[dict]] = {}
     for r in runs:
@@ -383,7 +504,25 @@ def sample(runs: list[dict], n_datasets: int | None, per_system: int,
     dropped = sorted(set(by_dataset) - set(complete))
     if dropped:
         print(f"  note: {len(dropped)} dataset(s) are not present for all "
-              f"{len(systems)} systems and are not drawn from: {', '.join(dropped)}")
+              f"{len(systems)} systems and are not drawn from")
+
+    if pool:
+        # A run directory is named `<dataset>-<level>`, and that is the name in front of
+        # you when you go looking, so --pool takes either form.
+        wanted = [re.sub(r"-level_\d+$", "", ds) for ds in pool]
+        allowed = [ds for ds in complete if ds in wanted]
+        missing = [ds for ds in wanted if ds not in complete]
+        if missing and allowed:
+            print(f"  note: the pool names {', '.join(missing)}, which "
+                  f"{'is' if len(missing) == 1 else 'are'} not available here")
+        if not allowed:
+            raise SystemExit(
+                f"build_survey: none of the pool ({', '.join(wanted)}) is available.\n"
+                f"  What is available: {', '.join(complete)}\n"
+                f"{hint}"
+                "  Or widen the pool with --pool, or lift it with --all-datasets.")
+        print(f"  pool: {', '.join(allowed)}")
+        complete = allowed
 
     chosen = sorted(rng.sample(complete, min(n_datasets, len(complete)))) if n_datasets else complete
     if n_datasets and n_datasets > len(complete):
@@ -649,7 +788,7 @@ def build(args) -> int:
         meta_path = args.geval_run / "meta.json"
         if not meta_path.is_file():
             raise SystemExit(f"build_survey: no meta.json under {args.geval_run}\n"
-                             "  build with --no-judge to collect ratings without one")
+                             "  drop --judged to collect ratings without one")
         gmeta = json.loads(meta_path.read_text(encoding="utf-8"))
 
         if gmeta.get("prompt_hash") != g._prompt_hash():
@@ -675,7 +814,15 @@ def build(args) -> int:
         raise SystemExit(f"build_survey: no rubric section for {missing}")
 
     rng = random.Random(args.seed)
-    picked = sample(runs, args.datasets, args.per_system, rng)
+    # A judged build can only offer what the scoring run scored; a --no-judge build offers
+    # everything under runs/. When the pool comes up empty, that distinction is the answer,
+    # so it travels into the error rather than being left for the reader to work out.
+    hint = ("" if args.no_judge else
+            "  This is a JUDGED build, so only what "
+            f"{args.geval_run.name} scored is available.\n"
+            "  Drop --judged to draw from runs/ itself, which has far more.\n")
+    picked = sample(runs, args.datasets, args.per_system,
+                    None if args.all_datasets else tuple(args.pool), rng, hint)
 
     profiles: dict[str, str] = {}
     goals: dict[str, str] = {}
@@ -762,6 +909,24 @@ def build(args) -> int:
         raise SystemExit(f"build_survey: item id collision on {dupes} — rebuild with a "
                          "different --seed, or widen item_id()'s digest")
 
+    # The tables themselves, written into the bundle because data/ is gitignored and never
+    # reaches the deployed site.
+    print("\ntables:")
+    tables = {}
+    table_dir = HERE / "data" / "tables"
+    # A previous build's tables would otherwise sit in the deploy for good — cases.json
+    # alone is 7 MB of a dataset this bundle may not even use.
+    for stale in (sorted(table_dir.glob("*.json")) if table_dir.is_dir() else []):
+        if stale.stem not in {i["dataset"] for i in items}:
+            print(f"  removing {stale.name}, which this build does not use")
+            stale.unlink()
+    for ds in sorted({i["dataset"] for i in items}):
+        meta = write_table(ds, HERE / "data" / "tables",
+                           HERE / "private" / "rowcounts.json",
+                           args.truncate_rows, args.table_budget_mb)
+        if meta:
+            tables[ds] = meta
+
     built_at = datetime.now().replace(microsecond=0).isoformat()
     public = {
         "meta": {
@@ -801,7 +966,10 @@ def build(args) -> int:
             "criteria": {c: rubric[c] for c in criteria},
         },
         "goals": goals,
-        "profiles": profiles,
+        # What the respondent is shown of the data. The schema profile the judge is given
+        # is still what the prompt receipts are computed from — it is just not what a
+        # person reads well, so the screen carries the table instead.
+        "tables": tables,
         "items": items,
     }
     (assert_blind if args.blind_systems else assert_no_scores)(public, criteria)
@@ -862,12 +1030,15 @@ def main() -> int:
                    help="trajectories per system per dataset, drawn independently "
                         "(default 1). Total items = datasets x systems x N.")
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--no-judge", action="store_true",
-                   help="build from runs/ alone, with no scoring run: sample trajectories "
-                        "and collect ratings, attaching no model scores. Implies "
-                        "--no-reveal, so the page closes with a thank-you and shows no "
-                        "agreement summary. Use this when runs/ has moved on from whatever "
-                        "was last judged.")
+    # Collecting is the default: runs/ moves faster than the scoring does, and a build that
+    # needed a matching scoring run to exist would be unbuildable most of the time.
+    p.add_argument("--judged", action="store_true",
+                   help="pair every item with its scores from --geval-run, so the closing "
+                        "screen can show agreement. Off by default: a build takes "
+                        "trajectories from runs/ and attaches no model scores, and the page "
+                        "closes with a thank-you. Score collected responses afterwards with "
+                        "--attach-scores.")
+    p.add_argument("--no-judge", action="store_true", help=argparse.SUPPRESS)  # now the default
     p.add_argument("--attach-scores", action="store_true",
                    help="do not build anything: write the answer key for the bundle that "
                         "is already deployed, from --geval-run, keeping its built_at and "
@@ -899,6 +1070,18 @@ def main() -> int:
     p.add_argument("--no-reveal", dest="reveal", action="store_false",
                    help="publish no answer key: the page then closes with a thank-you "
                         "and nothing about the judge is readable from the site")
+    p.add_argument("--pool", nargs="*", default=list(DATASET_POOL), metavar="DATASET",
+                   help="the datasets a draw may use — those whose table can be shown "
+                        f"(default: {', '.join(DATASET_POOL)})")
+    p.add_argument("--all-datasets", action="store_true",
+                   help="lift the pool: draw from every dataset present for every system, "
+                        "including ones with no table to show")
+    p.add_argument("--truncate-rows", type=int, default=1000, metavar="N",
+                   help="rows to ship for a table too big to ship whole (default 1000). "
+                        "The page always prints the true row count beside it.")
+    p.add_argument("--table-budget-mb", type=float, default=8.0, metavar="MB",
+                   help="a table whose CSV is under this ships whole; over it, "
+                        "--truncate-rows applies (default 8)")
     p.add_argument("--d2i-as-judged", action="store_true",
                    help="do not repair D2I trajectories that the judge's loader truncates "
                         "(see d2i_full_paths). Shows exactly what the last scoring run saw "
@@ -920,6 +1103,8 @@ def main() -> int:
     p.set_defaults(reveal=True)
     args = p.parse_args()
 
+    # `--judged` is the opt-in; `--no-judge` survives as the old spelling of the default.
+    args.no_judge = not args.judged
     # There is nothing to reveal without a judge, and a page that fetched a truth.json left
     # over from an earlier build would score these ratings against the wrong trajectories.
     if args.no_judge:

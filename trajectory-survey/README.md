@@ -46,9 +46,10 @@ and the failure is silent.
 Exactly what the judge was sent, and nothing else:
 
 * the **analytical goal**, verbatim from the run;
-* the **dataset profile** — `data/d2i_bench/schema/<dataset>_schema.txt`, the same
-  per-dataset reference schema every system was judged against, folded away after the first
-  read;
+* **the dataset itself** — its own table, folded away after the first look. This is one
+  place the screen departs from the judge's prompt on purpose: the judge is given a schema
+  profile, which is the wrong thing to put in front of a person, so the rows go in its
+  place. The profile is still what the prompt receipts are computed from;
 * the **trajectory**, rendered from the judge module's own `_format_trajectory`: each step's
   statement, the evidence attached to it, and — labelled as *not* evidence — any
   system-generated metadata;
@@ -166,14 +167,38 @@ build_survey: these trajectories are not what was shown when the ratings were co
 Items the scoring run does not cover are reported and simply get no key; the rest are
 scored.
 
+## The data a respondent sees
+
+`data/` is **gitignored** — covid.csv alone is 346 MB, past GitHub's 100 MB per-file limit —
+so the CSVs never reach the deployed site. Anything a respondent is to see has to be written
+into `trajectory-survey/data/tables/`, which is committed, and that is what the build does:
+
+```
+  carsales                     275 of       275 rows x   5 cols  ->   0.0 MB  (whole table)
+  cases                     10,000 of    10,000 rows x  58 cols  ->   7.3 MB  (whole table)
+  yelp_reviews               2,610 of     2,610 rows x  10 cols  ->   0.9 MB  (whole table)
+  covid                      1,000 of 3,348,186 rows x  13 cols  ->   0.1 MB  ** TRUNCATED **
+```
+
+Whole where it fits, truncated where it cannot: covid is 3.35 million rows, so its first
+`--truncate-rows` (default 1000) ship and the panel says so beside the true count, every
+time it is opened. `--table-budget-mb` (default 8) is the line between the two.
+
+Each table is its own file, fetched the first time someone opens the panel rather than by
+every respondent whether they look or not, and rendered **windowed** — 10 000 × 58 is
+580 000 cells, so only the ~40 rows around the scroll position are ever in the DOM.
+
 ## Sampling
 
 ```bash
-python3 trajectory-survey/build_survey.py            # every dataset, 1 per system  → 9 items
-python3 trajectory-survey/build_survey.py -d 2 -n 2  # 2 datasets, 2 per system     → 12 items
-python3 trajectory-survey/build_survey.py --seed 7   # a different draw
+python3 trajectory-survey/build_survey.py -d 4 -n 1   # all four pooled datasets, 1 per system
+python3 trajectory-survey/build_survey.py -d 2 -n 2   # 2 of them, 2 per system    → 12 items
+python3 trajectory-survey/build_survey.py --seed 7    # a different draw
 ```
 
+* `--pool` is the set a draw may use, defaulting to the datasets whose tables are on hand:
+  **covid, carsales, cases, yelp_reviews**. `--all-datasets` lifts it, at the cost of screens
+  with no data panel.
 * `-d/--datasets N` draws N datasets **shared by all three systems**. A system comparison is
   only a system comparison if every system was judged on the same data.
 * `-n/--per-system N` then draws N trajectories per system **within** each dataset,

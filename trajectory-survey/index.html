@@ -104,15 +104,34 @@ header.top .home { font-size: .85rem; }
   margin-top: 6px; font-size: .72rem; color: var(--warn);
 }
 
-/* the dataset profile: long, and read once per dataset, so it folds away.
-   One block per column — the name and its type first, the cheap statistics as chips beside
-   them, and only the long fields (top values, domain, samples) on their own lines. */
-pre.profile {
-  margin: 8px 0 0; padding: 10px 12px; max-height: 320px; overflow: auto;
-  font-size: .72rem; line-height: 1.5; background: var(--soft);
-  border: 1px solid var(--line); border-radius: 6px; white-space: pre-wrap;
-  word-break: break-word;
+/* the dataset itself, folded away after the first look. Windowed rendering needs a fixed
+   row height, so cells are one line each, clipped, with the full value on the title. */
+.tnote {
+  font-size: .76rem; color: var(--warn); background: #fff8ee;
+  border: 1px solid #f0dcc0; border-radius: 5px; padding: 6px 9px; margin: 8px 0 6px;
 }
+.tscroll {
+  max-height: 340px; overflow: auto; margin-top: 8px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--card);
+}
+table.tbl { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; font-size: .74rem; margin: 0; }
+table.tbl thead th {
+  position: sticky; top: 0; z-index: 1; background: var(--soft);
+  border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap;
+  padding: 5px 9px; font-size: .66rem; letter-spacing: .04em; color: var(--muted);
+}
+table.tbl td, table.tbl th.rn {
+  height: 27px; padding: 3px 9px; border-bottom: 1px solid var(--line);
+  white-space: nowrap; overflow: hidden; text-align: left; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+table.tbl th.rn {
+  color: var(--muted); background: var(--soft); font-weight: 400; font-size: .68rem;
+  position: sticky; left: 0; text-align: right;
+}
+table.tbl tr.spacer td, table.tbl tr.spacer { padding: 0; border: none; }
+table.tbl tbody tr:hover td { background: var(--accent-soft); }
+
 /* the criteria, named and glossed on the intro — one line each, so the whole instrument is
    visible before starting without becoming a second page of rubric */
 ul.crit-brief { margin: 8px 0 12px; padding-left: 18px; }
@@ -120,33 +139,6 @@ ul.crit-brief li { font-size: .88rem; line-height: 1.5; margin-bottom: 4px; }
 ul.crit-brief li::marker { color: var(--muted); }
 ul.crit-brief b { color: var(--head); }
 
-.pcount { font-size: .74rem; color: var(--muted); margin: 8px 0 6px; }
-.profile-box {
-  max-height: 380px; overflow: auto; background: var(--card);
-  border: 1px solid var(--line); border-radius: 6px;
-}
-.pcol { padding: 8px 11px; border-bottom: 1px solid var(--line); }
-.pcol:last-child { border-bottom: none; }
-.pcol:nth-child(even) { background: var(--soft); }
-.phead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
-.pname {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-weight: 700; color: var(--head); font-size: .8rem;
-}
-.ptype {
-  font-size: .66rem; padding: 1px 7px; border-radius: 99px;
-  background: var(--accent-soft); color: var(--accent);
-}
-/* A statistic reads as name-then-value, so the name is the quiet half. */
-.pchip { font-size: .7rem; color: var(--head); }
-.pchip b, .pdetail b {
-  color: var(--muted); font-weight: 700; font-size: .64rem; letter-spacing: .04em;
-  text-transform: uppercase; margin-right: 4px;
-}
-.pdetail {
-  font-size: .73rem; color: var(--ink); margin-top: 4px; line-height: 1.45;
-  word-break: break-word;
-}
 
 /* the six scales' own progress, inside the scoring card */
 .critbar {
@@ -485,102 +477,111 @@ function renderIntro() {
   };
 }
 
-/* ------------------------------------------------------------------ dataset profile */
+/* ------------------------------------------------------------------ the dataset */
 
-/* The profile arrives as one line per column, written for a prompt rather than for a
-   reader:
+/* The dataset itself, shown beside the trajectory: a goal and a chain of findings read as
+   abstractions without the rows they are about. It is the data, not anything anyone
+   concluded from it, so it costs no blinding.
 
-     - channel: type=categorical(str), missing=44.6%, distinct=4, top=[Social Media(47%),
-       Online(26%), …], domain=['Online', 'Outlet', 'Social Media', 'Stores']
+   The table lives in its own file under data/tables/ and is fetched the first time someone
+   opens the panel — `cases` is 10 000 x 58 and would otherwise be downloaded by every
+   respondent whether they looked at it or not. `covid` (3.35 million rows) ships truncated;
+   the header says so, beside the true count, so a sample is never mistaken for the whole.
 
-   Forty-six of those in a <pre> is a wall, and a respondent who cannot find a column in it
-   ends up judging the trajectory without the schema. So the same text is taken apart into
-   its fields and laid out — name, type, then the statistics — with the raw text still one
-   click away, because the raw text is what the judge was given and the reformatting is
-   presentation only.
+   Rendering is windowed: 10 000 x 58 is 580 000 cells, which no browser will lay out
+   happily, so only the ~40 rows around the scroll position are in the DOM and two spacer
+   rows hold the scrollbar at the right length. Row height is therefore fixed in CSS. */
+const TABLE_CACHE = {};
+const ROW_H = 27;
 
-   Splitting on commas naively would cut `top=[Houston, TX(0%), Miami, FL(0%)]` to pieces:
-   the separators only count at bracket depth 0. The second boundary is a space that
-   precedes a `key=`, which is how a numeric column packs `range=[1, 4] mean=2.253 var=…`
-   into one comma-field. */
-function splitFields(s) {
-  const out = [];
-  let depth = 0, start = 0;
-  for (let i = 0; i < s.length; i++) {
-    const ch = s[i];
-    if (ch === "[" || ch === "(" || ch === "{") depth++;
-    else if (ch === "]" || ch === ")" || ch === "}") depth = Math.max(0, depth - 1);
-    else if (depth === 0) {
-      const comma = ch === ",";
-      const gap = /\s/.test(ch) && /^\s*[a-z_]+=/.test(s.slice(i));
-      if (comma || gap) {
-        out.push(s.slice(start, i));
-        start = i + (comma ? 1 : 0);
-      }
-    }
-  }
-  out.push(s.slice(start));
-  return out.map(x => x.trim()).filter(Boolean);
-}
-
-/* Which fields are short enough to sit on the name's own line, in the order they read
-   best. Everything else (top, domain, samples, span) goes underneath, one per line. */
-const PROFILE_CHIPS = ["missing", "distinct", "range", "mean", "var", "skew", "outliers"];
-const PROFILE_ROWS = ["span", "top", "domain", "samples"];
-
-function parseProfile(text) {
-  const cols = [], preamble = [];
-  for (const raw of String(text || "").split("\n")) {
-    const line = raw.trim();
-    if (!line) continue;
-    // The name is everything up to the colon that introduces the FIELDS, not up to the
-    // first colon in the line: pandas leaves columns called "Unnamed: 0", and splitting
-    // greedily on ":" turned that into a column named "Unnamed" with a stray "0:".
-    const m = /^-\s+(.+?):\s+(?=[a-z_]+=)(.*)$/.exec(line);
-    if (!m) { preamble.push(line); continue; }
-    const kv = {}, extra = [];
-    for (const field of splitFields(m[2])) {
-      const p = /^([a-z_]+)=([\s\S]*)$/.exec(field);
-      if (p) kv[p[1]] = p[2].trim(); else extra.push(field);
-    }
-    cols.push({name: m[1].trim(), kv, extra});
-  }
-  return {cols, preamble};
-}
-
-function profileHTML(text) {
-  const {cols, preamble} = parseProfile(text);
-  const raw = `<details class="guide" style="margin-top:8px">
-      <summary>The profile exactly as the judge received it</summary>
-      <pre class="profile">${esc(text)}</pre>
-    </details>`;
-  // A profile in some other shape (the coarser bench_profile fallback, say) is shown as it
-  // is rather than mangled into a layout it does not fit.
-  if (!cols.length) return `<pre class="profile">${esc(text)}</pre>`;
-
-  const body = cols.map(c => {
-    const chips = PROFILE_CHIPS.filter(k => c.kv[k])
-      .map(k => `<span class="pchip"><b>${k}</b>${esc(c.kv[k])}</span>`).join("");
-    const rows = PROFILE_ROWS.filter(k => c.kv[k])
-      .map(k => `<div class="pdetail"><b>${k}</b>${esc(c.kv[k])}</div>`).join("");
-    const rest = c.extra.length
-      ? `<div class="pdetail">${esc(c.extra.join(", "))}</div>` : "";
-    return `
-      <div class="pcol">
-        <div class="phead">
-          <span class="pname">${esc(c.name)}</span>
-          ${c.kv.type ? `<span class="ptype">${esc(c.kv.type)}</span>` : ""}
-          ${chips}
-        </div>
-        ${rows}${rest}
-      </div>`;
-  }).join("");
-
+function tableCard(item) {
+  const t = (survey.tables || {})[item.dataset];
+  if (!t) return "";
+  const head = t.truncated
+    ? `${t.n_rows_shown.toLocaleString()} of ${t.n_rows_total.toLocaleString()} rows`
+    : `${t.n_rows_total.toLocaleString()} rows`;
   return `
-    <div class="pcount">${cols.length} columns${preamble.length
-      ? ` — ${esc(preamble.join(" "))}` : ""}</div>
-    <div class="profile-box">${body}</div>
-    ${raw}`;
+    <details class="guide table-panel" data-ds="${esc(item.dataset)}" open>
+      <summary>The data — ${esc(head)} × ${t.columns} columns${
+        t.truncated ? " (first rows only)" : ""}</summary>
+      <div class="tablebox"><p class="hint" style="margin:6px 0">Opening…</p></div>
+    </details>`;
+}
+
+async function loadTable(dataset) {
+  if (TABLE_CACHE[dataset]) return TABLE_CACHE[dataset];
+  const meta = (survey.tables || {})[dataset];
+  if (!meta) return null;
+  const r = await fetch(meta.file, {cache: "force-cache"});
+  if (!r.ok) throw new Error(`${meta.file} — ${r.status}`);
+  TABLE_CACHE[dataset] = await r.json();
+  return TABLE_CACHE[dataset];
+}
+
+function cell(v) {
+  if (v === null || v === undefined || v === "") return "—";
+  const s = String(v);
+  // pandas writes midnight timestamps for plain dates; show the day.
+  const day = /^(\d{4}-\d{2}-\d{2})[T ]00:00:00(\.0+)?$/.exec(s);
+  return day ? day[1] : s;
+}
+
+function renderTable(box, table) {
+  const n = table.rows.length;
+  box.innerHTML = `
+    ${table.truncated ? `<div class="tnote">Showing the first
+       ${table.n_rows_shown.toLocaleString()} of
+       ${table.n_rows_total.toLocaleString()} rows — the table is too large to send whole.</div>` : ""}
+    <div class="tscroll"><table class="tbl">
+      <thead><tr>${table.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>
+      <tbody></tbody>
+    </table></div>`;
+  const scroll = box.querySelector(".tscroll");
+  const body = box.querySelector("tbody");
+  const cols = table.columns.length;
+
+  let from = -1;
+  const paint = () => {
+    const first = Math.max(0, Math.floor(scroll.scrollTop / ROW_H) - 8);
+    if (first === from) return;
+    from = first;
+    const last = Math.min(n, first + 48);
+    const rows = table.rows.slice(first, last).map((r, i) => `
+      <tr><th class="rn">${(first + i + 1).toLocaleString()}</th>${
+        Array.from({length: cols}, (_, c) => {
+          const v = cell(r[c]);
+          const cut = v.length > 60 ? v.slice(0, 58) + "…" : v;
+          return `<td${cut === v ? "" : ` title="${esc(v)}"`}>${esc(cut)}</td>`;
+        }).join("")}</tr>`).join("");
+    body.innerHTML =
+      (first ? `<tr class="spacer" style="height:${first * ROW_H}px"></tr>` : "")
+      + rows
+      + (last < n ? `<tr class="spacer" style="height:${(n - last) * ROW_H}px"></tr>` : "");
+  };
+  scroll.onscroll = paint;
+  paint();
+}
+
+/* Wire every table panel on the screen: fetch on first open, then render. */
+function wireTables() {
+  app.querySelectorAll("details.table-panel").forEach(d => {
+    const show = async () => {
+      if (!d.open || d.dataset.loaded) return;
+      d.dataset.loaded = "1";
+      const box = d.querySelector(".tablebox");
+      try {
+        renderTable(box, await loadTable(d.dataset.ds));
+      } catch (e) {
+        d.dataset.loaded = "";
+        box.innerHTML = `<p class="err">The table could not load (${esc(e.message)}).</p>`;
+      }
+    };
+    d.ontoggle = show;
+    // The panel starts open — the data is context for the trajectory beside it, not an
+    // appendix — and `toggle` does not fire for something that was already open, so the
+    // first load is kicked off here rather than waiting for a click that never comes.
+    show();
+  });
 }
 
 /* ------------------------------------------------------------------ one trajectory */
@@ -650,10 +651,7 @@ function renderItem(item) {
             <span class="pill">${esc(item.dataset)}</span>
             <span class="pill">${item.n_steps} step${item.n_steps === 1 ? "" : "s"}</span>
           </div>
-          <details class="guide">
-            <summary>The dataset profile — the same one the judge was given</summary>
-            ${profileHTML(survey.profiles[item.dataset])}
-          </details>
+          ${tableCard(item)}
         </div>
         <div class="card">
           <div class="eyebrow">The trajectory</div>
@@ -695,6 +693,7 @@ function renderItem(item) {
   app.querySelectorAll(".scale button").forEach(b => {
     b.onclick = () => setScore(item, b.dataset.c, Number(b.dataset.v));
   });
+  wireTables();
   document.getElementById("next").onclick = () => commit(item, false);
   document.getElementById("skip").onclick = () => {
     if (!confirm("Record this trajectory as skipped and move on?")) return;
@@ -1139,7 +1138,9 @@ function screenRecord(item) {
     arm: item.arm || null,
     content: item.content,
     goal: survey.goals[item.dataset],
-    profile: survey.profiles[item.dataset],
+    // The data panel, by reference: the rows are their own deployed file (up to 7 MB), and
+    // copying them into every answer would make a response unopenable for no gain.
+    table: (survey.tables || {})[item.dataset] || null,
     n_steps: item.n_steps,
     max_depth: item.max_depth,
     steps: item.steps,
