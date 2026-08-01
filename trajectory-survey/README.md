@@ -89,6 +89,42 @@ python3 trajectory-survey/build_survey.py \
 Run directories are read from the site's own `runs/` copy, falling back to the path recorded
 in the scoring output. Both were checked to load byte-identical trajectories.
 
+## D2I trajectories arrive truncated, and are repaired here
+
+`load_d2i_trajectories` groups `repository.json`'s records by `trajectory_id`. D2I mints a
+**new** trajectory_id when the beam forks, and the ancestors keep the parent branch's id —
+so that grouping returns the tail *segment* of a path, not the path.
+
+Across this repository's D2I runs it truncates **95 of 129** reported trajectories: 44 of
+them down to a single node sitting at depth 3, with no base insight in sight. On
+`revenue_opportunities`, for instance, two of the five reported trajectories load as one
+node each; both are really four-node chains.
+
+This matters more here than almost anywhere. Resolution is defined as "does the trajectory
+resolve the uncertainty introduced by *the initial finding*" and Information Gain as
+progression "relative to the preceding trajectory" — so a lone depth-3 node is being rated,
+by a person or by the judge, on progression it was never shown. Both criteria can only come
+out low, for a reason that has nothing to do with D2I's search.
+
+The real path is recoverable exactly: every record carries its own `id` and its
+`parent_id`, so walking back from the deepest node of a reported trajectory reconstructs it.
+`d2i_full_paths()` does that, rebuilding node dicts in the loader's own shape with evidence
+from the judge's own `d2i_node_evidence`, and the build says what it repaired:
+
+```
+  d2i/cms_hospital_readmissions-level_2: rebuilt 5 truncated trajectory/ies from parent_id
+```
+
+Two consequences worth being explicit about:
+
+* **The `20260731-133448_systems` scores were computed on the truncated trajectories.** They
+  are not comparable with ratings collected from the repaired ones, and `--attach-scores`
+  will refuse to pair them — its prompt-hash check fails, which is exactly what that check
+  is for. Fix `load_d2i_trajectories` in the D2I repo the same way and re-run the judge
+  before comparing anything.
+* `--d2i-as-judged` turns the repair off, reproducing what the last scoring run saw. That is
+  what you want only if you are reproducing that run, never for collecting fresh ratings.
+
 ## Collecting before anything has been judged
 
 `runs/` moves faster than the scoring does. `--no-judge` builds from `runs/` alone: it

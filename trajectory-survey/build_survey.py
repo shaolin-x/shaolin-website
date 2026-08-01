@@ -158,6 +158,55 @@ def parse_rubric(rubric: str) -> tuple[dict, dict]:
 
 # --------------------------------------------------------------------------- runs
 
+def d2i_full_paths(run_dir: Path, trajectories: list[list[dict]], g) -> list[list[dict]]:
+    """Repair D2I trajectories that the judge's loader truncates.
+
+    `load_d2i_trajectories` groups `repository.json`'s records by `trajectory_id`. But D2I
+    mints a NEW trajectory_id when the beam forks, and the ancestors keep the parent
+    branch's id -- so grouping returns the tail SEGMENT of a path, not the path. Across
+    this repository's D2I runs that truncates 95 of 129 reported trajectories, 44 of them
+    all the way down to a single node sitting at depth 3, with no base insight in sight.
+
+    That matters more here than almost anywhere: Resolution and Information Gain are
+    defined against the base insight and against what came before, so a lone depth-3 node
+    is being rated -- by a person or by the judge -- on progression it was never shown.
+
+    The real path is recoverable exactly, because every record carries its own `id` and its
+    `parent_id`: walk from the deepest node of the reported trajectory back to the root.
+    Node dicts are rebuilt in the loader's own shape, with evidence from the judge's own
+    `d2i_node_evidence`, so nothing else about the rendering changes.
+    """
+    repo_path = run_dir / "repository.json"
+    if not repo_path.is_file():
+        return trajectories
+    records = json.loads(repo_path.read_text(encoding="utf-8"))["records"]
+    by_id = {r["id"]: r for r in records}
+    by_traj: dict[str, list[dict]] = {}
+    for r in records:
+        by_traj.setdefault(r["trajectory_id"], []).append(r)
+
+    reported = [t for t in g.reported_d2i_trajectory_ids(run_dir) if t in by_traj]
+    order = reported or list(by_traj)
+    if len(order) != len(trajectories):
+        return trajectories               # not the shape we know how to repair
+
+    out = []
+    for tid, loaded in zip(order, trajectories):
+        tail = max(by_traj[tid], key=lambda r: r["depth"])
+        path, seen, cur = [], set(), tail
+        while cur is not None and cur["id"] not in seen:
+            seen.add(cur["id"])
+            path.append(cur)
+            cur = by_id.get(cur.get("parent_id"))
+        path.reverse()
+        if len(path) <= len(loaded):
+            out.append(loaded)            # nothing to add: leave the loader's own answer
+            continue
+        out.append([{"description": r["label"], "depth": r["depth"],
+                     "evidence": g.d2i_node_evidence(r)} for r in path])
+    return out
+
+
 def run_dir_for(rec: dict, runs_root: Path, geval_root: Path) -> Path:
     """Where this scored run's artifacts are.
 
@@ -176,7 +225,8 @@ def run_dir_for(rec: dict, runs_root: Path, geval_root: Path) -> Path:
                      f"(tried {local} and {original})")
 
 
-def load_runs(runs_root: Path, level: str, quis_nodes: str, g) -> list[dict]:
+def load_runs(runs_root: Path, level: str, quis_nodes: str, g,
+              d2i_as_judged: bool = False) -> list[dict]:
     """One record per run directory, with no judge involved.
 
     This is the collection-only mode: the trajectories are loaded exactly as the judge's
@@ -197,6 +247,13 @@ def load_runs(runs_root: Path, level: str, quis_nodes: str, g) -> list[dict]:
             continue
         goal, trajectories, _ = g.load_run_trajectories(
             ref.path, kind, ref.config, quis_nodes=quis_nodes)
+        if kind == "d2i" and not d2i_as_judged:
+            fixed = d2i_full_paths(ref.path, trajectories, g)
+            repaired = sum(1 for a, b in zip(trajectories, fixed) if len(b) > len(a))
+            if repaired:
+                print(f"  {ref.name}: rebuilt {repaired} truncated trajectory/ies from "
+                      "parent_id (see d2i_full_paths)")
+            trajectories = fixed
         if not trajectories:
             print(f"  skip {ref.name}: no trajectories load from it")
             continue
@@ -410,7 +467,8 @@ def identify(args) -> int:
 
     print(f"{len(wanted)} distinct trajectory/ies rated in {args.identify.name}; "
           f"searching {args.runs_root}")
-    runs = load_runs(args.runs_root, args.level, args.quis_nodes, g)
+    runs = load_runs(args.runs_root, args.level, args.quis_nodes, g,
+                     d2i_as_judged=args.d2i_as_judged)
     profiles: dict[str, str] = {}
     found: dict[str, tuple] = {}
     for run in runs:
@@ -583,7 +641,8 @@ def build(args) -> int:
         # for the closing screen to score against, which is why --no-judge forces
         # --no-reveal below.
         print(f"no-judge build: trajectories from {args.runs_root}, no scores attached")
-        runs = load_runs(args.runs_root, args.level, args.quis_nodes, g)
+        runs = load_runs(args.runs_root, args.level, args.quis_nodes, g,
+                     d2i_as_judged=args.d2i_as_judged)
         print(f"loaded {len(runs)} runs, "
               f"{sum(len(r['trajectories']) for r in runs)} trajectories")
     else:
@@ -840,6 +899,12 @@ def main() -> int:
     p.add_argument("--no-reveal", dest="reveal", action="store_false",
                    help="publish no answer key: the page then closes with a thank-you "
                         "and nothing about the judge is readable from the site")
+    p.add_argument("--d2i-as-judged", action="store_true",
+                   help="do not repair D2I trajectories that the judge's loader truncates "
+                        "(see d2i_full_paths). Shows exactly what the last scoring run saw "
+                        "— a lone depth-3 node with no base insight, for 95 of 129 of "
+                        "them — which is what you want only if you are reproducing that "
+                        "run rather than collecting fresh ratings.")
     p.add_argument("--blind-systems", action="store_true",
                    help="leave the system name out of the served bundle, so a respondent "
                         "cannot see which agent produced a trajectory while rating it. "

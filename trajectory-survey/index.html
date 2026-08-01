@@ -611,7 +611,7 @@ function critHTML(item, k) {
   return `
     <div class="crit${optional ? " optional" : ""}" data-c="${k}">
       <span class="crit-name">${esc(c.title)}</span>
-      ${optional ? `<span class="notreq">optional here</span>` : ""}
+      ${optional ? `<span class="notreq">skip this question</span>` : ""}
       <span class="crit-q">${esc(c.question)}</span>
       ${why ? `<div class="whyoptional">${esc(why)}</div>` : ""}
       <div class="scale">
