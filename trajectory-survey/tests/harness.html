@@ -104,8 +104,14 @@ function checks(d) {
         log.push("data table: " + t.querySelectorAll("thead th").length + " columns, "
                  + rows + " rows in the DOM, " + spacers + " spacer(s) holding the scroll"
                  + (d.querySelector(".tnote") ? ", truncation notice shown" : ""));
-        const cells = t.querySelectorAll("tbody tr:not(.spacer) td");
-        log.push("  first cells: " + [...cells].slice(0, 4).map(c => c.textContent).join(" | "));
+        // Header cells and body cells must line up, or every value reads under the wrong
+        // column name — which is exactly what a stray row-number column once did.
+        const head = [...t.querySelectorAll("thead th")].map(h => h.textContent);
+        const row1 = t.querySelector("tbody tr:not(.spacer)");
+        const cells = [...row1.children].map(c => c.textContent);
+        log.push("  header/body widths: " + head.length + " vs " + cells.length
+                 + (head.length === cells.length ? "  (aligned)" : "  ** MISALIGNED **"));
+        log.push("  " + head.slice(1, 4).map((h, i) => h + "=" + cells[i + 1]).join("  "));
       }
       setTimeout(tick, 40);
     }, 900);

@@ -106,6 +106,7 @@ header.top .home { font-size: .85rem; }
 
 /* the dataset itself, folded away after the first look. Windowed rendering needs a fixed
    row height, so cells are one line each, clipped, with the full value on the title. */
+.unnamed { color: var(--muted); font-style: italic; }
 .tnote {
   font-size: .76rem; color: var(--warn); background: #fff8ee;
   border: 1px solid #f0dcc0; border-radius: 5px; padding: 6px 9px; margin: 8px 0 6px;
@@ -118,7 +119,12 @@ table.tbl { border-collapse: separate; border-spacing: 0; width: max-content; mi
 table.tbl thead th {
   position: sticky; top: 0; z-index: 1; background: var(--soft);
   border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap;
-  padding: 5px 9px; font-size: .66rem; letter-spacing: .04em; color: var(--muted);
+  padding: 5px 9px; font-size: .68rem; letter-spacing: 0; color: var(--head);
+  /* NOT the uppercase treatment the results tables use: a column name is a literal string
+     from the file, and shouting it makes the table look like something other than the
+     dataset. `business_id` is `business_id`. */
+  text-transform: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 table.tbl td, table.tbl th.rn {
   height: 27px; padding: 3px 9px; border-bottom: 1px solid var(--line);
@@ -533,7 +539,10 @@ function renderTable(box, table) {
        ${table.n_rows_shown.toLocaleString()} of
        ${table.n_rows_total.toLocaleString()} rows — the table is too large to send whole.</div>` : ""}
     <div class="tscroll"><table class="tbl">
-      <thead><tr>${table.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead>
+      <thead><tr><th class="rn" title="row number in this view — not a column of the file">#</th>${
+        table.columns.map(c =>
+          `<th>${c === "" ? '<span class="unnamed">(unnamed)</span>' : esc(c)}</th>`
+        ).join("")}</tr></thead>
       <tbody></tbody>
     </table></div>`;
   const scroll = box.querySelector(".tscroll");
@@ -553,10 +562,13 @@ function renderTable(box, table) {
           const cut = v.length > 60 ? v.slice(0, 58) + "…" : v;
           return `<td${cut === v ? "" : ` title="${esc(v)}"`}>${esc(cut)}</td>`;
         }).join("")}</tr>`).join("");
-    body.innerHTML =
-      (first ? `<tr class="spacer" style="height:${first * ROW_H}px"></tr>` : "")
+    // Spacers carry a real cell spanning every column: an empty <tr> is not required to
+    // take a height, and browsers disagree about whether it does.
+    const spacer = (h) => `<tr class="spacer"><td colspan="${cols + 1}"
+      style="height:${h}px"></td></tr>`;
+    body.innerHTML = (first ? spacer(first * ROW_H) : "")
       + rows
-      + (last < n ? `<tr class="spacer" style="height:${(n - last) * ROW_H}px"></tr>` : "");
+      + (last < n ? spacer((n - last) * ROW_H) : "");
   };
   scroll.onscroll = paint;
   paint();
