@@ -1,0 +1,934 @@
+{
+ "meta": {
+  "title": "How good is this analysis? \u2014 D2I trajectory rating",
+  "built_at": "2026-07-31T22:19:29",
+  "seed": 0,
+  "n_items": 18,
+  "datasets": [
+   "qrobur_tree_table",
+   "revenue_opportunities",
+   "salesfact"
+  ],
+  "per_system": 2,
+  "criteria": [
+   "goal_relevance",
+   "information_gain",
+   "interestingness",
+   "trustworthiness",
+   "actionability",
+   "resolution"
+  ],
+  "scale": {
+   "min": 1,
+   "max": 5
+  },
+  "reveal": true,
+  "match_assigned": false,
+  "blind_systems": false,
+  "judged": true,
+  "geval": {
+   "tag": "systems",
+   "written_at": "2026-07-31T13:42:33",
+   "judge_model": "gpt-4o-2024-08-06",
+   "temperature": "model default (unset)",
+   "rubric_version": "v8",
+   "prompt_hash": "6aece39ff501",
+   "repeats": 3,
+   "run": "runs/geval_runs/20260731-133448_systems"
+  }
+ },
+ "instructions": {
+  "system_prompt": "You are an expert evaluator of automated exploratory data analysis.\n\nYour task is to evaluate an ordered insight trajectory produced by a data-analysis\nagent. The trajectory should progressively contribute to the user's analytical goal\nthrough relevant, non-redundant, interesting, and evidence-supported observations.\n\nEvaluate only the provided trajectory. Do not introduce external facts, perform\nunsupported calculations, or assume that a claim is correct merely because it sounds\nplausible.\n\nUse the dataset profile only to understand the dataset schema, column semantics, and\nwhatever statistics it provides -- some profiles carry only dataset-level composition,\nothers carry real per-column statistics (ranges, distributions, value domains); do not\nassume it has more than what is shown. Use the evidence attached to each trajectory\nstep -- not the raw dataset, which you do not have -- to assess whether its\nconclusions are supported.\n\nEach trajectory step may also carry system-generated metadata (e.g. an internal\nconfidence, ranking, or pattern score). Metadata reflects what the source system\nitself believes about the step -- it is not evidence that the factual claim is\ncorrect, and must never be used to support Trustworthiness.\n\nEvidence itself is not all equal. An agent's own prose interpretation of a finding may\nhelp explain what a claim means, but it is not an independent check on that claim --\nit is the same agent restating or elaborating its own conclusion. Computed values,\nstatistical results, and execution outputs are independent of the claim and should\ncarry more weight for Trustworthiness than prose interpretation does. Where evidence\nis explicitly labeled as an agent's interpretation versus a computed result, weight it\naccordingly.\n\nEvaluate the trajectory independently on six criteria:\n1. Goal Relevance\n2. Information Gain\n3. Interestingness\n4. Trustworthiness\n5. Actionability\n6. Resolution\n\nAssign an integer score from 1 to 5 for each criterion according to the supplied\nrubrics; every criterion runs in the same direction, with 1 the worst outcome and 5\nthe best. Assess the trajectory as a whole, while considering the ordered progression\nbetween successive observations.\n\nRead each step's evidence as an EXECUTION TRACE, not as prose. It records three\nthings: what was analyzed (the operation that ran -- measure, breakdown, subspace),\nwhat was observed (the values it returned), and how strong the support is (a named\nstatistical test with its p-value, effect size and thresholds, or the explicit absence\nof one). Judge the computation these describe. Terse, structured evidence is not\nweaker evidence than a fluent paragraph; it is usually stronger.\n\nJudge the search, not the writing. Trajectories arrive in very different styles: some\nare narrative summaries written for a reader, others are terse operator output naming\ncolumns, statistics, empty results, or failed checks. Score what the trajectory\nESTABLISHES about the data, never how readable or confident it sounds. A step reported\nas \"no records match this subspace\" or \"the correlation is not significant\" is not a\nweaker contribution than one reported as \"X dominates the market\" -- it is frequently a\nsharper one, because it settles a question rather than restating a ranking.\n\nA negative or null result is a result. Showing that a correlation is absent, that a\nsubgroup is empty, that an effect does not hold in a slice, or that a plausible\nexplanation is ruled out reduces uncertainty about the base insight and tells a reader\nwhat not to pursue. Credit such steps fully under Information Gain, Actionability and\nResolution; do not treat them as failed exploration.\n\nUse the whole 1-5 scale. Do not cluster scores on 3 as a hedge. If a trajectory matches\nthe description of a 4 or a 5 on a criterion, assign it; if it matches a 1 or a 2,\nassign that. Reserve 3 for genuinely mixed cases, not for uncertainty about your own\njudgment. The six criteria measure different things, so near-identical scores across\nall six usually mean they were not applied separately.\n\nImportant evaluation rules:\n- Do not reward trajectory length by itself.\n- Repetition, paraphrasing, and increasingly narrow slices without new understanding\n  do not constitute information gain.\n- A later observation may provide information gain by introducing new evidence,\n  refining, explaining, localizing, contextualizing, or validating an earlier finding.\n- A trajectory may be trustworthy but uninteresting, or interesting but insufficiently\n  supported. Score each criterion independently.\n- Do not penalize a valid trajectory merely because other possible analyses were not\n  explored. Evaluate the quality of this trajectory, not the completeness of the\n  entire analysis.\n- Claims that exceed the supplied evidence, confuse association with causation, or\n  use unjustified language must reduce the Trustworthiness score.\n- Trustworthiness has two parts: whether the claim is CONSISTENT with the evidence\n  attached to it, and whether that evidence is SUFFICIENT to verify the claim. Do\n  not infer that a claim is false solely because its evidence is missing or thin --\n  but missing or non-diagnostic evidence caps how high Trustworthiness can score,\n  because the claim cannot be verified from what the trajectory provides.\n- Each reason must be specific and no longer than two sentences.\n- Return only the requested structured output.",
+  "preamble": {
+   "intro": "Follow these evaluation steps:",
+   "steps": [
+    "Understand the analytical goal and identify what a useful analysis should address.",
+    "Review the dataset profile to understand schema and value domains. Do not treat profile statistics as evidence for claims that require a separate computation.",
+    "Read the trajectory in order. For each observation, identify its claim, the evidence supporting it, how it relates to the preceding observations, and how it contributes to the analytical goal.",
+    "Score each of the six criteria below independently, following that criterion's own evaluation steps first, then assigning an integer score from 1 to 5 with its rubric. Do not let your judgment on one criterion carry over into another -- a trajectory can score high on one and low on another. Every criterion runs in the same direction: 1 is the worst outcome and 5 the best."
+   ]
+  },
+  "criteria": {
+   "goal_relevance": {
+    "title": "Goal Relevance",
+    "steps": [
+     "Restate, in your own terms, what the analytical goal is actually asking for, and what its unresolved questions are.",
+     "For each observation, judge whether it answers one of those questions, addresses a sub-question the goal implies, or drifts into an unrelated direction.",
+     "Mentioning a goal-related column is not the test. Ask whether the sequence of observations meaningfully answers the goal's unresolved questions.",
+     "Breadth of topical coverage is not relevance. A broad statement that touches several goal-related columns without settling anything contributes less than a narrow step that answers one of the goal's unresolved questions.",
+     "Weigh the trajectory as a whole: a few strong on-goal observations outweigh one drifting step, but a trajectory dominated by drift cannot score high even if one step is on-goal."
+    ],
+    "question": "To what extent does the trajectory as a whole help explain the analytical goal? A high score means the trajectory stays focused on the goal and progressively advances understanding of it.",
+    "levels": {
+     "1": "Very low. Largely tangential to the goal; contributes little to explaining it.",
+     "2": "Low. Only a small part of the trajectory is relevant; most observations drift or remain peripheral.",
+     "3": "Moderate. Generally on goal, but several observations provide only weak or indirect progress.",
+     "4": "High. Nearly every observation contributes to explaining the goal, with only minor drift.",
+     "5": "Very high. Stays tightly focused on the goal and consistently advances a coherent explanation of it."
+    },
+    "notes": ""
+   },
+   "information_gain": {
+    "title": "Information Gain",
+    "steps": [
+     "Take each observation in order and compare it only against the observations that came before it in the trajectory, not against outside knowledge.",
+     "At each step ask the same pair of questions: what unresolved question did the previous step leave open, and did this step answer it?",
+     "Expect a division of labour along the chain: early observations should identify statistically important findings, later ones should explain, validate, refine, localize, contextualize, or falsify what came before.",
+     "Adding another statistic, subgroup, or descriptive slice does not count unless it materially resolves prior uncertainty. A later step that only applies an already-stated finding to one more subgroup (e.g. the same trend for a different region) is a weak gain unless it changes or substantively sharpens the conclusion.",
+     "Credit the question answered, not the appearance of a new fact. A step that rules out an explanation, finds a subgroup empty, or falsifies an earlier reading is a STRONG gain -- it closes a question -- even though it introduces no new headline number. Conversely, a fresh-sounding statistic that leaves the previous step's question exactly as open as before is a weak gain."
+    ],
+    "question": "To what extent does each successive observation reduce uncertainty and increase analytical understanding relative to the preceding trajectory? Information gain is cumulative marginal improvement.",
+    "levels": {
+     "1": "Very low. Later observations are mostly repetitive, disconnected, or trivial; they add little or no new understanding.",
+     "2": "Low. Some additional information appears, but most follow-up steps only restate or slightly narrow prior findings without resolving important uncertainty.",
+     "3": "Moderate. Several observations meaningfully deepen the trajectory, but progression is uneven and some steps are redundant or only weak refinements.",
+     "4": "High. Most observations substantially reduce uncertainty by explaining, validating, refining, localizing, contextualizing, or falsifying earlier findings.",
+     "5": "Very high. Nearly every observation produces substantial marginal improvement. The trajectory forms a clear question-and-answer chain in which each step resolves a meaningful uncertainty left by the previous step."
+    },
+    "notes": "A single-step trajectory has no preceding observation to reduce uncertainty against, so score it on whether that one observation itself provides meaningful analytical understanding beyond the dataset profile -- not on progression: 1 = the observation is trivial or merely restates profile information. 2 = it provides limited new understanding. 3 = it provides a meaningful standalone finding. Scores of 4-5 require demonstrated progression across multiple observations and are not available to single-step trajectories."
+   },
+   "interestingness": {
+    "title": "Interestingness",
+    "steps": [
+     "Ask what a domain analyst reading this trajectory, with the stated goal in mind, would actually want to mention to someone else.",
+     "Distinguish a finding that is obvious from the dataset profile or common-sense domain knowledge alone from one that genuinely required the exploration to surface.",
+     "Do not reward routine dominance statements or obvious rankings (e.g. the best-known category ranking first) unless they reveal something genuinely informative about the analytical problem. A large number is not automatically interesting if it is the expected outcome.",
+     "Ignore narrative flourish. Superlatives such as \"dominates\", \"highest\", \"significantly\", or a confident business-sounding framing are writing style, not evidence of insight. A terse technical finding -- an unexpected empty subgroup, a correlation that fails, a distribution that contradicts the profile -- can be far more interesting than a fluent restatement of an expected ranking."
+    ],
+    "question": "To what extent does the trajectory uncover findings that are non-obvious, insight-generating, or analytically worth pointing out? A high score means it surfaces findings that are surprising, meaningful, or decision-relevant.",
+    "levels": {
+     "1": "Very low. Mostly obvious, routine, or analytically uninformative.",
+     "2": "Low. A few observations are mildly informative, but most are expected or unremarkable.",
+     "3": "Moderate. Some meaningful findings, mixed with routine descriptive observations.",
+     "4": "High. Consistently surfaces non-obvious and practically meaningful findings.",
+     "5": "Very high. Repeatedly uncovers highly insightful findings that would naturally attract an analyst's attention and deepen understanding of the dataset."
+    },
+    "notes": ""
+   },
+   "trustworthiness": {
+    "title": "Trustworthiness",
+    "steps": [
+     "For each observation, identify exactly what evidence (not metadata) is attached to it: the operation that ran, the values it returned, and the statistical support recorded for it.",
+     "Check CONSISTENCY: if the evidence is taken at face value, does it establish the claim as stated, or does the claim overreach it? Check this within each step and across the trajectory, whose steps must not contradict one another.",
+     "Check SUFFICIENCY, separately: does the evidence have enough diagnostic detail to verify the claim, or does it only gesture at support? A claim with no recorded statistical test rests on its returned values alone -- weigh it accordingly.",
+     "Computed results count for more than prose. A narrative-sounding explanation is the same agent restating its own conclusion and is not support by itself.",
+     "A system-generated confidence, ranking, or interestingness score is metadata, not evidence, no matter how confidently it is presented next to the claim."
+    ],
+    "question": "To what extent do the trajectory's claims faithfully match the evidence attached to them? This measures whether the trajectory is EVIDENCE-GROUNDED, not whether it is independently true in the raw dataset, which you do not have.",
+    "levels": {
+     "1": "Very low. Many material claims contradict the evidence, hallucinate unsupported facts, or substantially overclaim.",
+     "2": "Low. Multiple claims are weakly supported, inconsistent with the evidence, or rely on unsupported inference.",
+     "3": "Moderate. Most claims are broadly consistent with the evidence, but some important conclusions are insufficiently supported or slightly overstated.",
+     "4": "High. Nearly all claims faithfully reflect the evidence, with only minor unsupported details.",
+     "5": "Very high. Every material claim is faithfully grounded in the evidence and remains internally consistent throughout the trajectory."
+    },
+    "notes": ""
+   },
+   "actionability": {
+    "title": "Actionability",
+    "steps": [
+     "For each observation, ask whether it points toward something concrete a reader could do next: a further analysis to run, a decision to make, or a hypothesis worth testing -- not just a fact restated.",
+     "Judge the trajectory as a whole: does it converge on a focused thread that builds toward a specific, decision-relevant conclusion, or does it stay diffuse -- scattered across unrelated observations that do not add up to a direction?",
+     "A negative finding can be highly actionable: showing that a plausible explanation does not hold, or that an effect is absent in a slice, tells a reader what not to pursue and where to look instead. Score \"this hypothesis is ruled out\" as a concrete next step, not as an absence of one.",
+     "Do not require business-style phrasing. A localized diagnostic that names where a pattern breaks is a concrete follow-up analysis; a fluent recommendation that no step in the trajectory actually supports is not.",
+     "A trajectory that keeps a single analytical thread and deepens it is more actionable than one that samples many disconnected facts at the same shallow level, even if both are individually accurate."
+    ],
+    "question": "To what extent does the trajectory build toward a useful conclusion, hypothesis, or next analytical step? A high score means it does not just report facts; it converges on a direction a reader could plausibly act on.",
+    "levels": {
+     "1": "Very low. Purely descriptive; suggests no useful next step.",
+     "2": "Low. Some observations hint at possible follow-up analyses, but no coherent direction emerges.",
+     "3": "Moderate. Supports one or more plausible next steps, but the direction remains somewhat diffuse.",
+     "4": "High. Converges toward a clear and concrete follow-up analysis, hypothesis, or decision.",
+     "5": "Very high. Builds a focused, non-confounded analytical thread that directly motivates a specific next step, hypothesis, or decision."
+    },
+    "notes": ""
+   },
+   "resolution": {
+    "title": "Resolution",
+    "steps": [
+     "Identify the base insight -- the trajectory's first observation -- and state the uncertainty it introduces: why it holds, where it holds, how large it is, or whether it is real at all.",
+     "Work forward through the trajectory and mark which of those questions it answers, by explaining, validating, localizing, contextualizing, quantifying or falsifying the base insight, and which it leaves open or never raises.",
+     "Credit resolution regardless of direction: showing that a plausible explanation does NOT hold resolves uncertainty just as much as confirming one does. \"No significant correlation\", \"no records in this subspace\", and \"the pattern does not localize here\" are STRONG resolution signals when they answer a question the base insight raised -- they close it. Do not read them as the trajectory failing.",
+     "Judge what was resolved, not how much work was done: a long trajectory that never returns to the base insight resolves as little as a short one."
+    ],
+    "question": "To what extent does the trajectory resolve the uncertainty introduced by the initial finding? A higher score indicates that successive investigations progressively explain, validate, localize, contextualize, quantify, or falsify the base insight, leaving few important questions unanswered.",
+    "levels": {
+     "1": "Very low. Provides little clarification beyond the initial observation; most important questions, ambiguities, or explanatory gaps remain unresolved.",
+     "2": "Low. Some aspects of the base insight are investigated, but most important uncertainties are left unanswered.",
+     "3": "Moderate. Resolves several important questions about the base insight, although meaningful explanatory gaps remain.",
+     "4": "High. Most important uncertainties surrounding the base insight are resolved through explanation, validation, localization, contextualization, or falsification. Only minor questions remain.",
+     "5": "Very high. Provides a comprehensive understanding of the base insight. Successive investigations collectively explain, validate, localize, contextualize, or falsify the initial finding, leaving no important uncertainty unresolved."
+    },
+    "notes": ""
+   }
+  }
+ },
+ "goals": {
+  "qrobur_tree_table": "Investigate patterns in SNP density and sequencing coverage across genomic windows and chromosome position.",
+  "salesfact": "Explore revenue and market share across manufacturer, channel, region, and segment, over time.",
+  "revenue_opportunities": "Examine the size and shape of the 2015 sales pipeline across region, segment, opportunity size, sales stage, and partner status."
+ },
+ "profiles": {
+  "qrobur_tree_table": "- Unnamed: 0: type=numeric(int64), missing=0.0%, distinct=2822, range=[0, 2821] mean=1410 var=6.639e+05 skew=0.00 outliers=0.0%, samples=['296', '1485', '70', '124', '1148']\n- end: type=numeric(int64), missing=0.0%, distinct=2822, range=[1e+05, 7.062e+07] mean=3.536e+07 var=4.149e+14 skew=0.00 outliers=0.0%, samples=['7500000', '37225000', '1850000', '3200000', '28800000']\n- nsamplecov: type=numeric(float64), missing=5.8%, distinct=29, range=[8, 37] mean=33.22 var=31.82 skew=-2.37 outliers=13.4%, samples=['35.0', '36.0', '36.0', '21.0', '36.0']\n- nsnps: type=numeric(float64), missing=5.8%, distinct=141, range=[0, 171] mean=40.93 var=780 skew=1.02 outliers=1.8%, samples=['30.0', '37.0', '84.0', '4.0', '31.0']\n- start: type=numeric(int64), missing=0.0%, distinct=2822, range=[0, 7.052e+07] mean=3.526e+07 var=4.149e+14 skew=0.00 outliers=0.0%, samples=['7400000', '37125000', '1750000', '3100000', '28700000']\n- tree: type=categorical(str), missing=11.6%, distinct=2110, top=[(reference:1e-06,(CH:0.0041927,(NI:1e-06,HE:1e-06)100:0.0244335)100:0.0432978,(LALC2:1e-06,((FLCK216:1e-06,MXGT4:0.0027137)100:1e-06,(CUSV6:1e-06,((FLWO6:1e-06,(CUVN10:1e-06,CUCA4:1e-06)100:1e-06)100:1e-06,(EN:1e-06,(MXSA3017:1e-06,(HNDA09:1e-06,((FLSF54:1e-06,(BZBB1:1e-06,AR:1e-06)100:1e-06)100:1e-06,(CRL0001:1e-06,(CRL0030:1e-06,(FLBA140:1e-06,(TXMD3:1e-06,(FLCK18:1e-06,(DO:0.0027231,(DU:0.00270359,FLAB109:0.00546963)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.00269342)100:0.00269652)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.00541814);(0%), (reference:0.00543041,(FLSF54:1e-06,FLSA185:1e-06)100:0.00547166,(FLMO62:1e-06,(CUCA4:1e-06,(FLCK18:1e-06,(FLBA140:1e-06,(CRL0001:1e-06,((DU:1e-06,(FLCK216:1e-06,(FLSF47:1e-06,(FLAB109:1e-06,(LALC2:1e-06,(MXED8:1e-06,(TXWV2:1e-06,(SCCU3:1e-06,HNDA09:1e-06)100:1e-06)100:0.0108203)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06,(DO:1e-06,(CRL0030:1e-06,(BJVL19:1e-06,(MXGT4:1e-06,(TXMD3:1e-06,(((CUSV6:1e-06,CUVN10:1e-06)100:1e-06,(CH:0.00539449,(NI:1e-06,HE:1e-06)100:0.00538451)100:1e-06)100:1e-06,(AR:1e-06,(BZBB1:1e-06,((BJSL25:1e-06,BJSB3:1e-06)100:0.00539806,((FLWO6:1e-06,EN:1e-06)100:1e-06,(TXGR3:1e-06,MXSA3017:1e-06)100:1e-06)100:1e-06)100:0.00538927)100:1e-06)100:1e-06)100:0.00538948)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.00535676)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:2.76191e-05);(0%), (reference:0.0109157,((BJVL19:1e-06,(DU:1e-06,(CH:1e-06,(AR:1e-06,(EN:1e-06,DO:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06,((NI:1e-06,HE:1e-06)100:0.0334855,(BJSL25:1e-06,(TXMD3:1e-06,(BJSB3:1e-06,CRL0030:1e-06)100:1e-06)100:0.00418424)100:0.00120113)100:1e-06)100:1e-06,(MXGT4:1e-06,(MXED8:1e-06,(FLSF33:1e-06,(FLBA140:1e-06,(CUSV6:1e-06,(TXGR3:1e-06,(CUVN10:1e-06,(CRL0001:1e-06,(BZBB1:1e-06,(SCCU3:1e-06,(FLCK18:1e-06,(FLMO62:1e-06,((FLWO6:1e-06,(CUCA4:1e-06,FLCK216:1e-06)100:1e-06)100:1e-06,(FLAB109:1e-06,(LALC2:1e-06,(MXSA3017:1e-06,(FLSF47:1e-06,(HNDA09:1e-06,(FLSF54:1e-06,FLSA185:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.00538888)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.00539343)100:1e-06);(0%), (reference:1e-06,(FLMO62:1e-06,((FLSF47:1e-06,(FLSA185:0.00382678,(CH:1e-06,AR:0.00493111)100:0.000198063)100:0.00372223)100:0.00748367,((BZBB1:0.0120343,DO:0.00740677)100:0.000438071,(FLWO6:1e-06,(CUCA4:1e-06,CUSV6:1e-06)100:1e-06)100:0.011659)100:1e-06)100:1e-06)100:0.00572749,((CRL0030:1e-06,FLCK216:1e-06)100:0.00603721,(LALC2:1e-06,((NI:0.039258,FLSF54:1e-06)100:0.012436,((FLSF33:1e-06,(CRL0001:1e-06,(TXMD3:1e-06,FLBA140:0.00396744)100:1e-06)100:8.95135e-06)100:0.00773582,(TXGR3:1e-06,(DU:1e-06,(BJVL19:1e-06,BJSL25:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.000126291)100:0.0059764)100:1e-06);(0%), (DU:0.00728322,reference:0.00185936,((DO:1e-06,(BJSL25:0.00484362,((CRL0030:0.0111236,MXGT4:1e-06)100:1e-06,(BJVL19:1e-06,(BZBB1:0.0485548,(HE:1e-06,NI:1e-06)100:0.0473617)100:0.002789)100:1e-06)100:1e-06)100:0.000152846)100:0.000371142,(FLAB109:1e-06,(CUSV6:1e-06,((FLSF54:1e-06,(BJSB3:1e-06,((MXED8:1e-06,MXSA3017:1e-06)100:1e-06,(FLMO62:1e-06,CRL0001:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06,(FLCK18:0.00811291,((CUVN10:0.00367763,TXMD3:1e-06)100:0.0105879,(FLWO6:1e-06,(AR:1e-06,(FLBA140:1e-06,LALC2:1e-06)100:1e-06)100:1e-06)100:0.019092)100:1e-06)100:0.00809422)100:0.0103289)100:1e-06)100:1e-06)100:0.00155172);(0%)], samples=['(reference:0.0140645,(NI:1e-06,HE:1e-06)100:0.0197693,(AR:1e-06,(CH:0.0171338,(FLAB109:1e-06,((TXGR3:0.00459533,FLSF47:1e-06)100:0.00452283,(LALC2:1e-06,((FLWO6:0.00144909,(MXED8:1e-06,(MXSA3017:0.00287953,(FLBA140:0.00232031,(EN:1e-06,(DU:0.00645874,DO:0.00155933)100:0.00350896)100:0.00471267)100:1e-06)100:1e-06)100:0.00376283)100:1e-06,(FLMO62:1e-06,((HNDA09:0.00147716,(BZBB1:1e-06,TXMD3:1e-06)100:0.00201728)100:0.00522166,((CRL0001:1e-06,(BJSB3:1e-06,(BJSL25:0.0012985,(CUSV6:1e-06,CUVN10:1e-06)100:0.00435856)100:2.3267e-05)100:0.00124664)100:1e-06,(CRL0030:1e-06,(FLSA185:1e-06,((BJVL19:0.00197932,(CUCA4:1e-06,FLCK216:1e-06)100:0.00161657)100:0.00160862,((FLSF54:1e-06,(TXWV2:1e-06,SCCU3:0.00157925)100:1e-06)100:1e-06,(FLCK18:1e-06,(MXGT4:0.00462292,FLSF33:0.0145888)100:0.000215469)100:0.00276124)100:1e-06)100:1e-06)100:0.00125312)100:0.00125132)100:0.00127467)100:0.00284907)100:0.00449407)100:0.000195351)100:0.00319283)100:0.00106735)100:0.005968)100:0.011214)100:0.00731898);', '(reference:0.00377695,((DU:1e-06,DO:0.00275541)100:1e-06,(FLSF54:1e-06,(CRL0001:1e-06,(TXMD3:1e-06,(FLMO62:1e-06,FLSF33:1e-06)100:0.0029164)100:0.00608579)100:0.00114427)100:0.00771066)100:0.00244388,(AR:0.00163781,((EN:1e-06,(FLWO6:1e-06,(FLBA140:1e-06,LALC2:1e-06)100:1e-06)100:1e-06)100:0.00385883,((HE:0.00254988,NI:0.00223043)100:0.0208579,((CUVN10:1e-06,(MXSA3017:1e-06,(CH:1e-06,((CUCA4:1e-06,CUMM5:1e-06)100:0.00583078,(HNDA09:1e-06,(BZBB1:1e-06,CRL0030:1e-06)100:1e-06)100:1e-06)100:0.0111478)100:1e-06)100:0.00463732)100:0.00111146,(((MXED8:1e-06,MXGT4:0.00719066)100:1e-06,(FLCK216:1e-06,(FLAB109:1e-06,FLCK18:1e-06)100:1e-06)100:0.00378524)100:1e-06,(FLSA185:1e-06,(BJSB3:0.00169108,(TXGR3:1e-06,(BJVL19:1e-06,(BJSL25:1e-06,(FLSF47:1e-06,(SCCU3:0.00559156,CUSV6:1e-06)100:0.00236409)100:3.0781e-05)100:1e-06)100:1e-06)100:0.000204858)100:1e-06)100:0.00384162)100:0.00402132)100:0.00590109)100:1e-06)100:0.0103425)100:1e-06);', '(DO:0.00561133,reference:0.0059655,((NI:1e-06,HE:1e-06)100:0.0144561,(CH:0.00376375,(TXWV2:1e-06,((EN:0.0013252,AR:0.00322968)100:0.00412073,(DU:0.00292485,((MXSA3017:1e-06,CRL0030:0.000850841)100:0.00507772,(CUCA4:0.00190877,((FLWO6:0.00121848,(MXED8:1e-06,(HNDA09:1e-06,((CRL0001:0.000967021,BZBB1:1e-06)100:1e-06,(CUSV6:1e-06,CUVN10:0.00664721)100:1e-06)100:1e-06)100:0.00384138)100:0.000953661)100:0.000954916,(FLBA140:0.001983,((FLSF54:1e-06,(TXMD3:1e-06,(TXGR3:0.000176066,(FLAB109:1e-06,(FLSF47:1e-06,FLSA185:1e-06)100:0.00176223)100:0.00264887)100:1e-06)100:0.000915241)100:1e-06,(FLCK18:0.00108737,((MXGT4:0.00219497,(BJSL25:0.00336452,(BJSB3:1e-06,BJVL19:1e-06)100:0.00100404)100:0.00202937)100:0.00100877,(LALC2:1e-06,(FLSF33:1e-06,(SCCU3:0.00163356,(FLMO62:0.00108881,FLCK216:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.000997145)100:1e-06)100:1e-06)100:0.000836543)100:0.00122784)100:0.00139731)100:0.00437802)100:0.0032174)100:0.00262354)100:9.83855e-05)100:0.00224623)100:0.00271356);', '(TXGR3:1e-06,reference:1e-06,(MXSA3017:1e-06,(FLSF54:1e-06,(TXMD3:1e-06,((BZBB1:1e-06,(CRL0030:1e-06,(MXED8:1e-06,HNDA09:1e-06)100:1e-06)100:1e-06)100:0.0193632,(CRL0001:1e-06,(BJVL19:1e-06,(DO:1e-06,((BJSB3:1e-06,(BJSL25:1e-06,(LALC2:1e-06,(FLSF33:1e-06,(CUVN10:1e-06,(FLBA140:1e-06,MXGT4:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06,((FLSF47:1e-06,(NI:1e-06,HE:1e-06)100:0.0124894)100:1e-06,((CUSV6:1e-06,(FLAB109:1e-06,FLMO62:1e-06)100:1e-06)100:1e-06,(FLCK216:1e-06,(CH:1e-06,((FLSA185:1e-06,FLCK18:1e-06)100:0.0259471,(AR:1e-06,(DU:1e-06,EN:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.0135103)100:1e-06)100:1e-06)100:0.0114363)100:1e-06)100:0.00611127)100:1e-06)100:0.00131594)100:0.00380208)100:1e-06)100:1e-06)100:1e-06);', '(reference:0.00360267,(EN:0.0108436,DU:1e-06)100:0.00726552,(MXSA3017:1e-06,(DO:1e-06,((CH:0.00746615,(NI:1e-06,HE:1e-06)100:0.0359049)100:0.00368108,(FLMO62:1e-06,(SCCU3:1e-06,((HNDA09:1e-06,(CUVN10:1e-06,(BJSL25:1e-06,(BJVL19:1e-06,FLBA140:0.0115716)100:0.0228551)100:1e-06)100:0.00567172)100:0.00554339,((TXGR3:1e-06,BJSB3:1e-06)100:1e-06,(MXGT4:1e-06,((TXMD3:1e-06,CRL0001:1e-06)100:1e-06,(CUSV6:1e-06,(FLSA185:1e-06,(AR:1e-06,(MXED8:1e-06,((LALC2:1e-06,(FLCK18:0.0110862,FLWO6:1e-06)100:1e-06)100:1e-06,(FLSF54:1e-06,(FLSF33:1e-06,((CUCA4:1e-06,CRL0030:1e-06)100:0.0211316,(FLCK216:1e-06,FLSF47:1e-06)100:1e-06)100:0.00431887)100:1e-06)100:1e-06)100:0.00744999)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.00374543)100:0.00724416)100:1e-06)100:1e-06);']",
+  "salesfact": "- category: type=categorical(str), missing=0.0%, distinct=4, top=[Urban(55%), Rural(37%), Youth(5%), Mix(3%)], domain=['Mix', 'Rural', 'Urban', 'Youth']\n- category_sort: type=numeric(float64), missing=44.6%, distinct=4, range=[1, 4] mean=2.253 var=1.194 skew=0.60 outliers=0.0%, samples=['3.0', '1.0', '2.0', '2.0', '2.0']\n- channel: type=categorical(str), missing=44.6%, distinct=4, top=[Social Media(47%), Online(26%), Stores(24%), Outlet(3%)], domain=['Online', 'Outlet', 'Social Media', 'Stores']\n- city: type=categorical(str), missing=0.0%, distinct=24834, top=[Houston, TX(0%), Miami, FL(0%), San Diego, CA(0%), Las Vegas, NV(0%), San Antonio, TX(0%)], samples=['Dumas, TX', 'Roseville, CA', 'Saint Louis, MO', 'Terre Haute, IN', 'Orange, TX']\n- date: type=temporal(datetime64[us]), missing=0.0%, distinct=5149, span=1999-07-15..2014-12-30 (5647d, granularity=second), samples=['2008-06-28 00:00:00', '2003-10-11 00:00:00', '2001-07-17 00:00:00', '2010-09-22 00:00:00', '2011-08-28 00:00:00']\n- district: type=categorical(str), missing=0.0%, distinct=39, top=[District #38(5%), District #37(4%), District #36(4%), District #33(4%), District #34(4%)], domain=['District #01', 'District #02', 'District #03', 'District #04', 'District #05', 'District #06', 'District #07', 'District #08', 'District #09', 'District #10', 'District #11', 'District #12', 'District #13', 'District #14', 'District #15', 'District #16', 'District #17', 'District #18', 'District #19', 'District #20', 'District #21', 'District #22', 'District #23', 'District #24', 'District #25', 'District #26', 'District #27', 'District #28', 'District #29', 'District #30', 'District #31', 'District #32', 'District #33', 'District #34', 'District #35', 'District #36', 'District #37', 'District #38', 'District #39']\n- iscompete: type=boolean(bool), missing=0.0%, distinct=2, top=[False(84%), True(16%)], domain=['False', 'True']\n- iscompetehide: type=boolean(bool), missing=0.0%, distinct=2, top=[False(84%), True(16%)], domain=['False', 'True']\n- isvanarsdel: type=boolean(bool), missing=0.0%, distinct=2, top=[False(77%), True(23%)], domain=['False', 'True']\n- manufacturer: type=categorical(str), missing=0.0%, distinct=14, top=[Natura(28%), VanArsdel(23%), Aliqui(19%), Pirum(11%), Currus(10%)], domain=['Abbas', 'Aliqui', 'Barba', 'Currus', 'Fama', 'Leo', 'Natura', 'Palma', 'Pirum', 'Pomum', 'Quibus', 'Salvus', 'VanArsdel', 'Victoria']\n- manufacturerid: type=numeric(int64), missing=0.0%, distinct=14, range=[1, 14] mean=6.542 var=8.856 skew=-0.20 outliers=0.0%, samples=['7', '4', '8', '10', '7']\n- mfgisvanarsdel: type=boolean(bool), missing=0.0%, distinct=2, top=[False(77%), True(23%)], domain=['False', 'True']\n- month: type=temporal(datetime64[us]), missing=5.3%, distinct=174, span=0001-01-01..1999-12-01 (730088d, granularity=second), samples=['0001-12-01 00:00:00', '0001-05-10 00:00:00', '0001-06-13 00:00:00', '0001-11-02 00:00:00', '0001-02-13 00:00:00']\n- monthid: type=numeric(int64), missing=0.0%, distinct=186, range=[1.999e+05, 2.014e+05] mean=2.006e+05 var=1.54e+05 skew=0.31 outliers=0.0%, samples=['200806', '200310', '200107', '201009', '201108']\n- monthindex: type=numeric(int64), missing=0.0%, distinct=186, range=[7, 192] mean=89.64 var=2213 skew=0.33 outliers=0.0%, samples=['114', '58', '31', '141', '152']\n- monthname: type=temporal(datetime64[us]), missing=0.0%, distinct=12, span=0001-01-01..0001-12-01 (334d, granularity=second), samples=['0001-06-01 00:00:00', '0001-10-01 00:00:00', '0001-07-01 00:00:00', '0001-09-01 00:00:00', '0001-08-01 00:00:00']\n- monthno: type=numeric(int64), missing=0.0%, distinct=12, range=[1, 12] mean=7.081 var=13.45 skew=-0.28 outliers=0.0%, samples=['6', '10', '7', '9', '8']\n- product: type=categorical(str), missing=0.0%, distinct=1708, top=[Maximus UC-69(1%), Maximus UM-01(1%), Natura RP-80(1%), Natura RP-79(1%), Aliqui UE-06(1%)], samples=['Maximus UC-06', 'Currus UC-09', 'Natura UC-27', 'Pirum UM-17', 'Maximus UM-43']\n- productid: type=numeric(int64), missing=0.0%, distinct=1893, range=[1, 2412] mean=1233 var=4.821e+05 skew=0.47 outliers=0.0%, samples=['541', '2074', '964', '1140', '438']\n- quarter: type=categorical(str), missing=0.0%, distinct=4, top=[Q4(35%), Q1(24%), Q3(22%), Q2(20%)], domain=['Q1', 'Q2', 'Q3', 'Q4']\n- region: type=categorical(str), missing=0.0%, distinct=3, top=[East(46%), Central(28%), West(26%)], domain=['Central', 'East', 'West']\n- revenue: type=numeric(float64), missing=0.0%, distinct=3774, range=[427.8, 9.268e+05] mean=5572 var=2.087e+07 skew=12.00 outliers=1.3%, samples=['8492.4', '9446.85', '2204.37', '11321.1', '3716.37']\n- running_year: type=numeric(int64), missing=0.0%, distinct=16, range=[1, 16] mean=9.12 var=15.41 skew=-0.31 outliers=0.0%, samples=['7', '12', '14', '5', '4']\n- runningmonths: type=numeric(int64), missing=0.0%, distinct=186, range=[1, 186] mean=103.4 var=2213 skew=-0.33 outliers=0.0%, samples=['79', '135', '162', '52', '41']\n- segment: type=categorical(str), missing=0.0%, distinct=8, top=[Productivity(32%), Convenience(26%), Moderation(14%), Extreme(13%), Youth(5%)], domain=['All Season', 'Convenience', 'Extreme', 'Moderation', 'Productivity', 'Regular', 'Select', 'Youth']\n- state: type=categorical(str), missing=0.0%, distinct=49, top=[CA(14%), TX(7%), FL(6%), PA(4%), NY(4%)], domain=['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']\n- year: type=numeric(int64), missing=0.0%, distinct=16, range=[1999, 2014] mean=2006 var=15.41 skew=0.31 outliers=0.0%, samples=['2008', '2003', '2001', '2010', '2011']\n- zip: type=numeric(int64), missing=0.0%, distinct=32595, range=[1001, 9.995e+04] mean=5.536e+04 var=8.397e+08 skew=-0.05 outliers=0.0%, samples=['79029', '95678', '63119', '47805', '77632']",
+  "revenue_opportunities": "- account: type=categorical(str), missing=0.0%, distinct=332, top=[zumplus(2%), Statcom(1%), techiplex(1%), Zaptechno(1%), Ware-core(1%)], samples=['Freshtrans', 'Linesilbam', 'K-zoom', 'Gold-fase', 'ventohow']\n- account_id: type=numeric(int64), missing=0.0%, distinct=335, range=[1, 357] mean=159.7 var=1.075e+04 skew=0.21 outliers=0.0%, samples=['342', '71', '328', '193', '319']\n- create_date: type=numeric(int64), missing=0.0%, distinct=210, range=[4.164e+04, 4.2e+04] mean=4.174e+04 var=8111 skew=1.16 outliers=5.7%, samples=['41776', '41730', '41737', '41948', '41644']\n- date: type=temporal(datetime64[us]), missing=0.0%, distinct=103, span=2015-01-01..2015-12-31 (364d, granularity=second), samples=['2015-07-31 00:00:00', '2015-06-01 00:00:00', '2015-05-29 00:00:00', '2015-12-31 00:00:00', '2015-12-31 00:00:00']\n- estimatedclosedate: type=temporal(datetime64[us]), missing=0.0%, distinct=107, span=2015-01-01..2015-12-31 (364d, granularity=second), samples=['2015-07-31 08:00:00', '2015-06-01 10:59:00', '2015-05-29 10:59:00', '2015-12-31 10:59:00', '2015-12-31 10:59:00']\n- factoredproductrevenue: type=numeric(int64), missing=0.0%, distinct=457, range=[4940, 7.362e+06] mean=9.757e+05 var=1.308e+12 skew=2.46 outliers=9.6%, samples=['872025', '326971', '408736', '800373', '482681']\n- month: type=temporal(datetime64[us]), missing=0.0%, distinct=12, span=0001-01-01..0001-12-01 (334d, granularity=second), samples=['0001-07-01 00:00:00', '0001-06-01 00:00:00', '0001-05-01 00:00:00', '0001-12-01 00:00:00', '0001-12-01 00:00:00']\n- month_number: type=numeric(int64), missing=0.0%, distinct=12, range=[1, 12] mean=6.352 var=12.04 skew=0.35 outliers=0.0%, samples=['7', '6', '5', '12', '12']\n- opportunity_days: type=numeric(int64), missing=0.0%, distinct=203, range=[365, 725] mean=453 var=6533 skew=1.23 outliers=4.6%, samples=['440', '426', '416', '421', '725']\n- opportunity_id: type=numeric(int64), missing=0.0%, distinct=457, range=[1, 486] mean=248.3 var=1.905e+04 skew=-0.02 outliers=0.0%, samples=['446', '83', '420', '463', '408']\n- opportunity_name: type=categorical(str), missing=0.0%, distinct=457, top=[Opportunity #302(0%), Opportunity #174(0%), Opportunity #45(0%), Opportunity #334(0%), Opportunity #375(0%)], samples=['Opportunity #446', 'Opportunity #83', 'Opportunity #420', 'Opportunity #463', 'Opportunity #408']\n- opportunity_size: type=categorical(str), missing=0.0%, distinct=3, top=[Medium(34%), Small(33%), Large(32%)], domain=['Large', 'Medium', 'Small']\n- partner: type=categorical(str), missing=0.0%, distinct=86, top=[Direct(47%), Sontaxon(20%), Joblamcon(6%), Quadtex(1%), Free-electronics(1%)], samples=['Sontaxon', 'Direct', 'Direct', 'Sontaxon', 'Direct']\n- partner_driven: type=categorical(str), missing=0.0%, distinct=2, top=[t(53%), f(47%)], domain=['f', 't']\n- partner_id: type=numeric(int64), missing=0.0%, distinct=87, range=[1, 101] mean=24.89 var=447.5 skew=1.86 outliers=14.0%, samples=['8', '22', '22', '8', '22']\n- probability: type=numeric(float64), missing=0.0%, distinct=5, range=[0.1, 0.8] mean=0.2308 var=0.03474 skew=1.45 outliers=0.0%, samples=['0.1', '0.1', '0.1', '0.1', '0.1']\n- product_code: type=categorical(str), missing=0.0%, distinct=25, top=[Talus(6%), Juvenis(5%), Aqua(5%), Fatum(5%), Basium(5%)], domain=['Abbas', 'Aqua', 'Basium', 'Bellus', 'Campana', 'Carmen', 'Decimus', 'Eligo', 'Fatum', 'Gratus', 'Habitus', 'Ignis', 'Juvenis', 'Lacuna', 'Magis', 'Maximus', 'Nimis', 'Omins', 'Paratus', 'Quanti', 'Recolo', 'Sato', 'Talus', 'Umbra', 'Vero']\n- product_id: type=numeric(int64), missing=0.0%, distinct=25, range=[1, 25] mean=13.33 var=53.67 skew=-0.09 outliers=0.0%, samples=['10', '13', '18', '13', '7']\n- productrevenue: type=numeric(int64), missing=0.0%, distinct=458, range=[2.47e+04, 1.217e+07] mean=4.297e+06 var=8.847e+12 skew=0.53 outliers=0.0%, samples=['8720248', '3269705', '4087361', '8003726', '4826813']\n- rank: type=numeric(int64), missing=0.0%, distinct=457, range=[2, 484] mean=240.4 var=1.914e+04 skew=0.03 outliers=0.0%, samples=['432', '204', '250', '414', '283']\n- region: type=categorical(str), missing=0.0%, distinct=3, top=[East(43%), Central(37%), West(20%)], domain=['Central', 'East', 'West']\n- sales_stage: type=categorical(str), missing=0.0%, distinct=5, top=[Lead(52%), Qualify(21%), Solution(16%), Proposal(8%), Finalize(3%)], domain=['Finalize', 'Lead', 'Proposal', 'Qualify', 'Solution']\n- sales_stage_id: type=numeric(int64), missing=0.0%, distinct=5, range=[1, 5] mean=1.893 var=1.273 skew=1.07 outliers=0.0%, samples=['1', '1', '1', '1', '1']\n- segment: type=categorical(str), missing=0.0%, distinct=3, top=[Strategic(45%), Large(33%), Small & Medium(23%)], domain=['Large', 'Small & Medium', 'Strategic']\n- sizeid: type=numeric(int64), missing=0.0%, distinct=3, range=[1, 3] mean=1.989 var=0.6585 skew=0.02 outliers=0.0%, samples=['3', '2', '2', '3', '2']\n- state: type=categorical(str), missing=0.0%, distinct=19, top=[New York(12%), Iowa(9%), Nebraska(7%), North Carolina(7%), Kansas(7%)], domain=['California', 'Florida', 'Georgia', 'Illinois', 'Iowa', 'Kansas', 'Maine', 'Minnesota', 'Nebraska', 'Nevada', 'New York', 'North Carolina', 'Oregon', 'Pennsylvania', 'Texas', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin']"
+ },
+ "items": [
+  {
+   "id": "b8159134",
+   "content": "bae4fcd8a2cc095112ec9db494eaa8d670d398a01b69c426e2cc6672e8129ffa",
+   "dataset": "qrobur_tree_table",
+   "system": "quis",
+   "arm": "quis",
+   "n_steps": 2,
+   "max_depth": 1,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The tree value '(DU:0.00728322,reference:0.00185936,((DO:1e-06,(BJSL25:0.00484362,((CRL0030:0.0111236,MXGT4:1e-06)100:1e-06,(BJVL19:1e-06,(BZBB1:0.0485548,(HE:1e-06,NI:1e-06)100:0.0473617)100:0.002789)100:1e-06)100:1e-06)100:0.000152846)100:0.000371142,(FLAB109:1e-06,(CUSV6:1e-06,((FLSF54:1e-06,(BJSB3:1e-06,((MXED8:1e-06,MXSA3017:1e-06)100:1e-06,(FLMO62:1e-06,CRL0001:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06,(FLCK18:0.00811291,((CUVN10:0.00367763,TXMD3:1e-06)100:0.0105879,(FLWO6:1e-06,(AR:1e-06,(FLBA140:1e-06,LALC2:1e-06)100:1e-06)100:1e-06)100:0.019092)100:1e-06)100:0.00809422)100:0.0103289)100:1e-06)100:1e-06)100:0.00155172);' has an outstandingly large COUNT(*) compared to all others (all data).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=1.0, above_threshold=False, reported=False, subspace=all data",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The tree value '(NI:0.0227879,reference:0.0112461,((FLMO62:1e-06,(FLSF33:1e-06,FLBA140:1e-06)100:1e-06)100:0.00526781,(FLAB109:1e-06,(BJSB3:1e-06,(AR:1e-06,(FLSF54:1e-06,(CRL0001:1e-06,(BJVL19:1e-06,(BJSL25:1e-06,LALC2:0.00534212)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.0106708)100:0.00521827)100:0.0103378);' has an outstandingly large COUNT(*) compared to all others (nsamplecov = 13.0).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=2.0, above_threshold=True, reported=True, subspace=nsamplecov = 13.0",
+     "depth": 1
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ],
+   "optional": [
+    "trustworthiness"
+   ],
+   "notes": {
+    "trustworthiness": "Not required for this trajectory. This system records no claim-level evidence \u2014 every step above says so \u2014 because its statements are direct renderings of statistics computed over the stated subspace, and hold of the data by construction. There is nothing here for an evidence-grounded criterion to weigh, so it is fixed by policy rather than judged, and the model is not asked for it either. Answer it if you have a view; you can move on without it."
+   }
+  },
+  {
+   "id": "f1ab3d14",
+   "content": "e23e9128f67ee1a6e9bf4b3781b1f93ca7851ad343404821efac13dfc35b3f04",
+   "dataset": "qrobur_tree_table",
+   "system": "d2i",
+   "arm": "d2i",
+   "n_steps": 3,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The analysis computed the proportion of extreme SNP densities in genomic windows smaller than 1Mb, finding that 4.68% of these windows have SNP counts above the 95th percentile for their size range.",
+     "evidence": "Analyzed nsnps by start, end (explain). Returned 1 rows x 1 cols (0); first row 0=0.0468. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 1
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The analysis found that 0.0% of genomic windows exceed the 95th percentile for both SNP density and sequencing coverage, indicating no overlap in extremes.",
+     "evidence": "Analyzed record counts, restricted to nsnps > 95th percentile value; nsamplecov > 95th percentile value (extend). Returned the single value 0.0. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 2
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The analysis computed the proportion of genomic windows exceeding the 95th percentile for SNP density or sequencing coverage across different 'end' positions, finding that each 'end' position had a proportion of 0.0076 compared to an overall proportion of 0.0468.",
+     "evidence": "Analyzed record counts by end (contextualize). Returned 50 rows x 3 cols (end, proportion, overall_proportion); first row end=275,000, proportion=0.0076, overall_proportion=0.0468. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "048046cf",
+   "content": "ab098ab711da5872fbff982aedbbca9f3e85b171ebb44f1489d4cef32f47e54c",
+   "dataset": "qrobur_tree_table",
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "n_steps": 4,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "Despite the variability in SNP density, sequencing coverage remains relatively stable, suggesting that factors influencing SNP density do not significantly impact sequencing coverage.",
+     "evidence": "No explicit aggregation was recorded; the computation ran inside the plotting helper. Observed SNP Density and Sequencing Coverage Stats: {\"nsnps\": {\"count\": 2657.0, \"mean\": 40.933007150922094, \"std\": 27.92860192435562, \"min\": 0.0, \"25%\": 19.0, \"50%\": 35.0, \"75%\": 57.0, \"max\": 171.0}, \"nsamplecov\": {\"count\": 2657.0, \"mean\": 33.218667670. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The consistent number of missing values in both 'nsnps' and 'nsamplecov' columns might indicate a systematic issue or a specific condition under which data is missing, potentially related to certain genomic windows or chromosome positions.",
+     "evidence": "No explicit aggregation was recorded; the computation ran inside the plotting helper. Observed Missing nsamplecov Stats: {\"False\": 2657, \"True\": 165}. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The SNP density tends to be higher in certain genomic windows, with peaks reaching up to 131 SNPs at specific start positions, suggesting regions of the chromosome that may be more genetically diverse or subject to different evolutionary pressures.",
+     "evidence": "Analyzed describe of nsnps. Observed SNP Density Stats: {\"count\": 2657.0, \"mean\": 40.933007150922094, \"std\": 27.92860192435562, \"min\": 0.0, \"25%\": 19.0, \"50%\": 35.0, \"75%\": 57.0, \"max\": 171.0}. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 2
+    },
+    {
+     "tag": "[  +3]",
+     "statement": "The missing data for 'nsnps' and 'nsamplecov' represents approximately 5.85% of the total dataset, indicating a relatively small proportion of missing values that do not show any significant clustering or pattern across chromosome positions.",
+     "evidence": "No explicit aggregation was recorded; the computation ran inside the plotting helper. Observed Missing Data Stats: {\"False\": 2657, \"True\": 165}. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "102628ad",
+   "content": "5d71e18d92b24273c7b8eb6752cabfe6a5a842497b5f17a8424070857d7f49b2",
+   "dataset": "qrobur_tree_table",
+   "system": "d2i",
+   "arm": "d2i",
+   "n_steps": 1,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The program computed the correlation between 'nsnps' and 'nsamplecov' for small window sizes across different 'end' positions, finding no valid correlation values.",
+     "evidence": "Analyzed nsnps, nsamplecov by end (extend). Returned 50 rows x 3 cols (end, window_size_category, correlation); first row end=100,000, window_size_category=small, correlation=None; largest end end=1,325,000, window_size_category=small, correlation=None. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "e50a8b9a",
+   "content": "452181cf1cdf4352e86d37bf379684466f9eced0197acb23671ac4066b6f313d",
+   "dataset": "qrobur_tree_table",
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "n_steps": 4,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The SNP density is not uniformly distributed across genomic windows, indicating regions of higher genetic variation, which could be crucial for identifying areas of interest in genomic studies.",
+     "evidence": "No explicit aggregation was recorded; the computation ran inside the plotting helper. Observed for 'nsnps': count=2,657, mean=40.933, std=27.9286, min=0, 25%=19, 50%=35, 75%=57, max=171. Statistical support: a descriptive summary over n=2,657 rows; no statistical test was run.",
+     "metadata": "",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "Genomic windows with unique tree structures tend to have higher SNP densities, indicating potential regions of evolutionary significance or genetic variation hotspots.",
+     "evidence": "Analyzed after dropping rows missing tree. Observed SNP Density and Sequencing Coverage Stats: {\"nsnps\": {\"count\": 2495.0, \"mean\": 43.31422845691383, \"std\": 27.153737109457598, \"min\": 8.0, \"25%\": 22.0, \"50%\": 37.0, \"75%\": 58.0, \"max\": 171.0}, \"nsamplecov\": {\"count\": 2495.0, \"mean\": 34.083767535. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "Approximately 5.85% of the genomic windows have missing data, which highlights the importance of addressing these gaps to ensure a comprehensive analysis of SNP density and sequencing coverage across the genome.",
+     "evidence": "No explicit aggregation was recorded; the computation ran inside the plotting helper. Observed Missing Data Stats: {\"False\": 2657, \"True\": 165}. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 2
+    },
+    {
+     "tag": "[  +3]",
+     "statement": "Genomic windows with SNP densities reaching up to 171 and sequencing coverage consistently around 37 may indicate regions with significant evolutionary activity or selective pressures.",
+     "evidence": "No explicit aggregation was recorded; the computation ran inside the plotting helper. Observed SNP Density and Sequencing Coverage Stats: {\"nsnps\": {\"count\": 2657.0, \"mean\": 40.933007150922094, \"std\": 27.92860192435562, \"min\": 0.0, \"25%\": 19.0, \"50%\": 35.0, \"75%\": 57.0, \"max\": 171.0}, \"nsamplecov\": {\"count\": 2657.0, \"mean\": 33.218667670. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "ba11ec56",
+   "content": "fae10b883e26b22013eb2737c1adfea9018545b7eda3752f779794d61cc361b3",
+   "dataset": "qrobur_tree_table",
+   "system": "quis",
+   "arm": "quis",
+   "n_steps": 3,
+   "max_depth": 2,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The tree value '(DO:0.00900458,reference:0.00261,((DU:0.00167279,EN:0.0076872)100:0.00366191,((AR:1e-06,CH:0.00513211)100:0.00139968,((HE:1e-06,NI:1e-06)100:0.0121207,((FLSF47:1e-06,(FLAB109:0.00364908,FLSF54:1e-06)100:0.00452884)100:1e-06,(BZBB1:0.00430878,(CRL0030:0.0014328,(CRL0001:1e-06,(TXMD3:1e-06,((FLCK18:1e-06,(HNDA09:1e-06,SCCU3:1e-06)100:1e-06)100:0.00145583,(MXGT4:1e-06,((BJVL19:1e-06,(BJSL25:1e-06,(FLCK216:0.00680666,MXED8:1e-06)100:1e-06)100:0.000718893)100:0.0021381,(FLSF33:1e-06,(FLSA185:1e-06,((CUCA4:1e-06,MXSA3017:0.00138407)100:2.27225e-05,(FLWO6:1e-06,((CUSV6:1e-06,FLBA140:1e-06)100:0.00284952,(FLMO62:1e-06,(BJSB3:1e-06,(CUVN10:1e-06,(LALC2:1e-06,TXGR3:0.00298709)100:0.00198954)100:1e-06)100:2.24272e-05)100:0.00138872)100:0.000302522)100:0.00179251)100:1e-06)100:0.00209391)100:1e-06)100:0.00137488)100:1.70575e-05)100:1e-06)100:0.00272224)100:0.00144594)100:1e-06)100:0.00141404)100:0.00422106)100:1e-06)100:1e-06)100:0.00865203);' has an outstandingly large MAX(end) compared to all others (all data).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=1.0007, above_threshold=False, reported=False, subspace=all data",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The tree value '(NI:0.0347946,reference:0.00290743,(DO:0.0161385,(DU:1e-06,(AR:0.0053429,(CH:0.00272141,((TXGR3:1e-06,(BJVL19:1e-06,(BJSL25:1e-06,(MXGT4:1e-06,BJSB3:1e-06)100:1e-06)100:1e-06)100:0.00435516)100:0.00437675,((FLBA140:1e-06,SCCU3:1e-06)100:0.00883468,(FLWO6:1e-06,((LALC2:1e-06,FLSF33:0.00218683)100:1e-06,(TXMD3:1e-06,(FLSF47:1e-06,(FLMO62:1e-06,(FLAB109:1e-06,(FLCK18:1e-06,(FLCK216:1e-06,(CUCA4:1e-06,(CUVN10:1e-06,(HNDA09:1e-06,(MXSA3017:1e-06,(CRL0001:1e-06,(BZBB1:0.00269978,(CRL0030:1e-06,(CUSV6:1e-06,(FLSF54:1e-06,(MXED8:0.00217871,FLSA185:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.0032545)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.00322943)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.0132211)100:1e-06)100:1e-06)100:1e-06)100:0.00361045);' has an outstandingly large MAX(end) compared to all others (nsamplecov = 33.0).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=1.0057, above_threshold=False, reported=False, subspace=nsamplecov = 33.0",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The tree value '(reference:1e-06,(FLAB109:1e-06,FLSF54:1e-06)100:0.0168161,(CH:0.00282044,((CRL0001:0.0111841,DO:0.0027743)100:0.00342743,(DU:0.0602124,(NI:0.0333566,((BJVL19:1e-06,BJSB3:1e-06)100:0.00275277,(TXGR3:1e-06,((EN:1e-06,(CUVN10:1e-06,AR:0.00271628)100:1e-06)100:1e-06,((CUSV6:1e-06,(CRL0030:1e-06,(CUCA4:1e-06,BZBB1:1e-06)100:1e-06)100:1e-06)100:0.0154067,(BJSL25:1e-06,(FLCK18:1e-06,((LALC2:1e-06,((FLSF33:1e-06,FLSF47:1e-06)100:1e-06,(SCCU3:1e-06,TXWV2:1e-06)100:1e-06)100:0.0054493)100:1e-06,(FLBA140:1e-06,(FLMO62:1e-06,(MXED8:1e-06,(TXMD3:1e-06,(FLCK216:1e-06,(MXGT4:1e-06,(FLWO6:1e-06,FLSA185:1e-06)100:0.0080917)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:1e-06)100:0.00267845)100:1e-06)100:0.00616361)100:0.00193382)100:1e-06)100:0.0028515)100:1e-06)100:1.86886e-06)100:1e-06)100:0.000117702)100:0.00304568)100:0.00300536);' has an outstandingly large MAX(end) compared to all others (nsamplecov = 33.0 AND nsnps = 26.0).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=2.1847, above_threshold=True, reported=True, subspace=nsamplecov = 33.0 AND nsnps = 26.0",
+     "depth": 2
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ],
+   "optional": [
+    "trustworthiness"
+   ],
+   "notes": {
+    "trustworthiness": "Not required for this trajectory. This system records no claim-level evidence \u2014 every step above says so \u2014 because its statements are direct renderings of statistics computed over the stated subspace, and hold of the data by construction. There is nothing here for an evidence-grounded criterion to weigh, so it is fixed by policy rather than judged, and the model is not asked for it either. Answer it if you have a view; you can move on without it."
+   }
+  },
+  {
+   "id": "a476a4b0",
+   "content": "7f8455159a22c9012bc9241474110d1ce6cfc7d251670c9ed222af1248a1eab8",
+   "dataset": "salesfact",
+   "system": "d2i",
+   "arm": "d2i",
+   "n_steps": 1,
+   "max_depth": 2,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The East region maintains a 44.12% share of the 'Moderation' segment revenue when 'iscompetehide' is False, confirming its dominance without hidden competition data.",
+     "evidence": "Analyzed revenue by region, segment, restricted to iscompetehide == False (verify). Returned 24 rows x 4 cols (region, segment, revenue, proportion); first row region=Central, segment=All Season, revenue=42,173,824.77, proportion=0.009; largest revenue region=East, segment=Convenience, revenue=1,136,208,471.3, proportion=0.2416. Statistical support: East_Moderation_Proportion=0.4412.",
+     "metadata": "",
+     "depth": 2
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "9d6a2d9f",
+   "content": "14b71a06299a3d7652b71d37ff1c3bd1ccc70e0e4946bfc8aa012729ef90aa82",
+   "dataset": "salesfact",
+   "system": "quis",
+   "arm": "quis",
+   "n_steps": 3,
+   "max_depth": 2,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The category value 'Urban' has an outstandingly large SUM(units) compared to all others (all data).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=1.5164, above_threshold=True, reported=True, subspace=all data",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The category value 'Urban' has an outstandingly large SUM(units) compared to all others (mfgisvanarsdel = True).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=2503.9052, above_threshold=True, reported=True, subspace=mfgisvanarsdel = True",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The category value 'Urban' has an outstandingly large SUM(units) compared to all others (mfgisvanarsdel = True AND monthno = 12).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=11377.0, above_threshold=True, reported=True, subspace=mfgisvanarsdel = True AND monthno = 12",
+     "depth": 2
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ],
+   "optional": [
+    "trustworthiness"
+   ],
+   "notes": {
+    "trustworthiness": "Not required for this trajectory. This system records no claim-level evidence \u2014 every step above says so \u2014 because its statements are direct renderings of statistics computed over the stated subspace, and hold of the data by construction. There is nothing here for an evidence-grounded criterion to weigh, so it is fixed by policy rather than judged, and the model is not asked for it either. Answer it if you have a view; you can move on without it."
+   }
+  },
+  {
+   "id": "24d1ce6a",
+   "content": "8b6b3160f7d74254b2f48f6dd068a3f1478ec08a27cf31b1bfa8d6008bab2eab",
+   "dataset": "salesfact",
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "n_steps": 4,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The 'Convenience' segment has been the dominant revenue generator over the years, indicating a strong consumer preference for products that offer ease of use and accessibility.",
+     "evidence": "Analyzed grouped by year, segment. Observed 128 records of Revenue Distribution Stats (year, segment, revenue); first year=1,999, segment=All Season, revenue=2,383,846.29; largest revenue year=2,006, segment=Convenience, revenue=238,213,136.07. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "VanArsdel's dominance in market share, consistently above 36% from 1999 to 2002, highlights its strong market position, while Natura's and Aliqui's substantial shares indicate competitive positioning, with Natura's market share peaking at 23.69% in 2001, suggesting a correlation between market share and revenue growth.",
+     "evidence": "Analyzed sum of revenue, grouped by year, after dropping rows missing revenue. Observed 50 records of Market Share and Revenue Stats (year, manufacturer, revenue, revenue_total, market_share); first year=1999, manufacturer=Abbas, revenue=4,202,415, revenue_total=154,717,359.3, market_share=0.0272; largest market_share year=2000, manufacturer=VanArsdel, revenue=124,041,435.84, revenue_total=318,657,974.67, market_share=0.3893. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "Social Media has been the dominant channel in terms of revenue, peaking in 2006 with $238,213,136.07, whereas the Outlet channel's revenue decreased significantly after 2008, dropping to $5,410,034.91 by 2010.",
+     "evidence": "Analyzed sum of revenue, grouped by year, channel, after dropping rows missing channel, revenue. Observed 64 records of Revenue Trend Stats (year, channel, revenue); first year=1999, channel=Online, revenue=36,451,831.5; largest revenue year=2006, channel=Social Media, revenue=238,213,136.07. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 2
+    },
+    {
+     "tag": "[  +3]",
+     "statement": "Online channels consistently outperform other channels in terms of revenue, with the West region frequently leading in revenue peaks, indicating a strong market presence and consumer preference in that area.",
+     "evidence": "Analyzed mean of revenue, grouped by month, channel, region, after dropping rows missing channel, revenue. Observed 50 records of Monthly Revenue Stats (month, channel, region, revenue); first month=Apr-00, channel=Online, region=Central, revenue=9,987.0356; largest revenue month=Apr-04, channel=Online, region=East, revenue=11,753.837. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "098861e8",
+   "content": "da2a80b630cb886d2fa1804d5ac170881c1e51dffcaeaa850f422f48c961b61b",
+   "dataset": "salesfact",
+   "system": "d2i",
+   "arm": "d2i",
+   "n_steps": 1,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "VanArsdel's revenue increased over time when 'iscompetehide' is True, surpassing revenue when it is False from 2007 onwards.",
+     "evidence": "Analyzed revenue by year, restricted to isvanarsdel == True (extend). Returned 16 rows x 2 cols (False, True); first row False=34,153,560.63, True=24,109,438.5; largest True False=50,290,038.54, True=157,650,454.71. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "2518ede0",
+   "content": "82210c30b70307739d19b06dcb0a457036e11e49e2b58f15dcdf84265bde1388",
+   "dataset": "salesfact",
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "n_steps": 4,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The East region's dominance in revenue, particularly in the 'Moderation' segment, suggests a strong consumer preference or market penetration strategy that could be leveraged for future growth.",
+     "evidence": "Analyzed sum of revenue, grouped by region, segment. Observed 24 records of Regional Revenue Differences by Segment (region, segment, revenue); first region=Central, segment=All Season, revenue=42,173,824.77; largest revenue region=East, segment=Convenience, revenue=1,136,208,471.3. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The 'Moderation' segment's revenue growth indicates a strong consumer preference shift towards balanced product offerings, which manufacturers like VanArsdel and Natura have capitalized on effectively.",
+     "evidence": "Analyzed sum of revenue, grouped by year, segment, after dropping rows missing revenue. Observed 8 records of Revenue Growth by Segment (year, segment, revenue); first year=2,014, segment=All Season, revenue=19,490,949.45; largest revenue year=2,006, segment=Convenience, revenue=238,213,136.07. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "VanArsdel has emerged as the dominant manufacturer over the years, capturing more than half of the market share by 2014, indicating a strong competitive advantage or strategic positioning in the market.",
+     "evidence": "Analyzed sum of revenue, grouped by year, manufacturer, region, after dropping rows missing revenue, channel. Observed Market Share Stats: {\"year\": [\"1999\", \"2000\", \"2001\", \"2002\", \"2003\", \"2004\", \"2005\", \"2006\", \"2007\", \"2008\", \"2009\", \"2010\", \"2011\", \"2012\", \"2013\", \"2014\"], \"Abbas\": [0.032269546289774534, 0.043202588985782754, 0.03366. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 2
+    },
+    {
+     "tag": "[  +3]",
+     "statement": "VanArsdel's dominance in revenue, especially through Social Media and Online channels, highlights the importance of digital platforms in driving sales, with Social Media alone contributing over $33 million in revenue in 1999.",
+     "evidence": "Analyzed sum of revenue, grouped by year, manufacturer, channel, after dropping rows missing channel. Observed 50 records of Revenue Trends Stats (year, manufacturer, channel, revenue); first year=1999, manufacturer=Abbas, channel=Online, revenue=2,193,118.2; largest revenue year=1999, manufacturer=VanArsdel, channel=Social Media, revenue=33,070,766.4. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "cfb2a92b",
+   "content": "dd0ff42dfc0f253ae428d84b05f5b6ff77c811dea7b3f7621fdb3aafa0d78ecf",
+   "dataset": "salesfact",
+   "system": "quis",
+   "arm": "quis",
+   "n_steps": 4,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The category value 'Urban' has an outstandingly large COUNT(*) compared to all others (all data).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=1.5164, above_threshold=True, reported=True, subspace=all data",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The category value 'Urban' has an outstandingly large COUNT(*) compared to all others (manufacturer = 'VanArsdel').",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=2503.9052, above_threshold=True, reported=False, subspace=manufacturer = 'VanArsdel'",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The category value 'Urban' has an outstandingly large COUNT(*) compared to all others (manufacturer = 'VanArsdel' AND state = 'PA').",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=7604.0, above_threshold=True, reported=True, subspace=manufacturer = 'VanArsdel' AND state = 'PA'",
+     "depth": 2
+    },
+    {
+     "tag": "[  +3]",
+     "statement": "The category value 'Urban' has an outstandingly large COUNT(*) compared to all others (manufacturer = 'VanArsdel' AND state = 'PA' AND units = True).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=7604.0, above_threshold=True, reported=True, subspace=manufacturer = 'VanArsdel' AND state = 'PA' AND units = True",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ],
+   "optional": [
+    "trustworthiness"
+   ],
+   "notes": {
+    "trustworthiness": "Not required for this trajectory. This system records no claim-level evidence \u2014 every step above says so \u2014 because its statements are direct renderings of statistics computed over the stated subspace, and hold of the data by construction. There is nothing here for an evidence-grounded criterion to weigh, so it is fixed by policy rather than judged, and the model is not asked for it either. Answer it if you have a view; you can move on without it."
+   }
+  },
+  {
+   "id": "4d80ac43",
+   "content": "ce457d10d56b60730d92f0e6fe2304803514a92966c0746e45bed12cf7fb2a97",
+   "dataset": "revenue_opportunities",
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "n_steps": 4,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The likelihood of successfully closing a sale increases as opportunities progress through the sales stages, peaking at the 'Finalize' stage, which suggests that efforts to advance opportunities to later stages could significantly enhance closing rates.",
+     "evidence": "Analyzed mean of probability, grouped by sales_stage. Observed Sales Stage Probability Stats: {\"Finalize\": 0.8, \"Lead\": 0.1, \"Proposal\": 0.6, \"Qualify\": 0.2, \"Solution\": 0.4}. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The data suggests that partner-driven opportunities tend to stall or drop off significantly after the initial 'Lead' stage, highlighting potential challenges in advancing these opportunities through the sales pipeline.",
+     "evidence": "Analyzed filtered to year == 2015. Observed Partner-driven Opportunities vs Sales Stages Stats: {\"Lead\": 139, \"Qualify\": 46, \"Solution\": 33, \"Proposal\": 16, \"Finalize\": 7}. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The distribution of opportunity sizes is relatively balanced across regions, indicating that there is no overwhelming preference or dominance of a particular size, which suggests a diverse sales pipeline in terms of opportunity sizes.",
+     "evidence": "No explicit aggregation was recorded; the computation ran inside the plotting helper. Observed Opportunity Size Distribution Stats: {\"Medium\": 157, \"Small\": 153, \"Large\": 148}. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 2
+    },
+    {
+     "tag": "[  +3]",
+     "statement": "The Lead stage has the longest average duration, indicating that opportunities spend the most time in the initial phase of the sales pipeline, which could suggest a need for more efficient lead qualification processes.",
+     "evidence": "Analyzed mean of opportunity_days, grouped by sales_stage. Observed 5 records of Average Opportunity Duration by Sales Stage (sales_stage, opportunity_days); first sales_stage=Finalize, opportunity_days=377; largest opportunity_days sales_stage=Lead, opportunity_days=477.8787. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "f5c93c56",
+   "content": "ec6c0f76d0116e4fa3c3b8df126ba9ed594ac29803ba3279832fd6dc9a9df8bf",
+   "dataset": "revenue_opportunities",
+   "system": "quis",
+   "arm": "quis",
+   "n_steps": 4,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The opportunity_size value 'Large' has an outstandingly large SUM(factoredproductrevenue) compared to all others (all data).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=1.6142, above_threshold=True, reported=True, subspace=all data",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The opportunity_size value 'Large' has an outstandingly large SUM(factoredproductrevenue) compared to all others (partner_driven = 't').",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=3.1232, above_threshold=True, reported=False, subspace=partner_driven = 't'",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The opportunity_size value 'Large' has an outstandingly large SUM(factoredproductrevenue) compared to all others (partner_driven = 't' AND sales_stage = 'Lead').",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=6.2222, above_threshold=True, reported=False, subspace=partner_driven = 't' AND sales_stage = 'Lead'",
+     "depth": 2
+    },
+    {
+     "tag": "[  +3]",
+     "statement": "The opportunity_size value 'Large' has an outstandingly large SUM(factoredproductrevenue) compared to all others (partner_driven = 't' AND sales_stage = 'Lead' AND state = 'Pennsylvania').",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=15.5311, above_threshold=True, reported=True, subspace=partner_driven = 't' AND sales_stage = 'Lead' AND state = 'Pennsylvania'",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ],
+   "optional": [
+    "trustworthiness"
+   ],
+   "notes": {
+    "trustworthiness": "Not required for this trajectory. This system records no claim-level evidence \u2014 every step above says so \u2014 because its statements are direct renderings of statistics computed over the stated subspace, and hold of the data by construction. There is nothing here for an evidence-grounded criterion to weigh, so it is fixed by policy rather than judged, and the model is not asked for it either. Answer it if you have a view; you can move on without it."
+   }
+  },
+  {
+   "id": "3c3632cb",
+   "content": "6d932a1ff15a6c9cd06e1cdb8a76add664578bb7ae7da333500d8d5e42167fdb",
+   "dataset": "revenue_opportunities",
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "n_steps": 4,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "In 2015, Large opportunities consistently generated higher average product revenue across all sales stages compared to Medium and Small opportunities, with the Proposal stage being particularly lucrative for Large opportunities.",
+     "evidence": "Analyzed mean of productrevenue, grouped by opportunity_size, sales_stage. Observed 15 records of Average Product Revenue by Sales Stage (opportunity_size, sales_stage, productrevenue); first opportunity_size=Large, sales_stage=Finalize, productrevenue=6,849,055.125; largest productrevenue opportunity_size=Large, sales_stage=Proposal, productrevenue=8,224,056. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "Partner-driven opportunities in 2015 generated nearly double the average product revenue compared to non-partner-driven opportunities across all segments, highlighting the substantial financial impact of partnerships in the sales pipeline.",
+     "evidence": "Analyzed mean of productrevenue, grouped by partner_driven, segment, filtered to year == 2015. Observed 6 records of Average Product Revenue Stats (partner_driven, segment, productrevenue); first partner_driven=f, segment=Large, productrevenue=2,866,139.0135; largest productrevenue partner_driven=t, segment=Small & Medium, productrevenue=5,524,220.127. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The East region consistently shows higher average factored product revenues across all sales stages compared to the Central and West regions, indicating a potentially more lucrative market or more effective sales strategies in that region.",
+     "evidence": "Analyzed mean of factoredproductrevenue, grouped by region, sales_stage, filtered to year == 2015. Observed 15 records of Average Factored Product Revenue by Sales Stage and Region (region, sales_stage, factoredproductrevenue); first region=Central, sales_stage=Finalize, factoredproductrevenue=3,728,359.4; largest factoredproductrevenue region=East, sales_stage=Finalize, factoredproductrevenue=4,911,428.6. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 2
+    },
+    {
+     "tag": "[  +3]",
+     "statement": "The probability of closing a deal significantly increases as opportunities progress through the sales stages, peaking at the 'Finalize' stage, indicating that deals are most likely to close when they reach this stage.",
+     "evidence": "Analyzed mean of probability, grouped by sales_stage, segment. Observed 15 records of Average Probability Stats (sales_stage, segment, probability); first sales_stage=Finalize, segment=Large, probability=0.8; largest probability sales_stage=Finalize, segment=Strategic, probability=0.8. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "cb9e955b",
+   "content": "32483b0cc31cf581cdb41b9c96d0316fc3a114958e299df2b12addb1bcfa1c5c",
+   "dataset": "revenue_opportunities",
+   "system": "d2i",
+   "arm": "d2i",
+   "n_steps": 1,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The analysis computed average closing probabilities by product_code, segment, and partner_driven status, revealing variability across these dimensions.",
+     "evidence": "Analyzed probability by product_code, segment, partner_driven (extend). Returned 50 rows x 4 cols (product_code, segment, partner_driven, probability); first row product_code=Abbas, segment=Large, partner_driven=f, probability=0.3; largest probability product_code=Decimus, segment=Small & Medium, partner_driven=f, probability=0.6. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  },
+  {
+   "id": "750210c6",
+   "content": "11778896a9423d16ecb273dc1e5a6d228ed9cc74b4dd27079afafc90aad1fe5c",
+   "dataset": "revenue_opportunities",
+   "system": "quis",
+   "arm": "quis",
+   "n_steps": 3,
+   "max_depth": 2,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "The sales_stage value 'Lead' has an outstandingly large COUNT(*) compared to all others (all data).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=2.5426, above_threshold=True, reported=True, subspace=all data",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The sales_stage value 'Lead' has an outstandingly large COUNT(*) compared to all others (month_number = 10).",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=9.5, above_threshold=True, reported=True, subspace=month_number = 10",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The sales_stage value 'Lead' has an outstandingly large COUNT(*) compared to all others (month_number = 10 AND partner_driven = 't').",
+     "evidence": "No claim-level execution evidence was retained by the system.",
+     "metadata": "pattern=OutstandingValue, system_score=18.0, above_threshold=True, reported=True, subspace=month_number = 10 AND partner_driven = 't'",
+     "depth": 2
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ],
+   "optional": [
+    "trustworthiness"
+   ],
+   "notes": {
+    "trustworthiness": "Not required for this trajectory. This system records no claim-level evidence \u2014 every step above says so \u2014 because its statements are direct renderings of statistics computed over the stated subspace, and hold of the data by construction. There is nothing here for an evidence-grounded criterion to weigh, so it is fixed by policy rather than judged, and the model is not asked for it either. Answer it if you have a view; you can move on without it."
+   }
+  },
+  {
+   "id": "17a2b0b4",
+   "content": "77a6e86f9bd613e40d10c4f0a1979de041b1903fa472c7194b704a04a5ffc114",
+   "dataset": "revenue_opportunities",
+   "system": "d2i",
+   "arm": "d2i",
+   "n_steps": 4,
+   "max_depth": 3,
+   "steps": [
+    {
+     "tag": "[base]",
+     "statement": "Probability of closing declines significantly across months, starting at 0.414 and ending at 0.036 over the span (~334 days).",
+     "evidence": "Analyzed probability by month_number, month, date (base sweep). No result table was retained; the statistics below are the only recorded output. Statistical support: group comparison p=1.358e-77, effect size 4.3369; temporal trend p=2.472e-54, effect size 0.6409; temporal trend p=9.548e-53, effect size 0.6334 (thresholds alpha=0.05, min_effect=0.2, min_group=20).",
+     "metadata": "",
+     "depth": 0
+    },
+    {
+     "tag": "[  +1]",
+     "statement": "The analysis computed the mean probability of closing for each sales stage across months, revealing a significant overall decline with a slope of -0.039, indicating a strong negative trend over the year.",
+     "evidence": "Analyzed probability by date, sales_stage (explain). Returned 12 rows x 5 cols (Finalize, Lead, Proposal, Qualify, Solution); first row Finalize=0.8, Lead=None, Proposal=0.6, Qualify=None, Solution=0.4. Statistical support: overall_slope=-0.0391; overall_r_value=-0.8666; overall_p_value=0.0003.",
+     "metadata": "",
+     "depth": 1
+    },
+    {
+     "tag": "[  +2]",
+     "statement": "The lowest closing probabilities are in the 'Lead' stage across all regions, with a probability of 0.1.",
+     "evidence": "Analyzed probability by region, sales_stage (localize). Returned 15 rows x 3 cols (region, sales_stage, probability); first row region=Central, sales_stage=Lead, probability=0.1; largest probability region=Central, sales_stage=Finalize, probability=0.8. Statistical support: none recorded -- no test accompanies this claim, so it rests on the returned values alone.",
+     "metadata": "",
+     "depth": 2
+    },
+    {
+     "tag": "[  +3]",
+     "statement": "The analysis found no correlation between opportunity_days and probability in the 'Lead' stage across all regions in 2015.",
+     "evidence": "Analyzed probability by region, sales_stage, restricted to sales_stage == Lead; date >= 2015-01-01; date <= 2015-12-31 (extend). Returned 3 rows x 2 cols (region, correlation); first row region=Central, correlation=None. Statistical support: (3 recorded as NaN).",
+     "metadata": "",
+     "depth": 3
+    }
+   ],
+   "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+   ]
+  }
+ ]
+}

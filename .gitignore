@@ -11,3 +11,11 @@ survey/private/
 
 # Responses people send back.
 survey/responses/
+survey/results/
+
+# The trajectory-rating study, same split: the build's private half (which system is behind
+# each item, and the exact judge prompt each one was rendered from), the responses, and the
+# reports made from them. data/ is the deployed half and is committed.
+trajectory-survey/private/
+trajectory-survey/responses/
+trajectory-survey/results/

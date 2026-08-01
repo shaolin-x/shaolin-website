@@ -1,4 +1,11 @@
-# D2I human evaluation — the web survey
+# D2I human evaluation — the web survey  *(CLOSED)*
+
+> **This study is closed.** `index.html` is now a notice pointing at
+> [`../trajectory-survey/`](../trajectory-survey/), which measures human/model agreement on
+> whole trajectories instead. The survey itself is preserved unchanged as
+> `index_legacy.html` — unlinked, `noindex`, and with an empty `ENDPOINT`, so it collects
+> nothing. Everything below describes that archived study; restore it by moving
+> `index_legacy.html` back over `index.html`.
 
 The static counterpart to `human_trajectory_web.py`. That tool is local: it holds `runs/`
 open, samples a fresh session per judge, and enforces blinding inside the request handler.

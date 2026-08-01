@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How good is this analysis? — D2I trajectory rating</title>
+<meta name="description" content="Rate automated data-analysis trajectories on six criteria, against the same rubric an LLM judge was given. Measures how far a person and the judge agree.">
+<meta name="robots" content="noindex, follow">
+<style>
+/* The site's palette (css/style.css) — cardinal and gold, Arial — on a layout that has to
+   hold a long trajectory on one side and six rating scales on the other. Self-contained:
+   this page is served on its own, without the site nav. */
+:root {
+  --ink: #333; --head: #1a1a1a; --muted: #6b6b6b; --line: #e5e5e5; --soft: #f8f9fa;
+  --card: #fff; --bg: #fbfbfc; --accent: #990000; --accent-soft: #f6ecec; --gold: #FFCC00;
+  --ok: #1a7a4c; --warn: #a35a00; --radius: 8px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif; line-height: 1.6;
+}
+.wrap { max-width: 860px; margin: 0 auto; padding: 24px 20px 90px; }
+/* The rating screen is not prose — it is a trajectory being read against six scales — so
+   it gets room instead of stacking everything into one tall column. */
+.wrap.wide { max-width: 1360px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3 { color: var(--head); margin-top: 0; margin-bottom: .5rem; font-weight: 600; }
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.1rem; }
+h3 { font-size: .95rem; margin: 22px 0 6px; }
+
+header.top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--accent); padding-bottom: 8px;
+}
+header.top .home { font-size: .85rem; }
+.counter { font-size: .85rem; color: var(--muted); }
+.bar { height: 5px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 14px 0 22px; }
+.bar > i { display: block; height: 100%; background: var(--accent); transition: width .25s ease; }
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; margin-bottom: 16px;
+}
+.eyebrow {
+  font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+.muted { color: var(--muted); }
+.hint { font-size: .82rem; color: var(--muted); margin-top: 12px; }
+.err { color: var(--accent); font-size: .85rem; margin-top: 10px; font-weight: 600; }
+.ok { color: var(--ok); font-weight: 600; }
+.warn { color: var(--warn); font-weight: 600; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* trajectory on the left, the six scales on the right */
+.split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.split > div > .card:last-child { margin-bottom: 0; }
+@media (min-width: 1100px) {
+  .split { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; }
+  /* Each column scrolls with the page but sticks once its own top passes the viewport, so
+     a long trajectory and the scales it is being rated on stay together. */
+  .split > div {
+    position: sticky; top: 16px;
+    max-height: calc(100vh - 32px); overflow-y: auto; overscroll-behavior: contain;
+    padding-right: 4px;
+  }
+}
+
+.goal { font-size: 1rem; color: var(--head); }
+.pill {
+  display: inline-block; font-size: .72rem; padding: 2px 9px; border-radius: 99px;
+  background: var(--accent-soft); color: var(--accent); margin-right: 6px;
+}
+
+/* One trajectory step. The judge is shown three different things per step and they must
+   never be mistaken for each other here either:
+     .statement  the claim         — the payload, the only part in full ink
+     .evidence   what backs it     — monospace block, because it is an execution trace
+     .metadata   the system's own  — explicitly NOT evidence, so it is marked as such */
+.step { border-left: 2px solid var(--line); padding: 0 0 16px 18px; margin-left: 4px; position: relative; }
+.step:last-child { padding-bottom: 0; }
+.step::before {
+  content: ""; position: absolute; left: -5px; top: 8px; width: 8px; height: 8px;
+  border-radius: 99px; background: var(--line);
+}
+.step.base::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.step .tag {
+  font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 4px;
+}
+.step.base .tag { color: var(--accent); }
+.step .statement { color: var(--head); }
+.step .evidence {
+  margin-top: 7px; padding: 8px 10px; font-size: .76rem; line-height: 1.5;
+  color: var(--ink); background: var(--soft); border: 1px solid var(--line);
+  border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap; word-break: break-word;
+}
+.step .metadata {
+  margin-top: 6px; font-size: .72rem; color: var(--warn);
+}
+
+/* the dataset profile: long, and read once per dataset, so it folds away.
+   One block per column — the name and its type first, the cheap statistics as chips beside
+   them, and only the long fields (top values, domain, samples) on their own lines. */
+pre.profile {
+  margin: 8px 0 0; padding: 10px 12px; max-height: 320px; overflow: auto;
+  font-size: .72rem; line-height: 1.5; background: var(--soft);
+  border: 1px solid var(--line); border-radius: 6px; white-space: pre-wrap;
+  word-break: break-word;
+}
+/* the criteria, named and glossed on the intro — one line each, so the whole instrument is
+   visible before starting without becoming a second page of rubric */
+ul.crit-brief { margin: 8px 0 12px; padding-left: 18px; }
+ul.crit-brief li { font-size: .88rem; line-height: 1.5; margin-bottom: 4px; }
+ul.crit-brief li::marker { color: var(--muted); }
+ul.crit-brief b { color: var(--head); }
+
+.pcount { font-size: .74rem; color: var(--muted); margin: 8px 0 6px; }
+.profile-box {
+  max-height: 380px; overflow: auto; background: var(--card);
+  border: 1px solid var(--line); border-radius: 6px;
+}
+.pcol { padding: 8px 11px; border-bottom: 1px solid var(--line); }
+.pcol:last-child { border-bottom: none; }
+.pcol:nth-child(even) { background: var(--soft); }
+.phead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.pname {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700; color: var(--head); font-size: .8rem;
+}
+.ptype {
+  font-size: .66rem; padding: 1px 7px; border-radius: 99px;
+  background: var(--accent-soft); color: var(--accent);
+}
+/* A statistic reads as name-then-value, so the name is the quiet half. */
+.pchip { font-size: .7rem; color: var(--head); }
+.pchip b, .pdetail b {
+  color: var(--muted); font-weight: 700; font-size: .64rem; letter-spacing: .04em;
+  text-transform: uppercase; margin-right: 4px;
+}
+.pdetail {
+  font-size: .73rem; color: var(--ink); margin-top: 4px; line-height: 1.45;
+  word-break: break-word;
+}
+
+/* the six scales' own progress, inside the scoring card */
+.critbar {
+  height: 4px; background: var(--line); border-radius: 99px; overflow: hidden;
+  margin: 0 0 6px;
+}
+.critbar > i { display: block; height: 100%; background: var(--accent); transition: width .18s ease; }
+.critcount {
+  font-size: .72rem; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .05em; margin-bottom: 4px;
+}
+.critcount.full { color: var(--ok); }
+/* Shown when a trajectory being rated has been rated before — so a respondent who stepped
+   back knows the scales are showing what they gave, not a fresh screen. */
+.revising {
+  margin-left: 8px; padding: 1px 8px; border-radius: 99px; background: var(--soft);
+  border: 1px solid var(--line); color: var(--muted);
+  font-size: .64rem; letter-spacing: .04em;
+}
+
+/* one criterion */
+.crit { border-top: 1px solid var(--line); padding: 14px 0 4px; }
+.crit:first-of-type { border-top: none; padding-top: 2px; }
+.crit-name { font-weight: 700; color: var(--head); }
+/* A criterion this trajectory is not required to be scored on, because the system behind
+   it records nothing for that criterion to weigh. Marked rather than hidden, and quieter
+   than the rest so it does not compete with the scales that ARE being asked for. */
+.crit.optional { background: var(--soft); border-radius: 6px; padding: 12px 12px 6px; }
+.notreq {
+  font-size: .64rem; letter-spacing: .05em; text-transform: uppercase; font-weight: 700;
+  color: var(--warn); background: #fff5e6; border: 1px solid #f0dcc0;
+  border-radius: 99px; padding: 1px 8px; margin-left: 8px;
+}
+.whyoptional {
+  font-size: .78rem; line-height: 1.5; color: var(--ink);
+  background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--warn);
+  border-radius: 5px; padding: 8px 10px; margin: 0 0 9px;
+}
+.crit-q { display: block; font-size: .84rem; color: var(--muted); margin: 3px 0 9px; }
+.scale { display: flex; gap: 6px; flex-wrap: wrap; }
+.scale button {
+  flex: 1 1 0; min-width: 74px; padding: 7px 4px; line-height: 1.25;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.scale button .n { font-weight: 700; font-size: 1rem; }
+.scale button .w { font-size: .68rem; color: var(--muted); }
+.scale button.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
+.scale button.sel .w { color: #fff; opacity: .85; }
+.chosen {
+  margin-top: 8px; font-size: .82rem; color: var(--ink);
+  background: var(--accent-soft); border-radius: 6px; padding: 7px 10px;
+}
+.chosen.empty { background: transparent; color: var(--muted); padding-left: 0; }
+
+details.guide {
+  border: 1px solid var(--line); background: var(--soft); border-radius: 6px;
+  padding: 8px 12px; margin-top: 9px;
+}
+details.guide > summary {
+  cursor: pointer; list-style: none; color: var(--muted);
+  font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+}
+details.guide > summary::-webkit-details-marker { display: none; }
+/* A border triangle rather than a ▾ glyph: the arrow characters fall back inconsistently
+   across the fonts this page asks for. */
+details.guide > summary::after {
+  content: ""; display: inline-block; margin-left: 7px; vertical-align: middle;
+  border: 4px solid transparent; border-top-color: currentColor;
+  transform: translateY(2px); transition: transform .15s ease;
+}
+details.guide[open] > summary::after { transform: translateY(-2px) rotate(180deg); }
+details.guide > summary:hover { color: var(--accent); }
+details.guide ul, details.guide ol { margin: 9px 0 2px; padding-left: 18px; }
+details.guide li { font-size: .82rem; line-height: 1.45; margin-bottom: 5px; }
+details.guide li::marker { color: var(--muted); }
+details.guide p { font-size: .82rem; margin: 8px 0 2px; }
+dl.levels { margin: 8px 0 2px; font-size: .82rem; }
+dl.levels dt { font-weight: 700; color: var(--head); float: left; margin-right: 6px; }
+dl.levels dd { margin: 0 0 5px; }
+
+button {
+  font: inherit; color: var(--ink); background: var(--card); border: 1px solid #ccc;
+  border-radius: 6px; padding: 9px 16px; cursor: pointer; transition: .12s;
+}
+button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover:not(:disabled) { background: #7a0000; color: #fff; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.ghost { color: var(--muted); border-color: transparent; }
+button.ghost:hover:not(:disabled) { border-color: #ccc; }
+kbd {
+  font: .7rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  border: 1px solid #ccc; border-bottom-width: 2px; border-radius: 4px;
+  padding: 1px 5px; color: var(--muted); margin-right: 6px;
+}
+
+input[type=text], input[type=email], textarea, select {
+  font: inherit; color: var(--ink); background: #fff; border: 1px solid #ccc;
+  border-radius: 6px; padding: 9px 12px; margin: 4px 0 10px; width: 100%; max-width: 420px;
+}
+textarea { max-width: 100%; min-height: 60px; }
+label.field { display: block; font-size: .82rem; color: var(--muted); font-weight: 600; }
+
+.actions { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+.tiles { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 4px; }
+.tile {
+  flex: 1 1 170px; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; background: var(--soft);
+}
+.tile .big { font-size: 1.6rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
+.tile .lbl { font-size: .74rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.tile .sub { font-size: .74rem; color: var(--muted); margin-top: 4px; }
+
+table { border-collapse: collapse; width: 100%; font-size: .85rem; margin-top: 10px; }
+th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+th { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+td.q, th.q { text-align: left; }
+tr.total td { font-weight: 700; color: var(--head); background: var(--soft); }
+.scroll { overflow-x: auto; }
+
+details.review { border-top: 1px solid var(--line); padding: 10px 0; }
+details.review summary { cursor: pointer; font-size: .9rem; color: var(--head); }
+ol.steps { padding-left: 20px; } ol.steps li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 id="title">D2I trajectory rating</h1>
+    <span class="home" id="nav"></span>
+  </header>
+  <div class="counter" id="counter"></div>
+  <div class="bar" id="barwrap" style="visibility:hidden"><i id="prog" style="width:0"></i></div>
+  <div id="app"><p class="muted">Loading the survey…</p></div>
+</div>
+
+<!-- The agreement scoring. A plain script, not a module: tests/run_agreement.mjs `require`s
+     the same file to prove the browser and the offline analysis agree cell for cell.
+     Deploying index.html without it leaves the closing screen with no results. -->
+<script src="agreement.js"></script>
+<script>
+/* ------------------------------------------------------------------ helpers */
+const $ = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content.firstChild; };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const app = document.getElementById("app");
+
+const KEY = "d2i-rating-v1";        // one saved response per browser, bumped if the shape moves
+
+/* Where Submit posts: the /exec URL of the Apps Script in apps_script/. Left empty, the
+   button does not appear and the closing screen offers only the download — so the page is
+   correct both before the script is deployed and after. */
+const ENDPOINT = "";
+
+let survey = null, truth = null, R = null;
+let screen = "intro", err = "", scores = {}, note = "", shownAt = 0;
+/* Which trajectory is on screen. `null` means the closing screen — answers are not an
+   append-only stream any more, so "have I answered everything" no longer decides where the
+   respondent is; this does. */
+let cursor = null;
+
+const items = () => survey.items;
+const answered = () => new Set(R.answers.map(a => a.item));
+const nextIndex = () => items().findIndex(i => !answered().has(i.id));
+const answerFor = (id) => R.answers.find(a => a.item === id);
+
+/* Put a trajectory on screen, with whatever was recorded for it last time — going back has
+   to show the scores that were given, not a blank scale, or "back" would mean "erase". */
+function loadItem(i) {
+  cursor = i;
+  const a = answerFor(items()[i].id);
+  scores = a && a.scores ? Object.assign({}, a.scores) : {};
+  note = a ? (a.note || "") : "";
+  shownAt = Date.now();
+}
+
+/* Enter the rating screens where the respondent left off — the screen they were on if they
+   have one, otherwise the first thing not yet answered. If that is nothing, they have
+   finished and belong on the closing screen. */
+function startRating() {
+  if (cursor === null || cursor < 0 || cursor >= items().length) {
+    const i = nextIndex();
+    cursor = i < 0 ? null : i;
+  }
+  if (cursor !== null) loadItem(cursor);
+  screen = "rate";
+  render();
+}
+const criteria = () => survey.meta.criteria;
+const label = (k) => (window.TrajAgreement ? TrajAgreement.label(k) : k);
+/* "Very low. Largely tangential…" — the first clause is the scale word for that level. */
+const levelWord = (text) => String(text || "").split(".")[0];
+/* A criterion's rubric opens with the question it asks and then elaborates; the opening
+   sentence alone is the gloss the intro needs. Ends at the first ., ? or ! before a space. */
+const firstSentence = (text) => {
+  const m = /^[\s\S]*?[.?!](?=\s|$)/.exec(String(text || "").trim());
+  return m ? m[0] : String(text || "");
+};
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify(R)); } catch (e) {} }
+
+function uuid() {
+  if (crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+}
+
+function fresh(respondent) {
+  return {
+    id: uuid(),
+    started_at: new Date().toISOString(),
+    finished_at: null,
+    respondent,
+    survey: {
+      built_at: survey.meta.built_at, seed: survey.meta.seed,
+      n_items: survey.meta.n_items, criteria: criteria(), geval: survey.meta.geval,
+    },
+    user_agent: navigator.userAgent,
+    answers: [],
+  };
+}
+
+/* ------------------------------------------------------------------ chrome */
+
+function navLink() {
+  const nav = document.getElementById("nav");
+  if (screen === "intro" || !R) {
+    nav.innerHTML = `<a href="../index.html">← Shaolin Xie</a>`;
+    return;
+  }
+  nav.innerHTML = `<a href="#" id="back">← Back to the start</a>`;
+  document.getElementById("back").onclick = (e) => {
+    e.preventDefault(); screen = "intro"; render();
+  };
+}
+
+function chrome() {
+  navLink();
+  document.querySelector(".wrap").classList.toggle(
+    "wide", screen === "rate" && !!R && cursor !== null);
+  const c = document.getElementById("counter"), bar = document.getElementById("barwrap");
+  if (screen !== "rate" || !R) { c.textContent = ""; bar.style.visibility = "hidden"; return; }
+  const done = R.answers.length, total = items().length;
+  const left = total - done;
+  bar.style.visibility = "visible";
+  // The count LEFT, not just the position: "trajectory 3 of 9" says where you are, and a
+  // respondent deciding whether to finish now or later wants to know what is still ahead.
+  // Revisiting an answered one shows the position it is at and the work still outstanding,
+  // which is why the two counts are computed from different things.
+  c.textContent = cursor !== null
+    ? `Trajectory ${cursor + 1} of ${total}`
+      + (left ? ` — ${left} to go, roughly ${Math.max(1, Math.round(left * 3))} min`
+              : " — all rated")
+    : `${done} of ${total} rated`;
+  document.getElementById("prog").style.width = (100 * done / Math.max(1, total)) + "%";
+}
+
+/* ------------------------------------------------------------------ intro */
+
+/* Deliberately short: what the study is for, how much of it there is, and that it is scored
+   on a fixed set of criteria. Nothing about HOW to score belongs here — that lives beside
+   the scale it applies to, on the rating screen, where it is read at the moment it is used
+   instead of memorised in advance. */
+function renderIntro() {
+  const m = survey.meta, ins = survey.instructions;
+  const resume = R && R.answers.length && nextIndex() >= 0;
+  const n = m.n_items, k = criteria().length;
+  app.innerHTML = "";
+  app.append($(`
+    <div>
+      <div class="card">
+        <h2>${esc(m.title)}</h2>
+        <p><strong>What you are scoring.</strong> You are shown results produced by LLM agents, who act as data analysts to find actionable insights from the datasets.
+        In this survey, you are shown a dataset and
+        an analytical goal, and you are asked to evaluate the resulting trajectory. Each of those chains is a <em>trajectory</em>, and each of its steps
+        carries the evidence that was actually computed for using it. You will see
+        <strong>${n} ${n === 1 ? "trajectory" : "trajectories"}</strong>, one per screen,
+        with the goal and the dataset they belong to. You will score them based on a set of criteria shown.</p>
+        <p><strong>What you are judging them on.</strong> ${k} criteria, each scored on its
+        own from 1 to 5:</p>
+        <ul class="crit-brief">
+          ${criteria().map(c => `<li><b>${esc(ins.criteria[c].title)}</b> — ${
+            esc(firstSentence(ins.criteria[c].question))}</li>`).join("")}
+        </ul>
+        <p><strong>What a score means.</strong> Every criterion runs the same way: 1 is the
+        worst, 5 the best. A trajectory can be high on one and low on another: a
+        carefully evidenced chain that never gets anywhere is trustworthy and unactionable at
+        the same time. There is no separate overall mark to give; the overall figure is
+        simply the average across the ${k}.</p>
+        <p class="muted">Roughly ${Math.round(n * 3)} minutes. Your progress is saved in this
+        browser, and nothing is sent anywhere until you choose to at the end.</p>
+        
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">About you <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">— all optional</span></div>
+        <label class="field">Name or handle
+          <input type="text" id="name" placeholder="e.g. alex, or leave blank" autocomplete="off"></label>
+        <label class="field">Email <span class="muted" style="font-weight:400">— only if you would like the results sent to you</span>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="off"></label>
+        <label class="field">How familiar are you with exploratory data analysis?
+          <select id="background">
+            <option value="">— prefer not to say —</option>
+            <option value="daily">I do it regularly (analyst, data scientist, researcher)</option>
+            <option value="some">Some experience</option>
+            <option value="little">Little or none</option>
+          </select></label>
+        <div class="row" style="margin-top:8px">
+          <button class="primary" id="go">${resume ? "Resume" : "Start"}</button>
+          ${resume ? `<span class="muted">${R.answers.length} of ${items().length} already rated</span>
+                      <button class="ghost" id="restart">Start over</button>` : ""}
+        </div>
+        ${err ? `<div class="err">${esc(err)}</div>` : ""}
+      </div>
+    </div>`));
+
+  if (R && R.respondent) {
+    document.getElementById("name").value = R.respondent.name || "";
+    document.getElementById("email").value = R.respondent.email || "";
+    document.getElementById("background").value = R.respondent.background || "";
+  }
+  document.getElementById("go").onclick = () => {
+    const respondent = {
+      name: document.getElementById("name").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      background: document.getElementById("background").value,
+    };
+    if (!R || !R.answers.length) R = fresh(respondent);
+    else R.respondent = respondent;
+    save();
+    startRating();
+  };
+  const rs = document.getElementById("restart");
+  if (rs) rs.onclick = () => {
+    if (!confirm("Discard your ratings so far and start again?")) return;
+    R = null; localStorage.removeItem(KEY); render();
+  };
+}
+
+/* ------------------------------------------------------------------ dataset profile */
+
+/* The profile arrives as one line per column, written for a prompt rather than for a
+   reader:
+
+     - channel: type=categorical(str), missing=44.6%, distinct=4, top=[Social Media(47%),
+       Online(26%), …], domain=['Online', 'Outlet', 'Social Media', 'Stores']
+
+   Forty-six of those in a <pre> is a wall, and a respondent who cannot find a column in it
+   ends up judging the trajectory without the schema. So the same text is taken apart into
+   its fields and laid out — name, type, then the statistics — with the raw text still one
+   click away, because the raw text is what the judge was given and the reformatting is
+   presentation only.
+
+   Splitting on commas naively would cut `top=[Houston, TX(0%), Miami, FL(0%)]` to pieces:
+   the separators only count at bracket depth 0. The second boundary is a space that
+   precedes a `key=`, which is how a numeric column packs `range=[1, 4] mean=2.253 var=…`
+   into one comma-field. */
+function splitFields(s) {
+  const out = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === "[" || ch === "(" || ch === "{") depth++;
+    else if (ch === "]" || ch === ")" || ch === "}") depth = Math.max(0, depth - 1);
+    else if (depth === 0) {
+      const comma = ch === ",";
+      const gap = /\s/.test(ch) && /^\s*[a-z_]+=/.test(s.slice(i));
+      if (comma || gap) {
+        out.push(s.slice(start, i));
+        start = i + (comma ? 1 : 0);
+      }
+    }
+  }
+  out.push(s.slice(start));
+  return out.map(x => x.trim()).filter(Boolean);
+}
+
+/* Which fields are short enough to sit on the name's own line, in the order they read
+   best. Everything else (top, domain, samples, span) goes underneath, one per line. */
+const PROFILE_CHIPS = ["missing", "distinct", "range", "mean", "var", "skew", "outliers"];
+const PROFILE_ROWS = ["span", "top", "domain", "samples"];
+
+function parseProfile(text) {
+  const cols = [], preamble = [];
+  for (const raw of String(text || "").split("\n")) {
+    const line = raw.trim();
+    if (!line) continue;
+    // The name is everything up to the colon that introduces the FIELDS, not up to the
+    // first colon in the line: pandas leaves columns called "Unnamed: 0", and splitting
+    // greedily on ":" turned that into a column named "Unnamed" with a stray "0:".
+    const m = /^-\s+(.+?):\s+(?=[a-z_]+=)(.*)$/.exec(line);
+    if (!m) { preamble.push(line); continue; }
+    const kv = {}, extra = [];
+    for (const field of splitFields(m[2])) {
+      const p = /^([a-z_]+)=([\s\S]*)$/.exec(field);
+      if (p) kv[p[1]] = p[2].trim(); else extra.push(field);
+    }
+    cols.push({name: m[1].trim(), kv, extra});
+  }
+  return {cols, preamble};
+}
+
+function profileHTML(text) {
+  const {cols, preamble} = parseProfile(text);
+  const raw = `<details class="guide" style="margin-top:8px">
+      <summary>The profile exactly as the judge received it</summary>
+      <pre class="profile">${esc(text)}</pre>
+    </details>`;
+  // A profile in some other shape (the coarser bench_profile fallback, say) is shown as it
+  // is rather than mangled into a layout it does not fit.
+  if (!cols.length) return `<pre class="profile">${esc(text)}</pre>`;
+
+  const body = cols.map(c => {
+    const chips = PROFILE_CHIPS.filter(k => c.kv[k])
+      .map(k => `<span class="pchip"><b>${k}</b>${esc(c.kv[k])}</span>`).join("");
+    const rows = PROFILE_ROWS.filter(k => c.kv[k])
+      .map(k => `<div class="pdetail"><b>${k}</b>${esc(c.kv[k])}</div>`).join("");
+    const rest = c.extra.length
+      ? `<div class="pdetail">${esc(c.extra.join(", "))}</div>` : "";
+    return `
+      <div class="pcol">
+        <div class="phead">
+          <span class="pname">${esc(c.name)}</span>
+          ${c.kv.type ? `<span class="ptype">${esc(c.kv.type)}</span>` : ""}
+          ${chips}
+        </div>
+        ${rows}${rest}
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="pcount">${cols.length} columns${preamble.length
+      ? ` — ${esc(preamble.join(" "))}` : ""}</div>
+    <div class="profile-box">${body}</div>
+    ${raw}`;
+}
+
+/* ------------------------------------------------------------------ one trajectory */
+
+function trajectoryHTML(item) {
+  return item.steps.map(s => `
+    <div class="step${s.tag === "[base]" ? " base" : ""}">
+      <div class="tag">${s.tag === "[base]" ? "Base insight" : "Step " + s.tag.replace(/\D/g, "")}</div>
+      <div class="statement">${esc(s.statement)}</div>
+      <div class="evidence">${esc(s.evidence)}</div>
+      ${s.metadata ? `<div class="metadata">System metadata (not evidence): ${esc(s.metadata)}</div>` : ""}
+    </div>`).join("");
+}
+
+/* Criteria this trajectory is not required to be scored on — the ones the model is not
+   asked for either, because the system behind it records nothing for that criterion to
+   weigh. Shown rather than hidden: a five-scale screen among six-scale ones would say
+   which system produced it. */
+const optionalOn = (item) => (item.optional || []);
+const isOptional = (item, k) => optionalOn(item).indexOf(k) >= 0;
+const requiredOn = (item) => item.criteria.filter(k => !isOptional(item, k));
+
+function critHTML(item, k) {
+  const c = survey.instructions.criteria[k];
+  const v = scores[k];
+  const optional = isOptional(item, k);
+  const why = (item.notes || {})[k];
+  return `
+    <div class="crit${optional ? " optional" : ""}" data-c="${k}">
+      <span class="crit-name">${esc(c.title)}</span>
+      ${optional ? `<span class="notreq">optional here</span>` : ""}
+      <span class="crit-q">${esc(c.question)}</span>
+      ${why ? `<div class="whyoptional">${esc(why)}</div>` : ""}
+      <div class="scale">
+        ${[1, 2, 3, 4, 5].map(n => `
+          <button type="button" data-c="${k}" data-v="${n}" class="${v === n ? "sel" : ""}"
+                  title="${esc(c.levels[n])}">
+            <span class="n">${n}</span><span class="w">${esc(levelWord(c.levels[n]))}</span>
+          </button>`).join("")}
+      </div>
+      <div class="chosen${v ? "" : " empty"}">${v ? esc(c.levels[v]) : "Not yet rated."}</div>
+      <details class="guide">
+        <summary>How this one is judged</summary>
+        <ol>${c.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+        <dl class="levels">${Object.entries(c.levels)
+          .map(([n, t]) => `<dt>${n}</dt><dd>${esc(t)}</dd>`).join("")}</dl>
+        ${c.notes ? `<p>${esc(c.notes)}</p>` : ""}
+      </details>
+    </div>`;
+}
+
+function renderItem(item) {
+  const done = requiredOn(item).every(k => scores[k]);
+  const n = cursor + 1, total = items().length;
+  const already = answerFor(item.id);
+  // "Finish" only when this is the last screen AND nothing earlier is still outstanding;
+  // otherwise moving on from here lands on another trajectory, not on the results.
+  const lastLeft = n === total && !items().slice(0, -1).some(x => !answerFor(x.id));
+  app.innerHTML = "";
+  app.append($(`
+    <div class="split">
+      <div>
+        <div class="card">
+          <div class="eyebrow">The analytical goal</div>
+          <div class="goal">${esc(survey.goals[item.dataset])}</div>
+          <div style="margin-top:10px">
+            <span class="pill">${esc(item.dataset)}</span>
+            <span class="pill">${item.n_steps} step${item.n_steps === 1 ? "" : "s"}</span>
+          </div>
+          <details class="guide">
+            <summary>The dataset profile — the same one the judge was given</summary>
+            ${profileHTML(survey.profiles[item.dataset])}
+          </details>
+        </div>
+        <div class="card">
+          <div class="eyebrow">The trajectory</div>
+          ${trajectoryHTML(item)}
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="eyebrow">Score each criterion independently — trajectory ${n} of ${total}
+            ${already ? `<span class="revising">${already.skipped
+              ? "you skipped this one — scoring it now replaces that"
+              : "already rated — changing it is fine"}</span>` : ""}</div>
+          <!-- The screen's own progress. The bar at the top of the page counts trajectories;
+               this counts the scales on this one, which is what the Next button waits for. -->
+          <div class="critbar"><i id="critprog" style="width:0"></i></div>
+          <div class="critcount" id="critcount"></div>
+          ${item.criteria.map(k => critHTML(item, k)).join("")}
+          <div class="actions">
+            <label class="field" for="note">Anything worth saying about this one? <span class="muted" style="font-weight:400">— optional</span></label>
+            <textarea id="note" placeholder="e.g. the evidence contradicts step 2">${esc(note)}</textarea>
+            <div class="row">
+              <button id="prev" ${n === 1 ? "disabled" : ""}>← Previous</button>
+              <button class="primary" id="next" ${done ? "" : "disabled"}>
+                ${lastLeft ? "Finish" : "Next trajectory"} →</button>
+              <!-- Only once nothing is outstanding: a respondent who came back from the
+                   results to change one answer needs one click to return, not seventeen. -->
+              ${nextIndex() < 0 ? `<button id="toresults">Back to my results →</button>` : ""}
+              <button class="ghost" id="skip">I cannot judge this one</button>
+              <span class="muted" id="allsix" style="font-size:.82rem${done ? ";display:none" : ""}">All ${requiredOn(item).length} before you can move on.</span>
+            </div>
+            <div class="hint"><kbd>1</kbd>–<kbd>5</kbd> scores the next unrated criterion.
+            ${n === 1 ? "" : "Going back keeps what you gave — you can change it."}</div>
+          </div>
+        </div>
+      </div>
+    </div>`));
+
+  app.querySelectorAll(".scale button").forEach(b => {
+    b.onclick = () => setScore(item, b.dataset.c, Number(b.dataset.v));
+  });
+  document.getElementById("next").onclick = () => commit(item, false);
+  document.getElementById("skip").onclick = () => {
+    if (!confirm("Record this trajectory as skipped and move on?")) return;
+    commit(item, true);
+  };
+  // Going back records what is on screen first, so a half-finished screen is not lost by
+  // stepping away from it — but only if something was actually given.
+  document.getElementById("prev").onclick = () => {
+    stash(item);
+    loadItem(cursor - 1);
+    render();
+  };
+  const back = document.getElementById("toresults");
+  if (back) back.onclick = () => { stash(item); cursor = null; render(); };
+  paintProgress(item);
+}
+
+/* Keep whatever is on screen without moving on. An untouched screen is left untouched: a
+   respondent who steps back past a trajectory they never scored should not thereby have
+   "answered" it. */
+function stash(item) {
+  const el = document.getElementById("note");
+  const text = (el ? el.value : note).trim();
+  if (!Object.keys(scores).length && !text) return;
+  const at = R.answers.findIndex(a => a.item === item.id);
+  const partial = !requiredOn(item).every(k => scores[k]);
+  const rec = {
+    item: item.id, content: item.content, dataset: item.dataset,
+    system: item.system || null,
+    scores: Object.assign({}, scores), skipped: false, partial,
+    note: text, answered_at: new Date().toISOString(),
+    ms: shownAt ? Date.now() - shownAt : null,
+  };
+  if (at >= 0) R.answers[at] = Object.assign({}, R.answers[at], rec);
+  else if (!partial) R.answers.push(rec);        // a complete screen counts as answered
+  else return;                                   // a partial first pass stays uncommitted
+  save();
+}
+
+/* Recording a score patches the criterion in place instead of re-rendering the screen.
+   Re-rendering replaced the whole panel, which reset both columns' scroll positions — so
+   every click threw the reader back to the top of a list they were halfway down. Nothing
+   else on the screen depends on a score, so nothing else needs to move. */
+function setScore(item, k, n, scrollIntoView) {
+  scores[k] = n;
+  const wrap = app.querySelector(`.crit[data-c="${k}"]`);
+  if (!wrap) { renderItem(item); return; }
+  wrap.querySelectorAll(".scale button").forEach(
+    b => b.classList.toggle("sel", Number(b.dataset.v) === n));
+  const chosen = wrap.querySelector(".chosen");
+  chosen.textContent = survey.instructions.criteria[k].levels[n];
+  chosen.classList.remove("empty");
+  if (scrollIntoView) wrap.scrollIntoView({block: "nearest"});
+
+  paintProgress(item);
+}
+
+/* The scored/total count for the trajectory on screen, and the Next button's state.
+   Counted over the REQUIRED criteria: a screen whose optional one is unanswered is
+   finished, and a bar that said 5 of 6 forever would say otherwise. */
+function paintProgress(item) {
+  const required = requiredOn(item);
+  const total = required.length;
+  const n = required.filter(c => scores[c]).length;
+  const spare = optionalOn(item).length;
+  const done = n === total;
+  const bar = document.getElementById("critprog");
+  if (bar) bar.style.width = (100 * n / total) + "%";
+  const count = document.getElementById("critcount");
+  if (count) {
+    count.textContent = (done ? `All ${total} scored — ready to move on`
+                              : `${n} of ${total} scored`)
+                      + (spare ? ` (${spare} optional on this one)` : "");
+    count.classList.toggle("full", done);
+  }
+  const next = document.getElementById("next");
+  if (next) next.disabled = !done;
+  const hint = document.getElementById("allsix");
+  if (hint) hint.style.display = done ? "none" : "";
+}
+
+/* Digit keys score the first criterion still unrated, so a whole screen can be answered
+   1-1-2-3-2-4 without reaching for the mouse. Ignored while typing in the note. */
+function onKey(e) {
+  if (screen !== "rate" || !R) return;
+  if (e.target && /^(TEXTAREA|INPUT|SELECT)$/.test(e.target.tagName)) return;
+  const item = cursor === null ? null : items()[cursor];
+  if (!item) return;
+  const n = Number(e.key);
+  if (!(n >= 1 && n <= 5)) return;
+  // Required ones first; an optional criterion is only reached once the rest are done, so
+  // typing 1-2-3-4-5 never lands a score on the scale that was not asked for.
+  const k = requiredOn(item).find(c => !scores[c])
+         || item.criteria.find(c => !scores[c]);
+  if (!k) return;
+  e.preventDefault();
+  // Scrolled into view here but not on click: a key press can land on a criterion that is
+  // off screen, where a click cannot.
+  setScore(item, k, n, true);
+}
+
+/* Record this screen and move on. An answer is keyed by its trajectory and REPLACED rather
+   than appended, so revisiting one leaves a response with one row per trajectory however
+   many times it was revised. */
+function commit(item, skipped) {
+  const el = document.getElementById("note");
+  const at = R.answers.findIndex(a => a.item === item.id);
+  const rec = {
+    item: item.id,
+    // The content fingerprint travels with every answer, not just the item id: the id
+    // names a slot in a build, this names the trajectory that was actually on the screen.
+    // It is what lets a returned file be matched back against runs/ years later.
+    content: item.content,
+    dataset: item.dataset,
+    // The dataset and the system that produced this trajectory, on the answer itself, so
+    // a row of ratings is self-describing without joining anything.
+    system: item.system || null,
+    scores: skipped ? {} : Object.assign({}, scores),
+    skipped: !!skipped,
+    partial: !skipped && !requiredOn(item).every(k => scores[k]),
+    note: (el ? el.value : note).trim(),
+    answered_at: new Date().toISOString(),
+    ms: shownAt ? Date.now() - shownAt : null,
+  };
+  if (at >= 0) {
+    R.answers[at] = Object.assign({}, R.answers[at], rec,
+                                  {revised_at: new Date().toISOString()});
+  } else {
+    R.answers.push(rec);
+  }
+  save();
+
+  // Forward one screen; from the last one, back to whatever is still outstanding, and only
+  // when nothing is does the closing screen come up.
+  const next = cursor + 1;
+  if (next < items().length) loadItem(next);
+  else {
+    const left = nextIndex();
+    if (left >= 0) loadItem(left); else cursor = null;
+  }
+  render();
+}
+
+/* ------------------------------------------------------------------ scoring */
+
+/* One cell per (trajectory, criterion) the respondent actually rated, paired with the
+   judge's mean and its individual repeats. Cells the judge did not judge — QUIS's
+   trustworthiness, assigned 5 by policy — are marked, and agreement.js drops them. */
+function cells() {
+  if (!truth) return [];
+  const out = [];
+  for (const a of R.answers) {
+    if (a.skipped) continue;
+    const t = truth.items[a.item];
+    if (!t) continue;
+    for (const [k, v] of Object.entries(a.scores)) {
+      const block = t.scores[k];
+      if (!block) continue;
+      out.push({
+        item: a.item, content: a.content, dataset: a.dataset, criterion: k, human: v,
+        judge: block.score, judge_scores: block.scores || [],
+        assigned: !!block.assigned,
+      });
+    }
+  }
+  return out;
+}
+
+async function loadTruth() {
+  if (truth || !survey.meta.reveal) return truth;
+  try {
+    const r = await fetch("data/truth.json", {cache: "no-store"});
+    if (r.ok) truth = await r.json();
+  } catch (e) { truth = null; }
+  return truth;
+}
+
+function report() {
+  const c = cells();
+  if (!c.length || !window.TrajAgreement) return null;
+  return TrajAgreement.compute(c, {order: criteria()});
+}
+
+/* What the download and the submission carry. `decisions` is the per-trajectory detail —
+   dropped from the submitted copy, which Apps Script writes into one spreadsheet cell that
+   truncates at 50 000 characters with no error. */
+/* Nothing about the model goes into a response. The agreement table on the closing screen
+   is computed here, from the answer key, purely to show the respondent how they did — but
+   the file they take away is a record of THEIR answers, not of a comparison. Writing judge
+   scores into it would mean every stored response carried a copy of the model's half,
+   which was never asked of the respondent and can always be recomputed offline from the
+   scoring run. `score_survey.py` joins the two when the time comes.
+
+   Nothing calls a `results()` builder any more; `report()` serves the screen directly. */
+
+/* ------------------------------------------------------------------ closing screen */
+
+function tile(big, lbl, sub) {
+  return `<div class="tile"><div class="big">${big}</div><div class="lbl">${esc(lbl)}</div>
+          ${sub ? `<div class="sub">${sub}</div>` : ""}</div>`;
+}
+
+const pct = (v) => (v === null || v === undefined || Number.isNaN(v) ? "—" : (100 * v).toFixed(0) + "%");
+const num = (v, d) => (v === null || v === undefined || Number.isNaN(v) ? "—" : v.toFixed(d === undefined ? 2 : d));
+const ciTxt = (r, k, f) => (r.ci && r.ci[k] ? `95% CI ${f(r.ci[k][0])}–${f(r.ci[k][1])}` : "");
+
+function tableHTML(rep) {
+  const row = (r, cls) => `
+    <tr class="${cls || ""}">
+      <td class="q">${esc(TrajAgreement.label(r.criterion))}</td>
+      <td>${r.n}</td>
+      <td>${num(r.human_mean)}</td>
+      <td>${num(r.judge_mean)}</td>
+      <td>${pct(r.exact)}<span class="muted"> / ${pct(r.exact_chance)}</span></td>
+      <td>${pct(r.within1)}</td>
+      <td>${num(r.mae)}</td>
+      <td>${num(r.pearson, 2)}</td>
+      <td>${num(r.qwk, 2)}</td>
+      <td>${num(r.alpha, 2)}</td>
+      <td>${r.judge_self && r.judge_self.n ? pct(r.judge_self.exact) : "—"}</td>
+    </tr>`;
+  return `
+    <div class="scroll"><table>
+      <thead><tr>
+        <th class="q">criterion</th><th>n</th><th>you</th><th>judge</th>
+        <th>exact / chance</th><th>±1</th><th>MAE</th><th>r</th><th>QWK</th><th>α</th>
+        <th>judge vs itself</th>
+      </tr></thead>
+      <tbody>${rep.criteria.map(r => row(r)).join("")}${row(rep.pooled, "total")}</tbody>
+    </table></div>`;
+}
+
+function reviewHTML(rep) {
+  return R.answers.map((a, i) => {
+    const t = truth.items[a.item];
+    const item = items().find(x => x.id === a.item);
+    if (!t || !item) return "";
+    const rows = criteria().map(k => {
+      const b = t.scores[k], h = a.scores[k];
+      if (!b) return "";
+      const gap = h === undefined ? null : Math.abs(h - b.score);
+      return `<tr>
+        <td class="q">${esc(TrajAgreement.label(k))}${b.assigned ? ' <span class="muted">(assigned, not judged)</span>' : ""}</td>
+        <td>${h === undefined ? "—" : h}</td>
+        <td>${num(b.score)} <span class="muted">(${(b.scores || []).join(", ")})</span></td>
+        <td class="${gap === null ? "" : gap < 0.5 ? "ok" : gap > 1.5 ? "warn" : ""}">${gap === null ? "—" : num(gap)}</td>
+        <td class="q muted">${esc(b.reason || "")}</td>
+      </tr>`;
+    }).join("");
+    const at = items().findIndex(x => x.id === a.item);
+    return `
+      <details class="review">
+        <summary>${i + 1}. ${esc(item.dataset)} — ${esc(t.system)}${a.skipped ? " (skipped)" : ""}</summary>
+        <div class="scroll"><table>
+          <thead><tr><th class="q">criterion</th><th>you</th><th>judge (repeats)</th><th>gap</th>
+                     <th class="q">what the judge said</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        ${a.note ? `<p class="hint">Your note: ${esc(a.note)}</p>` : ""}
+        <div class="row" style="margin-top:8px">
+          <button class="ghost revise" data-at="${at}">← Change my scores for this one</button>
+        </div>
+      </details>`;
+  }).join("");
+}
+
+async function renderDone() {
+  await loadTruth();
+  const rep = report();
+  R.finished_at = R.finished_at || new Date().toISOString();
+  save();
+
+  if (!rep) {
+    app.innerHTML = "";
+    app.append($(`
+      <div class="card">
+        <h2>Thank you — that is all ${items().length}.</h2>
+        <p>${truth ? "No ratings were recorded." : "This build publishes no answer key, so " +
+           "there is nothing to score against here. Your answers are scored offline."}</p>
+        <div class="row" style="margin-top:12px">
+          <button class="primary" id="dl">Download my answers (.json)</button>
+          <button class="ghost revise" data-at="${items().length - 1}">← Back to the trajectories</button>
+        </div>
+      </div>`));
+    document.getElementById("dl").onclick = download;
+    app.querySelectorAll("button.revise").forEach(b => {
+      b.onclick = () => { loadItem(Number(b.dataset.at)); render(); };
+    });
+    return;
+  }
+
+  const p = rep.pooled;
+  app.innerHTML = "";
+  app.append($(`
+    <div>
+      <div class="card">
+        <h2>Done — here is how far you and the judge agreed.</h2>
+        <div class="tiles">
+          ${tile(pct(p.within1), "within 1 point", `${pct(p.within1_chance)} by chance`)}
+          ${tile(pct(p.exact), "exact match", `${pct(p.exact_chance)} by chance`)}
+          ${tile(num(p.pearson, 2), "correlation", ciTxt(p, "pearson", v => v.toFixed(2)))}
+          ${tile(pct(p.judge_self.exact), "judge vs itself",
+                 `its own ${survey.meta.geval.repeats} repeats`)}
+        </div>
+        <p class="hint">The fourth tile is the one to read the others against: the judge
+        scored every trajectory ${survey.meta.geval.repeats} times, and that is how often it
+        agreed with <em>itself</em>. Matching it more closely than it matches itself is not
+        possible, so that number, not 100%, is the ceiling.</p>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Per criterion</div>
+        ${tableHTML(rep)}
+        <p class="hint">
+          <strong>exact</strong> — you and the judge's rounded mean chose the same number,
+          against what two raters with your marginals would hit by accident.
+          <strong>±1</strong> — within one point of its unrounded mean.
+          <strong>MAE</strong> — average distance, in scale points.
+          <strong>r</strong> — correlation across trajectories: whether you ranked them the
+          same way, independently of whether you scored them high or low.
+          <strong>QWK</strong> — chance-corrected agreement that counts a 2-point miss more
+          than a 1-point one. <strong>α</strong> — Krippendorff's alpha.
+          ${rep.n_excluded_assigned ? `<br>${rep.n_excluded_assigned} of your ratings are not
+          in this table: the judge was never asked those (one system's trustworthiness is
+          assigned by policy rather than judged), so there is nothing to agree with.` : ""}
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Trajectory by trajectory</div>
+        <p class="hint" style="margin-top:0">Which system produced each one, what the judge
+        gave it — with its individual repeats — and its reasoning. <strong>Change my
+        scores</strong> takes you back to that screen; the table here is recomputed when you
+        return.</p>
+        ${reviewHTML(rep)}
+      </div>
+
+      <div class="card" id="sendcard">
+        <div class="eyebrow">Send your answers</div>
+        <p>The file carries your ratings, this table, and enough provenance to be read months
+        from now without this site.</p>
+        <div class="row">
+          <button class="primary" id="dl">Download (.json)</button>
+          <button id="dlcsv">Download the table (.csv)</button>
+          ${ENDPOINT ? `<button class="primary" id="send">Submit my answers</button>` : ""}
+          <button class="ghost revise" data-at="${items().length - 1}">← Back to the trajectories</button>
+        </div>
+        ${ENDPOINT ? "" : `<p class="hint">Email it to
+          <a href="mailto:shaolinx@usc.edu">shaolinx@usc.edu</a>.</p>`}
+        <div id="sendmsg"></div>
+      </div>
+    </div>`));
+
+  document.getElementById("dl").onclick = download;
+  document.getElementById("dlcsv").onclick = () => {
+    const rep2 = report();
+    saveAs(TrajAgreement.toCSV(rep2) + "\n", "csv", "text/csv");
+  };
+  // Back into the rating screens from the results. The table is rebuilt from the answers
+  // every time this screen is drawn, so a revision is reflected the moment they return.
+  app.querySelectorAll("button.revise").forEach(b => {
+    b.onclick = () => { loadItem(Number(b.dataset.at)); render(); };
+  });
+  const send = document.getElementById("send");
+  if (send) send.onclick = async () => {
+    send.disabled = true; send.textContent = "Sending…";
+    const msg = document.getElementById("sendmsg");
+    const r = await submit();
+    send.textContent = r.ok ? "Sent ✓" : "Submit my answers";
+    send.disabled = r.ok;
+    msg.innerHTML = r.ok
+      ? `<p class="ok">${r.confirmed ? "Received — thank you." :
+          "Sent, but we could not confirm it. Please download the file too, just in case."}</p>`
+      : `<p class="err">Could not send it (${esc(r.error)}). Please download the file and
+         email it to <a href="mailto:shaolinx@usc.edu">shaolinx@usc.edu</a>.</p>`;
+  };
+}
+
+async function submit() {
+  R.finished_at = R.finished_at || new Date().toISOString();
+  save();
+  // The same record as the download, minus `shown`: step text alone would overrun the
+  // 45 000 characters a spreadsheet cell holds. `--identify --annotate` restores it.
+  const body = JSON.stringify(R);
+  const headers = {"Content-Type": "text/plain;charset=utf-8"};
+  try {
+    const r = await fetch(ENDPOINT, {method: "POST", headers, body, redirect: "follow"});
+    if (!r.ok) return {ok: false, error: `the server answered ${r.status}`};
+    const j = await r.json().catch(() => null);
+    if (j && j.ok === false) return {ok: false, error: j.error || "rejected"};
+    return {ok: true, confirmed: true};
+  } catch (e) {
+    // Apps Script answers from a redirect whose CORS headers are not guaranteed, so the
+    // browser sometimes refuses to let us read a reply that did arrive. Retry opaquely and
+    // say plainly that we could not confirm it.
+    try {
+      await fetch(ENDPOINT, {method: "POST", mode: "no-cors", headers, body});
+      return {ok: true, confirmed: false};
+    } catch (e2) {
+      return {ok: false, error: e2.message || "could not reach the server"};
+    }
+  }
+}
+
+function saveAs(text, ext, type) {
+  const name = (R.respondent.name || "anonymous").replace(/[^A-Za-z0-9._-]+/g, "-");
+  const blob = new Blob([text], {type});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `d2i-rating_${name}_${(R.started_at || "").slice(0, 10)}.${ext}`;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* Everything that was actually on the screen, for the trajectories this respondent saw:
+   the goal, the dataset profile, and each trajectory's steps with their evidence. It makes
+   the download a complete record — the ratings and the thing rated, readable years later
+   with no runs/, no bundle and no site.
+
+   Only in the download. The submitted copy has to fit in one spreadsheet cell (45 000
+   characters), and step text alone would blow through that; `--identify --annotate` puts
+   it back from runs/ for anything that arrived by Submit. */
+/* One evaluation screen, exactly as it stood: the goal, the dataset profile, every step
+   with its evidence and metadata, and each criterion with the rubric text that sat beside
+   its scale — including the note on a criterion that was marked optional. Attached to the
+   answer it belongs to, so the record reads screen by screen rather than as a set of ids
+   pointing at tables elsewhere.
+
+   Yes, this repeats the profile and the rubric on every screen. That is the point: a
+   record of what someone was shown is worth more than a normalised one, and the
+   duplication costs a few hundred kilobytes in a file nobody has to parse in a hurry. */
+function screenRecord(item) {
+  const ins = survey.instructions;
+  return {
+    position: items().findIndex(i => i.id === item.id) + 1,
+    of: items().length,
+    dataset: item.dataset,
+    // Which agent produced it, when the build carries that (it does unless it was built
+    // --blind-systems). Never rendered on the rating screen; recorded here so the file
+    // says what was rated and what made it, with nothing to join against.
+    system: item.system || null,
+    arm: item.arm || null,
+    content: item.content,
+    goal: survey.goals[item.dataset],
+    profile: survey.profiles[item.dataset],
+    n_steps: item.n_steps,
+    max_depth: item.max_depth,
+    steps: item.steps,
+    criteria: item.criteria.map(k => ({
+      key: k,
+      title: ins.criteria[k].title,
+      question: ins.criteria[k].question,
+      evaluation_steps: ins.criteria[k].steps,
+      levels: ins.criteria[k].levels,
+      notes: ins.criteria[k].notes,
+      optional: isOptional(item, k),
+      optional_note: (item.notes || {})[k] || null,
+    })),
+  };
+}
+
+/* The response as a record: every answer with the screen it was given on. */
+function fullRecord() {
+  const byId = Object.fromEntries(items().map(i => [i.id, i]));
+  return Object.assign({}, R, {
+    answers: R.answers.map(a => (byId[a.item]
+      ? Object.assign({}, a, {screen: screenRecord(byId[a.item])})
+      : a)),
+  });
+}
+
+function download() {
+  R.finished_at = R.finished_at || new Date().toISOString();
+  save();
+  // Built for the copy being written out, never stored on `R`: the screens would
+  // otherwise be saved into localStorage on every update, and would ride along on a later
+  // Submit into a spreadsheet cell that cannot hold them.
+  saveAs(JSON.stringify(fullRecord(), null, 2) + "\n", "json", "application/json");
+}
+
+/* ------------------------------------------------------------------ router */
+
+function render() {
+  if (screen === "intro" || !R) { renderIntro(); chrome(); return; }
+  if (cursor === null) { renderDone().then(chrome); chrome(); return; }
+  shownAt = Date.now();
+  renderItem(items()[cursor]);
+  chrome();
+}
+
+(async function start() {
+  try {
+    const r = await fetch("data/survey.json", {cache: "no-store"});
+    if (!r.ok) throw new Error(`survey.json — ${r.status}`);
+    survey = await r.json();
+  } catch (e) {
+    app.innerHTML = `<div class="card"><h2>The survey could not load.</h2>
+      <p>${esc(e.message)}</p>
+      <p class="hint">Opening this file straight off disk will not work — the browser blocks
+      <code>fetch</code> on <code>file://</code>. Serve the folder instead:
+      <code class="mono">python3 -m http.server 8000</code>, then open
+      <code class="mono">http://localhost:8000/trajectory-survey/</code>.</p></div>`;
+    return;
+  }
+  document.getElementById("title").textContent = survey.meta.title;
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    // A rebuild moves the item ids and the sampling, so answers from an older build are not
+    // answers to these questions. Kept, not silently scored: the response file still has them.
+    if (saved && saved.survey && saved.survey.built_at === survey.meta.built_at) R = saved;
+    else if (saved) err = "This survey was rebuilt since you last opened it, so it starts fresh.";
+  } catch (e) {}
+
+  // With the answer key published, fetching it early costs nothing and makes the closing
+  // screen instant — it is a public URL either way.
+  if (survey.meta.reveal) loadTruth();
+
+  document.addEventListener("keydown", onKey);
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Would you have asked the same question? — D2I human evaluation</title>
+<meta name="description" content="A short survey: given a data-analysis trajectory, which question would you ask next? Your answers are compared against the D2I search agent.">
+<meta name="robots" content="noindex, follow">
+<style>
+/* The site's palette (css/style.css) — cardinal and gold, Arial — on a survey layout that
+   has to hold long questions and a scoring table, so it is narrower and quieter than the
+   home page. Self-contained: this page is served on its own, without the site nav. */
+:root {
+  --ink: #333; --head: #1a1a1a; --muted: #6b6b6b; --line: #e5e5e5; --soft: #f8f9fa;
+  --card: #fff; --bg: #fbfbfc; --accent: #990000; --accent-soft: #f6ecec; --gold: #FFCC00;
+  --ok: #1a7a4c; --warn: #a35a00; --radius: 8px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif; line-height: 1.6;
+}
+.wrap { max-width: 820px; margin: 0 auto; padding: 24px 20px 90px; }
+/* The decision screen only. Prose screens (intro, results) stay at 820px, which is about as
+   wide as a paragraph should be read; the decision screen is not prose but two panels side
+   by side, so it is given room rather than stacking ~240 words into one tall column. */
+.wrap.wide { max-width: 1280px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3 { color: var(--head); margin-top: 0; margin-bottom: .5rem; font-weight: 600; }
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.1rem; }
+
+header.top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--accent); padding-bottom: 8px;
+}
+header.top .home { font-size: .85rem; }
+.counter { font-size: .85rem; color: var(--muted); }
+.bar { height: 5px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 14px 0 22px; }
+.bar > i { display: block; height: 100%; background: var(--accent); transition: width .25s ease; }
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; margin-bottom: 16px;
+}
+
+/* The decision screen: context on the left, the question being asked on the right.
+   Single column below the breakpoint, in the same order — context first, then the ask —
+   so nothing depends on the two panels being side by side. */
+/* `minmax(0, 1fr)` even in the single-column case: a grid item defaults to `min-width: auto`,
+   which lets the 46-column sample table size the whole column to its content and push the
+   page sideways. The 0 minimum is what keeps the table scrolling inside its own card. */
+.split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.split > .col-ctx > .card:last-child,
+.split > .col-ask > .card:last-child { margin-bottom: 0; }
+
+@media (min-width: 1040px) {
+  .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 20px; }
+  /* Each panel scrolls with the page, but sticks once its own top passes the viewport, so
+     the candidate list and the trajectory it is being judged against stay together however
+     unequal their heights are. */
+  .split > .col-ctx, .split > .col-ask {
+    position: sticky; top: 16px;
+    max-height: calc(100vh - 32px); overflow-y: auto; overscroll-behavior: contain;
+  }
+  /* The scrollbar would otherwise sit hard against the card edge. */
+  .split > .col-ctx { padding-right: 4px; }
+}
+.eyebrow {
+  font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+.goal { font-size: 1rem; color: var(--head); }
+.cols { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.col {
+  font-size: .75rem; padding: 2px 9px; border-radius: 99px;
+  background: var(--accent-soft); color: var(--accent);
+}
+
+/* The trajectory: a vertical spine, the current node highlighted.
+
+   A step carries four different kinds of text, and the point of the styling is that they
+   should never be mistaken for each other:
+
+     .meta     where you are      — a small caps label and the operator as a pill
+     .q        what was asked     — italic, quiet: it is context, not the finding
+     .finding  what was found     — the payload, and the only thing set in full ink
+     .stat     the evidence       — monospace in a chip, so numbers read as numbers
+
+   Only one of the four is dark. Making them all legible-but-grey is what made the panel
+   read as a wall. */
+.step { border-left: 2px solid var(--line); padding: 0 0 18px 18px; margin-left: 4px; position: relative; }
+.step:last-child { padding-bottom: 0; }
+.step::before {
+  content: ""; position: absolute; left: -5px; top: 7px; width: 8px; height: 8px;
+  border-radius: 99px; background: var(--line);
+}
+.step.head::before {
+  background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+}
+/* Deliberately *not* the uppercase treatment `.eyebrow` uses: that is the card-title voice,
+   and reusing it here made two ranks of heading compete inside one card. The pill carries
+   the structure; this is just a whereabouts note. */
+.step .meta {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: .74rem; color: var(--muted); margin-bottom: 6px;
+}
+.step .q {
+  color: var(--muted); font-style: italic; font-size: .89rem;
+  margin-bottom: 5px; line-height: 1.5;
+}
+.step .finding { color: var(--head); }
+/* The node actually being judged. Marked by tinting the block, not by bolding the text —
+   these findings run to several lines, and a bold paragraph is harder to read, not easier. */
+.step.head {
+  background: var(--accent-soft); border-left-color: var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 10px 12px 12px 18px; margin-top: 2px;
+}
+.step.head .meta { color: var(--accent); }
+.step.head .stat { background: var(--card); }
+.step .stat {
+  display: inline-block; margin-top: 7px; padding: 1px 8px;
+  font-size: .72rem; color: var(--muted); background: var(--soft);
+  border: 1px solid var(--line); border-radius: 5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* The question being put, separated from the options by a rule rather than by spacing alone
+   — the one place on the screen where the eye should stop first. */
+.ask { font-weight: 700; color: var(--head); margin-bottom: 4px; font-size: 1.06rem; }
+.ask-sub {
+  font-size: .84rem; color: var(--muted);
+  padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--line);
+}
+/* The answer controls are not part of the option list, so they are set apart from it. */
+.actions { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+/* The criteria to weigh. Set as a quiet inset rather than as body text: it is a checklist to
+   glance down, not another paragraph competing with the candidates for attention. */
+details.guide {
+  border: 1px solid var(--line); border-top: 1px solid var(--line);
+  background: var(--soft); border-radius: 6px; padding: 9px 13px; margin-bottom: 14px;
+}
+details.guide > summary {
+  cursor: pointer; list-style: none; color: var(--muted);
+  font-size: .76rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+}
+details.guide > summary::-webkit-details-marker { display: none; }
+/* A border triangle rather than a ▾ glyph: the arrow characters fall back inconsistently
+   across the fonts this page asks for, and one of them rendered as a dash. */
+details.guide > summary::after {
+  content: ""; display: inline-block; margin-left: 7px; vertical-align: middle;
+  border: 4px solid transparent; border-top-color: currentColor;
+  transform: translateY(2px); transition: transform .15s ease;
+}
+details.guide[open] > summary::after { transform: translateY(-2px) rotate(180deg); }
+details.guide > summary:hover { color: var(--accent); }
+details.guide ul { margin: 9px 0 1px; padding-left: 17px; }
+details.guide li {
+  font-size: .84rem; color: var(--ink); line-height: 1.45; margin-bottom: 5px;
+}
+details.guide li::marker { color: var(--muted); }
+
+/* The same criteria on the intro, laid out side by side so the two decisions are visibly
+   two different judgements rather than one long list. */
+.guides { display: grid; gap: 16px; margin-top: 12px; }
+@media (min-width: 720px) { .guides { grid-template-columns: 1fr 1fr; } }
+.guides > div {
+  background: var(--soft); border: 1px solid var(--line);
+  border-radius: 6px; padding: 12px 14px;
+}
+.guide-ask { font-weight: 600; color: var(--head); font-size: .93rem; }
+.guides ul { margin: 8px 0 0; padding-left: 17px; }
+.guides li { font-size: .84rem; line-height: 1.45; margin-bottom: 5px; }
+.guides li::marker { color: var(--muted); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+button {
+  font: inherit; color: var(--ink); background: var(--card); border: 1px solid #ccc;
+  border-radius: 6px; padding: 9px 16px; cursor: pointer; transition: .12s;
+}
+button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover:not(:disabled) { background: #7a0000; color: #fff; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.ghost { color: var(--muted); border-color: transparent; }
+button.ghost:hover:not(:disabled) { border-color: #ccc; }
+kbd {
+  font: .7rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  border: 1px solid #ccc; border-bottom-width: 2px; border-radius: 4px;
+  padding: 1px 5px; color: var(--muted); margin-right: 6px;
+}
+
+/* one candidate question */
+.cand {
+  display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left;
+  padding: 11px 14px; margin-bottom: 7px; line-height: 1.5;
+}
+.cand:hover:not(:disabled) { background: var(--accent-soft); }
+.cand.sel { border-color: var(--accent); background: var(--accent-soft); }
+.cand .n {
+  flex: none; width: 23px; height: 23px; border-radius: 99px; background: var(--soft);
+  border: 1px solid var(--line); font-size: .78rem; display: grid; place-items: center; margin-top: 1px;
+}
+.cand.sel .n { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cand .grow { flex: 1; }
+.tag {
+  font-size: .7rem; padding: 1px 7px; border-radius: 99px; background: var(--soft);
+  border: 1px solid var(--line); color: var(--muted); margin-right: 8px; white-space: nowrap;
+}
+
+input[type=text], input[type=email], textarea, select {
+  font: inherit; color: var(--ink); background: #fff; border: 1px solid #ccc;
+  border-radius: 6px; padding: 9px 12px; margin: 4px 0 10px; width: 100%; max-width: 420px;
+}
+label.field { display: block; font-size: .82rem; color: var(--muted); font-weight: 600; }
+.hint { font-size: .8rem; color: var(--muted); margin-top: 12px; }
+.err { color: var(--accent); font-size: .85rem; margin-top: 10px; font-weight: 600; }
+
+/* the dataset sample above every question: a few real rows, so the goal and the candidate
+   questions can be read against the data they are about. Its own card, so the goal is not
+   read as a caption for the table. */
+.sample-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  flex-wrap: wrap;
+}
+table.sample { font-size: .8rem; margin-top: 6px; }
+table.sample th, table.sample td { white-space: nowrap; text-align: left; }
+table.sample td.num, table.sample th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.sample tbody tr:last-child td { border-bottom: none; }
+table.sample tbody td { color: var(--head); }
+
+table { border-collapse: collapse; width: 100%; font-size: .85rem; margin-top: 10px; }
+th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+th { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+td.q, th.q { text-align: left; }
+tr.picked td { background: #fffbe6; font-weight: 600; }
+tr.top td { color: var(--head); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.ok { color: var(--ok); font-weight: 600; }
+.warn { color: var(--warn); font-weight: 600; }
+.muted { color: var(--muted); }
+/* Horizontally scrollable, with shadows that appear only on the side there is more to see.
+   Purely CSS: the two `local` gradients are painted with the content and slide away as it
+   scrolls, uncovering the fixed `scroll` shadows underneath. Without this a 46-column
+   sample just looks cut off at the card edge. */
+.scroll {
+  overflow-x: auto;
+  background:
+    linear-gradient(to right, var(--card) 40%, rgba(255, 255, 255, 0)) left center,
+    linear-gradient(to left, var(--card) 40%, rgba(255, 255, 255, 0)) right center,
+    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, .13), rgba(0, 0, 0, 0)) left center,
+    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .13), rgba(0, 0, 0, 0)) right center;
+  background-repeat: no-repeat;
+  background-size: 34px 100%, 34px 100%, 13px 100%, 13px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.tiles { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 4px; }
+.tile {
+  flex: 1 1 150px; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; background: var(--soft);
+}
+.tile .big { font-size: 1.6rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
+.tile .lbl { font-size: .74rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.tile .lbl.mono { text-transform: none; letter-spacing: 0; opacity: .8; margin-top: 4px; }
+
+/* The group headers inside the results table ("Selection alignment"). */
+th.grp {
+  text-align: left; background: var(--soft); color: var(--head);
+  font-size: .74rem; text-transform: uppercase; letter-spacing: .05em;
+}
+h3 { font-size: .95rem; color: var(--head); margin: 22px 0 6px; }
+
+details { border-top: 1px solid var(--line); padding: 10px 0; }
+details summary { cursor: pointer; font-size: .9rem; color: var(--head); }
+ol.steps { padding-left: 20px; } ol.steps li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 id="title">D2I human evaluation</h1>
+    <span class="home" id="nav"></span>          <!-- filled by navLink(), which depends on the screen -->
+  </header>
+  <div class="counter" id="counter"></div>
+  <div class="bar" id="barwrap" style="visibility:hidden"><i id="prog" style="width:0"></i></div>
+  <div id="app"><p class="muted">Loading the survey…</p></div>
+</div>
+
+<!-- The scoring. A plain script, not a module: survey/tests/run_metrics.mjs `require`s the
+     same file to prove the browser and the offline analysis agree cell for cell, and a
+     module would make that indirection harder for no gain. Deploying index.html without
+     this file leaves the completion page with no results. -->
+<script src="metrics.js"></script>
+<script>
+/* ------------------------------------------------------------------ helpers */
+const $ = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content.firstChild; };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const app = document.getElementById("app");
+
+const KEY = "d2i-survey-v1";          // one saved response per browser, bumped if the schema moves
+
+/* Where Submit posts: the /exec URL of the Apps Script in survey/apps_script/, which appends
+   to a Google Sheet and mails the response on. Left empty the button does not appear at all
+   and the closing screen offers only the download — so the page is correct both before the
+   script is deployed and after, and a half-configured endpoint can never silently eat a
+   response. */
+const ENDPOINT = "";
+
+/* ------------------------------------------------------------------ state
+   `survey` is the public bundle; `truth` is fetched only once the last decision is locked in,
+   so the answer key is not sitting in the tab while the questions are still being answered.
+   `R` is the response under construction — mirrored into localStorage after every verdict,
+   which is what makes a reload or a closed laptop non-fatal. */
+let survey = null, truth = null, R = null;
+let stage = "stop", sel = null, screen = "intro", lastStop = null, err = "";
+/* A note typed on the stop screen. The pick screen has its own box, so if both are filled
+   the later one wins — the same precedence as the CLI's `note = note2 or note`. */
+let stopNote = "";
+/* Set while the model's answer to the decision just judged is on screen; cleared by Next. */
+let revealed = null;
+
+const decisions = () => survey.decisions;
+const judged = () => new Set(R.verdicts.map(v => v.decision));
+const nextIndex = () => decisions().findIndex(d => !judged().has(d.id));
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify(R)); } catch (e) {} }
+
+/* A submission id, minted once per response. The submit path can legitimately send the same
+   response twice — see submit() — so the receiving script needs something stable to
+   recognise the second copy by. */
+function uuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "r-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+}
+
+function fresh(respondent) {
+  return {
+    id: uuid(),
+    survey: {built_at: survey.meta.built_at, seed: survey.meta.seed, n_decisions: survey.meta.n_decisions},
+    respondent,
+    started_at: new Date().toISOString(),
+    finished_at: null,
+    submitted_at: null,
+    user_agent: navigator.userAgent,
+    verdicts: [],
+  };
+}
+
+/* One verdict, shaped like human_trajectory_eval.make_verdict — minus `true_index`, which
+   this page genuinely cannot compute: the shuffle that maps a slot back to a candidate is
+   only in the private bundle. score_survey.py resolves it at scoring time. */
+function record(decision, terminate, slot, choice, note) {
+  const v = {
+    decision: decision.id,
+    terminate: terminate === undefined ? null : terminate,
+    slot: slot === undefined ? null : slot,
+    choice: choice,
+    note: (note || "").trim(),
+    ts: new Date().toISOString(),
+  };
+  R.verdicts.push(v);
+  save();
+  return v;
+}
+
+/* A decision is finished: show the model's ranking if this build reveals as it goes,
+   otherwise go straight on. Every path that records a verdict ends here, so the two modes
+   cannot diverge. */
+function advance(decision, verdict) {
+  if (!survey.meta.feedback) return begin();
+  // Feedback is on, so a reveal is always shown — even when the key is missing, where the
+  // screen says so. Skipping silently is indistinguishable from a broken Submit button.
+  revealed = {d: decision, phase: "pick", v: verdict, missing: !(truth && truth[decision.id])};
+  return render();
+}
+
+/* The stop answer is given, but nothing is written yet: the two questions still produce ONE
+   verdict, so it is recorded once the whole decision is done. Reveal how the search actually
+   ruled on stopping, then go on to the candidates.
+
+   Showing this before the candidate question is a deliberate departure from the CLI, which
+   holds both halves back until the end precisely so that learning the search continued here
+   cannot tilt the pick that follows. Answering the candidate question at every node — rather
+   than ending the decision on "terminate" — is what makes it worth the trade: it doubles the
+   picks the sample yields. `report()` already flags feedback-driven dependence in its
+   footnote, and that caveat now covers this too. */
+function afterStop(decision) {
+  if (survey.meta.feedback) {
+    revealed = {d: decision, phase: "stop", terminate: lastStop,
+                missing: !(truth && truth[decision.id])};
+    return render();
+  }
+  return toCandidates(decision);
+}
+
+/* Leave the stop reveal. Every node that offers candidates now asks for one, whether the
+   respondent said continue or terminate; a node with none is finished here. */
+function toCandidates(decision) {
+  revealed = null;
+  if (decision.candidates.length) {
+    stage = "pick"; sel = null;
+    return render();
+  }
+  record(decision, lastStop, null, lastStop ? "t" : "c", stopNote);
+  return begin();
+}
+
+/* ------------------------------------------------------------------ chrome */
+
+/* The header link. The opening screen is the survey's front page, so from anywhere else the
+   link goes back to it — never discarding an answer, since everything is already saved and
+   that screen offers Resume. On the opening screen itself there is nothing to go back to,
+   so it becomes the way out to the rest of the site. */
+function navLink() {
+  const nav = document.getElementById("nav");
+  if (!nav) return;
+  if (screen === "intro" || !R) {
+    nav.innerHTML = `<a href="../index.html">← Shaolin Xie</a>`;
+    return;
+  }
+  nav.innerHTML = `<a href="#" id="back">← Back to the start</a>`;
+  document.getElementById("back").onclick = (e) => {
+    e.preventDefault();
+    screen = "intro";
+    render();
+  };
+}
+
+function chrome() {
+  navLink();
+  // Only the decision screen goes two-column, so only it gets the wider container. A reveal
+  // is a single card and reads as prose, so it stays in the narrow measure.
+  document.querySelector(".wrap").classList.toggle(
+    "wide", screen === "judge" && !!R && !revealed && nextIndex() >= 0);
+  const c = document.getElementById("counter"), bar = document.getElementById("barwrap");
+  if (screen !== "judge" || !R) { c.textContent = ""; bar.style.visibility = "hidden"; return; }
+  const done = R.verdicts.length, total = decisions().length, i = nextIndex();
+  bar.style.visibility = "visible";
+  // While a reveal is up, `nextIndex` already points past it — the header should still name
+  // the decision on screen, which is the one just answered.
+  const shown = revealed ? decisions().findIndex(x => x.id === revealed.d.id) : i;
+  c.textContent = revealed
+                ? `Decision ${shown + 1} of ${total}`
+                  // The stop reveal sits mid-decision — the candidate question still follows.
+                  + (revealed.phase === "stop" ? "" : " — answered")
+                : i >= 0 ? `Decision ${i + 1} of ${total}`
+                : `${done} of ${total} answered`;
+  document.getElementById("prog").style.width = (100 * done / Math.max(1, total)) + "%";
+}
+
+/* ------------------------------------------------------------------ intro */
+function renderIntro() {
+  const m = survey.meta;
+  const resume = R && R.verdicts.length && nextIndex() >= 0;
+  app.innerHTML = "";
+  app.append($(`
+    <div>
+      <div class="card">
+        <h2>${esc(m.title)}</h2>
+        <p>D2I is a search agent that explores a dataset by asking itself one question at a
+        time. At every step it makes two calls: <strong>is this line of enquiry still worth
+        following?</strong> and, if so, <strong>which question should come next?</strong></p>
+        <p>This survey replays ${m.n_decisions} of those moments from real runs and asks you
+        the same two things. You see the goal, a sample of the dataset, and the trajectory so
+        far — exactly what the agent saw. You do not see its scores, its ranking, or which
+        candidate it went on to answer.</p>
+        <p class="muted">About ${Math.max(3, Math.round(m.n_decisions * 0.75))}–${Math.round(m.n_decisions * 1.5)} minutes.
+        Your progress is saved in this browser, so you can close the tab and come back.
+        Nothing is transmitted anywhere: at the end you download your answers as a file and
+        send them on if you choose to.</p>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">How it works</div>
+        <ol class="steps">
+          <li>Read the trajectory — the chain of findings the agent has built up so far.</li>
+          <li>Say whether it is worth continuing. This is asked <em>before</em> you see any
+              candidate, because that is the position the agent's own judge is in.</li>
+          <li>If you continue, pick the question you would ask next from the pool that
+              actually competed at that node, in a shuffled order.</li>
+          ${survey.meta.feedback ? `<li>You then see what the agent did — how it ranked every
+              candidate and where your pick landed — and click <em>Next</em> to carry on.</li>` : ""}
+        </ol>
+        <p class="hint">There is no trick and no single right answer — the point is to measure
+        how often a person and the agent agree, so please answer as you would if the analysis
+        were yours. Skip anything you cannot judge rather than guessing.</p>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">What to weigh</div>
+        <p class="hint" style="margin-top:0">Both questions are judgement calls. These are the
+        things to weigh — they are repeated on every screen, where you can fold them away once
+        they are familiar.</p>
+        <div class="guides">
+          ${["stop", "pick"].map(k => `
+            <div>
+              <div class="guide-ask">${esc(GUIDE[k].ask)}</div>
+              <ul>${GUIDE[k].points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+            </div>`).join("")}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">About you <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">— all optional</span></div>
+        <label class="field">Name or handle
+          <input type="text" id="name" placeholder="e.g. alex, or leave blank" autocomplete="off"></label>
+        <label class="field">Email <span class="muted" style="font-weight:400">— only if you would like the results sent to you</span>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="off"></label>
+        <label class="field">How familiar are you with exploratory data analysis?
+          <select id="background">
+            <option value="">— prefer not to say —</option>
+            <option value="daily">I do it regularly (analyst, data scientist, researcher)</option>
+            <option value="some">Some experience</option>
+            <option value="little">Little or none</option>
+          </select></label>
+        <div class="row" style="margin-top:8px">
+          <button class="primary" id="go">${resume ? "Resume" : "Start"}</button>
+          ${resume ? `<span class="muted">${R.verdicts.length} of ${decisions().length} already answered</span>
+                      <button class="ghost" id="restart">Start over</button>` : ""}
+        </div>
+        ${err ? `<div class="err">${esc(err)}</div>` : ""}
+      </div>
+    </div>`));
+
+  if (R && R.respondent) {
+    document.getElementById("name").value = R.respondent.name || "";
+    document.getElementById("email").value = R.respondent.email || "";
+    document.getElementById("background").value = R.respondent.background || "";
+  }
+  document.getElementById("go").onclick = () => {
+    const respondent = {
+      name: document.getElementById("name").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      background: document.getElementById("background").value,
+    };
+    if (!R || !R.verdicts.length) R = fresh(respondent);
+    else R.respondent = respondent;
+    save();
+    screen = "judge"; begin();
+  };
+  const rs = document.getElementById("restart");
+  if (rs) rs.onclick = () => {
+    if (!confirm("Discard your answers so far and start again?")) return;
+    R = null; localStorage.removeItem(KEY); render();
+  };
+}
+
+/* ------------------------------------------------------------------ judging */
+function begin() {
+  const d = decisions()[nextIndex()];
+  stage = d && d.ask_stop ? "stop" : "pick";
+  sel = null; lastStop = null; stopNote = "";
+  render();
+}
+
+/* One cell of the data sample. Values arrive exactly as the run's report.json held them, so
+   pandas' midnight timestamps ("2010-01-01T00:00:00") are shortened back to the date they
+   stand for, and a long string is cut with the full value left on the title attribute. */
+function cell(v) {
+  if (v === null || v === undefined || v === "") return "—";
+  if (typeof v === "number") return Number.isInteger(v) ? v.toLocaleString() : String(+v.toFixed(4));
+  const s = String(v);
+  const day = /^(\d{4}-\d{2}-\d{2})T00:00:00(\.0+)?$/.exec(s);
+  return day ? day[1] : s;
+}
+
+/* The rows the agent itself was shown, from report.json's `data_sample`, keyed by run.
+   Nothing here is a tell: it is the sample dataset, not anything anyone concluded from it —
+   and reading the goal or a candidate question without seeing a row is guesswork.
+
+   Real rows say what the columns are *and* what is in them, so the column list is not shown
+   alongside them. It is still the fallback for a run whose report.json carried no
+   data_sample, where the alternative would be a goal with no schema at all. */
+function dataSample(d) {
+  const s = (survey.samples || {})[d.run];
+  if (!s || !s.rows || !s.rows.length) {
+    return d.columns && d.columns.length
+      ? `<div class="card">
+           <div class="eyebrow">The columns</div>
+           <div class="cols">${d.columns.map(c => `<span class="col">${esc(c)}</span>`).join("")}</div>
+         </div>`
+      : "";
+  }
+  const cols = s.columns && s.columns.length ? s.columns : Object.keys(s.rows[0]);
+  // Right-align a column only when every value in it is a number, so mixed or text columns
+  // are not raggedly aligned against the numeric ones.
+  const num = cols.map(c => s.rows.every(r => r[c] === null || typeof r[c] === "number"));
+  const head = cols.map((c, i) => `<th class="${num[i] ? "num" : ""}">${esc(c)}</th>`).join("");
+  const body = s.rows.map(r => `<tr>${cols.map((c, i) => {
+    const t = cell(r[c]);
+    const cut = t.length > 44 ? t.slice(0, 42) + "…" : t;
+    return `<td class="${num[i] ? "num" : ""}"${cut === t ? "" : ` title="${esc(t)}"`}>${esc(cut)}</td>`;
+  }).join("")}</tr>`).join("");
+  const shape = s.n_rows
+    ? `${s.rows.length} of ${s.n_rows.toLocaleString()} rows`
+    : `${s.rows.length} rows`;
+  return `
+    <div class="card">
+      <div class="sample-head">
+        <div class="eyebrow" style="margin-bottom:0">Sample dataset</div>
+        <span class="muted" style="font-size:.78rem">${shape}${
+          s.n_columns ? ` &nbsp;·&nbsp; ${s.n_columns} columns` : ""} &nbsp;·&nbsp; sampled</span>
+      </div>
+      <div class="scroll"><table class="sample">
+        <thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
+    </div>`;
+}
+
+/* What a respondent is asked to weigh, for each of the two decisions. Stated once here and
+   rendered both in the intro (in full, before anyone starts) and on every decision screen
+   (collapsible, as a reminder) — so the wording a respondent judges against cannot drift
+   between the two places. */
+const GUIDE = {
+  pick: {
+    ask: "Which candidate would you investigate next?",
+    points: [
+      "Does the question address one of the most important remaining unknowns?",
+      "Does it naturally follow from the current trajectory?",
+      "Will answering it substantially improve your understanding?",
+      "Is it directly relevant to the analytical goal?",
+      "Is it likely to produce genuinely new evidence rather than repeat previous analyses?",
+    ],
+  },
+  stop: {
+    ask: "Should exploration continue?",
+    points: [
+      "Are there still important unanswered questions?",
+      "Is further exploration likely to produce meaningful new understanding?",
+      "Has the current trajectory already explained the phenomenon sufficiently?",
+      "Would additional investigation mostly repeat existing findings?",
+      "Would you personally continue investigating if this were your own analysis?",
+    ],
+  },
+};
+
+/* The same five points are put on all 20 screens, so they are collapsible: open by default,
+   and once a respondent closes them they stay closed. Guidance that cannot be dismissed
+   stops being read and just adds to the wall of text it was meant to help with. */
+const GUIDE_KEY = "d2i-survey-guide-open";
+const guideOpen = () => localStorage.getItem(GUIDE_KEY) !== "0";
+
+function guide(kind) {
+  const g = GUIDE[kind];
+  return `
+    <details class="guide"${guideOpen() ? " open" : ""}>
+      <summary>When making your decision, consider…</summary>
+      <ul>${g.points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+    </details>`;
+}
+
+/* Everything the respondent consults but does not act on: the goal, the sample rows and the
+   trajectory that led here. The left panel on a wide screen. */
+function trajectory(d) {
+  const last = d.path.length - 1;
+  const steps = d.path.map((s, i) => `
+    <div class="step ${i === last ? "head" : ""}">
+      <div class="meta">
+        <span class="tag">${esc(s.action)}</span>
+        <span>step ${i} · depth ${s.depth}${i === last ? " · the node being judged" : ""}</span>
+      </div>
+      ${s.question ? `<div class="q">${esc(s.question)}</div>` : ""}
+      ${s.label ? `<div class="finding">${esc(s.label)}</div>` : ""}
+      <div class="stat">${esc(s.statistic)}</div>
+    </div>`).join("");
+  // Three cards, not two: the goal, the data and the path taken through it are three
+  // different things to look at, and running them together is most of what made the panel
+  // feel like one undifferentiated block of text.
+  return `
+    <div class="card">
+      <div class="eyebrow">The analyst's goal</div>
+      <div class="goal">${esc(d.goal)}</div>
+    </div>
+    ${dataSample(d)}
+    <div class="card">
+      <div class="eyebrow">Trajectory so far &nbsp;·&nbsp; depth ${d.depth} → ${d.child_depth}</div>
+      ${steps}
+    </div>`;
+}
+
+function renderDecision(d) {
+  let body = "";
+  if (stage === "stop") {
+    // Picked and submitted exactly like a candidate, rather than acted on immediately: the
+    // two questions then read as one interface, and a mis-click is recoverable before it is
+    // recorded — which matters more here, since "stop here" ends the decision outright.
+    body += `
+      <div class="card">
+        <div class="ask">${esc(GUIDE.stop.ask)}</div>
+        <div class="ask-sub">Judge it on the trajectory alone — the candidate questions come next.</div>
+        ${guide("stop")}
+        ${[["continue", "Keep exploring", "this line still has somewhere useful to go"],
+           ["terminate", "Stop here", "the line is spent — further questions would add little"]]
+          .map(([act, label, why], i) => `
+          <button class="cand" data-stop="${i}">
+            <span class="n">${i + 1}</span>
+            <span class="grow"><span class="tag">${act}</span><strong>${label}</strong>
+              <span class="muted"> — ${why}</span></span>
+          </button>`).join("")}
+        <div class="actions">
+        <label class="field">Why? <span class="muted" style="font-weight:400">— optional, one line</span>
+          <input type="text" id="note" placeholder="e.g. the goal is already answered"></label>
+        <div class="row">
+          <button class="primary" id="submit" disabled>Submit</button>
+          <button class="ghost" data-act="skip"><kbd>S</kbd>Skip — I cannot judge this</button>
+          ${R.verdicts.length ? `<button class="ghost" data-act="undo"><kbd>U</kbd>Back</button>` : ""}
+        </div>
+        <div class="hint">Press <kbd>1</kbd> or <kbd>2</kbd> to select, <kbd>↵</kbd> to submit.</div>
+        </div>
+      </div>`;
+  } else {
+    body += `
+      <div class="card">
+        <div class="ask">${esc(GUIDE.pick.ask)}</div>
+        <div class="ask-sub">These are the ${d.candidates.length} candidates that competed at this
+          node, in a random order.</div>
+        ${guide("pick")}
+        ${d.candidates.map(c => `
+          <button class="cand" data-slot="${c.slot}">
+            <span class="n">${c.slot}</span>
+            <span class="grow"><span class="tag">${esc(c.action)}</span>${esc(c.question)}</span>
+          </button>`).join("")}
+        <div class="actions">
+        <label class="field">Why? <span class="muted" style="font-weight:400">— optional, one line</span>
+          <input type="text" id="note" placeholder="e.g. the only one that touches the second half of the goal"></label>
+        <div class="row">
+          <button class="primary" id="submit" disabled>Submit</button>
+          <button class="ghost" data-act="skip"><kbd>S</kbd>Skip — I cannot judge this</button>
+          <button class="ghost" data-act="back"><kbd>U</kbd>Back</button>
+        </div>
+        <div class="hint">Press <kbd>1</kbd>–<kbd>${d.candidates.length}</kbd> to select, <kbd>↵</kbd> to submit.</div>
+        </div>
+      </div>`;
+  }
+  app.innerHTML = "";
+  app.append($(`<div class="split">
+    <div class="col-ctx">${trajectory(d)}</div>
+    <div class="col-ask">${body}</div>
+  </div>`));
+  app.querySelectorAll("[data-act]").forEach(b => b.onclick = () => act(b.dataset.act, d));
+  // Remember whether the guidance is wanted, so the choice survives the next 19 screens.
+  const g = app.querySelector("details.guide");
+  if (g) g.ontoggle = () => localStorage.setItem(GUIDE_KEY, g.open ? "1" : "0");
+
+  // Both stages select the same way; `key` is the attribute that distinguishes them, so
+  // `sel` means "slot" while picking a question and "0 = continue, 1 = terminate" while
+  // answering the stop question.
+  const key = stage === "stop" ? "stop" : "slot";
+  app.querySelectorAll(`.cand[data-${key}]`).forEach(b => b.onclick = () => {
+    sel = Number(b.dataset[key]);
+    app.querySelectorAll(`.cand[data-${key}]`).forEach(
+      x => x.classList.toggle("sel", Number(x.dataset[key]) === sel));
+    document.getElementById("submit").disabled = false;
+  });
+
+  const s = document.getElementById("submit");
+  if (s) s.onclick = () => {
+    if (sel === null) return;
+    if (stage !== "stop") return advance(d, record(d, lastStop, sel, String(sel), noteValue() || stopNote));
+    return act(sel === 1 ? "terminate" : "continue", d);
+  };
+  window.scrollTo({top: 0, behavior: "instant"});
+}
+
+const noteValue = () => { const n = document.getElementById("note"); return n ? n.value : ""; };
+
+/* The two stages produce ONE verdict, as in the CLI, so "back" from the candidate screen
+   rewinds to the stop question without anything having been written. */
+function act(what, d) {
+  if (what === "undo") {
+    if (!R.verdicts.length) return;
+    R.verdicts.pop(); save();
+    screen = "judge"; return begin();
+  }
+  if (what === "back") {
+    if (d.ask_stop) { stage = "stop"; sel = null; return render(); }
+    return act("undo", d);
+  }
+  if (what === "skip") return advance(d, record(d, stage === "pick" ? lastStop : null, null, "s",
+                                              noteValue() || (stage === "pick" ? stopNote : "")));
+  // Continue and terminate now differ only in what they record. Both reveal how the search
+  // ruled, then both go on to the candidates — a node's pool is worth judging whether or not
+  // the respondent would have stopped there.
+  if (what === "continue" || what === "terminate") {
+    lastStop = what === "terminate";
+    stopNote = noteValue();          // read before the re-render destroys the input
+    return afterStop(d);
+  }
+}
+
+/* ------------------------------------------------------------------ the close */
+
+/* Scored here, in the browser, only after the last decision is locked in — `truth.json` is
+   requested for the first time at this point. With --no-reveal it does not exist, the fetch
+   fails, and the page falls back to a plain thank-you. */
+async function loadTruth() {
+  if (truth !== null || !survey.meta.reveal) return;
+  try {
+    const r = await fetch("data/truth.json", {cache: "no-store"});
+    truth = r.ok ? await r.json() : false;
+  } catch (e) { truth = false; }
+}
+
+/* Everything the closing screen reports, in one place.
+
+   No metric is computed here. `build_survey.py` ran `human_trajectory_eval.pick_row` once
+   per candidate slot at build time and published the result in truth.json, so a pick is
+   scored by looking its slot up; metrics.js only reduces those rows (mean, κ, weighted
+   mean, AUROC, Youden) and bootstraps a CI. That is why the number a respondent sees here
+   is the same number the offline analysis prints — there is no second implementation.
+
+   Returns null when there is no answer key to score against (`--no-reveal`). */
+function tally() {
+  if (!truth || !window.SurveyMetrics) return null;
+  const meta = (survey.meta && survey.meta.metrics) || null;
+  if (!meta) return null;
+  const rows = SurveyMetrics.rowsFor(R.verdicts, truth, decisions());
+  return {
+    rows: rows.review,
+    picks: rows.picks,
+    stops: rows.stops,
+    skipped: rows.skipped,
+    agg: SurveyMetrics.aggregate(rows, meta.table),
+    terms: SurveyMetrics.termAttribution(rows.picks, meta.terms || []),
+    criteria: SurveyMetrics.criterionAttribution(rows.stops),
+    // Judged rows are the ones the model's own judge actually ruled on and left a utility
+    // behind; the rest are inferred from the search having carried on, and are counted
+    // apart rather than pooled into the headline.
+    judged: rows.stops.filter(s => s.margin !== null && s.margin !== undefined),
+    versionMismatch: meta.version !== SurveyMetrics.VERSION,
+  };
+}
+
+/* The metric table, the two attribution tables and the two confusion matrices, as one
+   block of HTML. Shared by the closing screen and the copy/download paths. */
+function resultsHTML(t) {
+  const M = SurveyMetrics;
+  let html = M.renderTable(t.agg);
+
+  const lam = (t.rows.find(r => r.t && r.t.lambdas) || {}).t;
+  const weights = lam && lam.lambdas;
+  if (t.terms.length) {
+    html += `<h3>Which part of the score you tracked</h3>
+      <p class="hint">D2I fuses five terms. Each row re-ranks the same pools by one term alone
+        and re-scores your picks against it — so a high row is a signal you followed, whether
+        or not D2I weights it that way.</p>
+      <div class="scroll"><table><thead><tr><th>term</th><th>κ_sel</th><th>attainment</th>
+        <th>chance</th><th>D2I λ</th><th>n</th></tr></thead><tbody>`;
+    for (const a of t.terms) {
+      html += `<tr><td class="mono">${esc(a.term)}</td>
+        <td class="mono">${M.fmtValue(a.kappa, "num")}</td>
+        <td class="mono">${M.fmtValue(a.attainment, "num")}</td>
+        <td class="mono">${M.fmtValue(a.e_attainment, "num")}</td>
+        <td class="mono">${weights && weights[a.term] !== undefined ? weights[a.term] : "—"}</td>
+        <td class="mono">${a.n}</td></tr>`;
+    }
+    html += "</tbody></table></div>";
+  }
+
+  if (t.criteria.some(c => c.auroc !== null)) {
+    html += `<h3>Which part of the stop judgment you tracked</h3>
+      <p class="hint">How well each of the judge's five criteria, on its own, orders your
+        continue/stop calls. Above the aggregate utility means that criterion alone predicts
+        you better than the judge's own combination of them.</p>
+      <div class="scroll"><table><thead><tr><th>criterion</th><th>AUROC</th><th>n</th>
+        </tr></thead><tbody>`;
+    for (const c of t.criteria) {
+      html += `<tr><td class="mono">${esc(c.criterion)}</td>
+        <td class="mono">${M.fmtValue(c.auroc, "num")}</td>
+        <td class="mono">${c.n}</td></tr>`;
+    }
+    html += "</tbody></table></div>";
+  }
+
+  if (t.picks.length) {
+    html += `<h3>Action confusion</h3>
+      <p class="hint">Rows: the action D2I scored highest. Columns: the action you picked.
+        The diagonal is agreement.</p>`
+      + M.renderMatrix(M.confusion(t.picks, "top_action", "pick_action"), "D2I", "you");
+  }
+  if (t.judged.length) {
+    const conf = M.confusion(t.judged, "model", "human", ["false", "true"]);
+    conf.labels = ["continue", "terminate"];
+    html += `<h3>Stop/continue confusion</h3>
+      <p class="hint">Over the ${t.judged.length} call${t.judged.length === 1 ? "" : "s"} the
+        model's judge actually ruled on. Off-diagonal above the other says one of you would
+        have explored longer than the other.</p>`
+      + M.renderMatrix(conf, "D2I", "you");
+  }
+  return html;
+}
+
+/* Send the response to the Apps Script endpoint.
+   `{ok, confirmed, error}` — `confirmed` false means it was sent but the browser would not
+   let us read the reply, so we cannot prove it landed.
+
+   Two details make this work against Apps Script specifically. The content type is
+   text/plain, which keeps the POST a CORS "simple request": application/json would trigger
+   an OPTIONS preflight, and an Apps Script web app has no way to answer one. And the whole
+   thing is wrapped in a fallback to mode:"no-cors", because Apps Script serves the reply
+   from a redirect whose CORS headers are not guaranteed — when the read is blocked the POST
+   itself has still arrived, so retrying opaquely is right and reporting failure would be
+   wrong. That retry is why every response carries an `id` the script dedupes on. */
+/* The scored results attached to the response.
+
+   `rows`/`stops` are the per-decision records, kept so the pooled analysis can be rerun
+   offline without the browser; `summary` is the metric table as raw floats (never the
+   formatted strings), which is what `score_survey.py --check-parity` diffs against its own
+   recomputation. `table_text` is the rendered table and is deliberately NOT included here
+   — see download(). */
+/* `full` controls the heavy half. The download gets everything — it is the artefact a
+   respondent keeps and a reader opens months later, so it carries every candidate, every
+   score breakdown and the rendered table. The submitted copy keeps the scored rows and the
+   summary but drops the per-decision detail: Code.gs writes the body into a single
+   spreadsheet cell that Sheets truncates at 50k characters without saying so, and the
+   detail is reconstructible from `survey.json` + `truth.json` + the verdicts anyway. */
+function results(full) {
+  const t = tally();
+  if (!t) return null;
+  // Always built — `counts` is derived from it — but only *emitted* when `full`.
+  const details = SurveyMetrics.detail(R.verdicts, truth, decisions(), survey.runs || {},
+                                       (survey.meta.metrics || {}).terms || []);
+  const out = {
+    computed_at: new Date().toISOString(),
+    engine: "metrics.js/" + SurveyMetrics.VERSION,
+    metrics_version: (survey.meta.metrics || {}).version || null,
+    truth_built_at: survey.meta.built_at,
+    survey_seed: survey.meta.seed,
+    version_mismatch: !!t.versionMismatch,
+    // How many of each kind of question was put and answered — the two families run over
+    // different subsets, so a single "n" would be misleading.
+    counts: SurveyMetrics.counts(details, t),
+    // The measures, keyed by a stable name as well as in table order.
+    headline: SurveyMetrics.headlines(t.agg),
+    summary: t.agg.map(r => ({key: r.key, label: r.label, group: r.group, est: r.est,
+                              value: r.value, chance: r.chance, lo: r.lo, hi: r.hi, n: r.n})),
+    term_attribution: t.terms,
+    criterion_attribution: t.criteria,
+    action_confusion: SurveyMetrics.confusion(t.picks, "top_action", "pick_action"),
+    stop_confusion: SurveyMetrics.confusion(t.judged, "model", "human", ["false", "true"]),
+    // The per-decision metric rows the summary above was computed from.
+    rows: t.picks,
+    stops: t.stops,
+    n_skipped: t.skipped,
+    n_stops_judged: t.judged.length,
+    // The λ weights D2I fused the terms with — one set per build, not per decision.
+    lambdas: (t.rows.find(r => r.t && r.t.lambdas) || {t: {}}).t.lambdas || null,
+    runs: survey.runs || {},
+  };
+  if (full) {
+    // Every decision, resolved: provenance, the trajectory, the candidates with D2I's
+    // scores and breakdowns, and what the respondent chose.
+    out.decisions = details;
+    out.table_text = SurveyMetrics.toText(t.agg);
+  }
+  return out;
+}
+
+async function submit() {
+  R.finished_at = R.finished_at || new Date().toISOString();
+  // Without the rendered table: Code.gs writes the whole body into one spreadsheet cell,
+  // and Sheets truncates a cell at 50k characters with no error — a clipped row would fail
+  // to parse later, long after the respondent has gone.
+  R.results = results(false);
+  save();
+  const body = JSON.stringify(R);
+  const headers = {"Content-Type": "text/plain;charset=utf-8"};
+  try {
+    const r = await fetch(ENDPOINT, {method: "POST", headers, body, redirect: "follow"});
+    if (!r.ok) return {ok: false, error: `the server answered ${r.status}`};
+    const j = await r.json().catch(() => null);
+    if (j && j.ok === false) return {ok: false, error: j.error || "rejected"};
+    return {ok: true, confirmed: true};
+  } catch (e) {
+    try {
+      await fetch(ENDPOINT, {method: "POST", mode: "no-cors", headers, body});
+      return {ok: true, confirmed: false};
+    } catch (e2) {
+      return {ok: false, error: e2.message || "could not reach the server"};
+    }
+  }
+}
+
+function saveAs(text, ext, type) {
+  const name = (R.respondent.name || "anonymous").replace(/[^A-Za-z0-9._-]+/g, "-");
+  const blob = new Blob([text], {type});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `d2i-survey_${name}_${(R.started_at || "").slice(0, 10)}.${ext}`;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* The primary artefact: the answers *and* their scores, as one JSON file. It carries the
+   rendered table too — unlike submit(), a download has no size ceiling to respect. The
+   format stays JSON because score_survey.py and Code.gs both parse it; `results` is purely
+   additive, so an older reader still finds `verdicts` exactly where it expects it. */
+function download() {
+  R.finished_at = R.finished_at || new Date().toISOString();
+  R.results = results(true);
+  save();
+  saveAs(JSON.stringify(R, null, 2) + "\n", "json", "application/json");
+}
+
+function downloadCSV() {
+  const t = tally();
+  if (!t) return;
+  saveAs(SurveyMetrics.toCSV(t.agg, {picks: t.picks, stops: t.stops}) + "\n", "csv", "text/csv");
+}
+
+async function copyMarkdown(button) {
+  const t = tally();
+  if (!t) return;
+  const text = SurveyMetrics.toMarkdown(t.agg);
+  const done = ok => {
+    button.textContent = ok ? "Copied ✓" : "Press ⌘C";
+    setTimeout(() => { button.textContent = "Copy the table (Markdown)"; }, 2000);
+  };
+  try {
+    await navigator.clipboard.writeText(text);
+    done(true);
+  } catch (e) {
+    // Clipboard access is refused outside a secure context, which includes a plain-http
+    // localhost preview on some browsers. Fall back to a selection the user can copy.
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.append(ta); ta.select();
+    done(document.execCommand && document.execCommand("copy"));
+    ta.remove();
+  }
+}
+
+function reviewRow(x) {
+  if (!x.mine) {
+    const said = x.v.terminate === true ? "stop here"
+               : x.v.terminate === false ? "keep exploring" : "skipped";
+    const model = x.t.model_terminate === null ? null
+                : x.t.model_terminate ? "stopped here" : "kept exploring";
+    return `<details>
+      <summary><span class="mono">${esc(x.d.id)}</span> — you said <strong>${said}</strong>${
+        model ? `, D2I <strong class="${(x.t.model_terminate === x.v.terminate) ? "ok" : "warn"}">${model}</strong>` : ""}</summary>
+      <p class="hint">${esc(x.d.goal)}</p>
+      ${x.t.terminate_reason ? `<p class="hint">D2I's judge: ${esc(x.t.terminate_reason)}</p>` : ""}
+    </details>`;
+  }
+  const body = x.t.rows.slice().sort((a, b) => a.rank - b.rank).map(r => `
+    <tr class="${r.slot === x.v.slot ? "picked" : ""} ${r.rank === 1 ? "top" : ""}">
+      <td>${r.rank}</td>
+      <td>${r.answered ? "✓" : ""}${r.slot === x.v.slot ? " ←" : ""}</td>
+      <td class="mono">${r.score.toFixed(4)}</td>
+      ${r.terms.map(t => `<td class="mono">${t === null ? "—" : t.toFixed(2)}</td>`).join("")}
+      <td class="q"><span class="tag">${esc(r.action)}</span>${esc(r.question)}</td>
+    </tr>`).join("");
+  const w = x.t.lambdas;
+  return `<details>
+    <summary><span class="mono">${esc(x.d.id)}</span> — your pick ranked
+      <strong class="${x.mine.rank === 1 ? "ok" : ""}">${x.mine.rank}</strong> of ${x.t.n}</summary>
+    <p class="hint">${esc(x.d.goal)}</p>
+    <div class="scroll"><table>
+      <thead><tr><th>#</th><th></th><th>score</th>
+        ${x.t.terms.map(t => `<th>${t}</th>`).join("")}<th class="q">question</th></tr></thead>
+      <tbody>${body}</tbody></table></div>
+    ${w ? `<div class="hint mono">score = ${x.t.terms.map(t => `${w[t]}·${t}`).join(" + ")}
+           &nbsp;·&nbsp; ✓ = D2I answered it</div>` : ""}
+  </details>`;
+}
+
+/* What the model did — shown twice per decision, once per question.
+
+   `phase: "stop"` lands straight after the stop answer and reports only how the search
+   ruled on stopping; nothing is recorded yet, since the two questions still produce one
+   verdict. `phase: "pick"` lands after the candidate pick, carries the ranking table, and
+   is the point at which the verdict exists. */
+function renderReveal() {
+  const {d, v, phase} = revealed;
+  const isStop = phase === "stop";
+  const nextLabel = isStop
+    ? (d.candidates.length ? "Choose the next question" : "Next decision")
+    : (nextIndex() < 0 ? "See my results" : "Next decision");
+
+  // The answer key could not be read, but the answer is already saved. Say what happened
+  // instead of showing a blank card or skipping straight past it.
+  if (revealed.missing) {
+    app.innerHTML = "";
+    app.append($(`
+      <div><div class="card">
+        <div class="eyebrow">Answer recorded</div>
+        <p>Your answer to decision ${decisions().findIndex(x => x.id === d.id) + 1} is saved, but
+        this page could not load <span class="mono">data/truth.json</span>, so it cannot show
+        you what the model did here.</p>
+        <p class="hint">If you are running the survey locally, rebuild it with
+        <span class="mono">python3 survey/build_survey.py</span> and reload. The survey itself
+        is unaffected — every answer is still being recorded.</p>
+        <div class="row" style="margin-top:16px">
+          <button class="primary" data-act="next"><kbd>↵</kbd>${nextLabel}</button>
+          <button class="ghost" data-act="undo"><kbd>U</kbd>Change my answer</button>
+        </div>
+      </div></div>`));
+    wireReveal();
+    return;
+  }
+
+  const t = truth[d.id];
+  let head = "";
+
+  const said = isStop ? revealed.terminate : (v ? v.terminate : null);
+  if (t.model_terminate !== null && said !== null) {
+    const agree = t.model_terminate === said;
+    head += `<p><strong class="${agree ? "ok" : "warn"}">${agree ? "✓ You agreed" : "✗ You disagreed"}</strong>
+      — the model ${t.model_terminate ? "stopped this line here" : "kept exploring this line"}.</p>`;
+    head += `<p class="hint">You said you would ${said ? "stop here" : "keep exploring"}.</p>`;
+    // How close the call was, when the judge actually made one. A utility of 0.30 against a
+    // 0.35 bar is a near-miss; 0.10 is not, and disagreeing with the two is not the same
+    // thing — which is exactly what the margin-weighted row on the closing screen measures.
+    const st = t.stop || {};
+    if (st.utility !== null && st.utility !== undefined
+        && st.threshold !== null && st.threshold !== undefined) {
+      const near = Math.abs(st.margin) < 0.1;
+      head += `<p class="hint">Its judge scored this line
+        <span class="mono">${st.utility.toFixed(2)}</span> against a
+        <span class="mono">${st.threshold.toFixed(2)}</span> bar — ${
+          near ? "a close call either way" : "not a close call"}
+        (margin <span class="mono">${st.margin > 0 ? "+" : ""}${st.margin.toFixed(2)}</span>).</p>`;
+    }
+    if (t.model_terminate && t.terminate_reason) {
+      head += `<p class="hint">Its judge said: ${esc(t.terminate_reason)}</p>`;
+    }
+  }
+
+  const mine = (isStop || !v || v.slot === null) ? null : t.rows.find(r => r.slot === v.slot);
+  if (mine) {
+    const top = t.rows.find(r => r.rank === 1);
+    head += `<p>Your pick ranked <strong class="${mine.rank === 1 ? "ok" : ""}">${mine.rank}</strong>
+      of ${t.n}${mine.rank === 1 ? " — the model's own top choice." :
+      `, ${(top.score - mine.score).toFixed(4)} below its top choice.`}</p>`;
+  } else if (!isStop && v && v.slot === null) {
+    head += `<p class="muted">You skipped the question here — this is what the model did anyway.</p>`;
+  }
+
+  // No verdict exists during the stop phase, so there is no picked slot to mark yet.
+  const picked = (!isStop && v) ? v.slot : null;
+  const rows = t.rows.slice().sort((a, b) => a.rank - b.rank).map(r => `
+    <tr class="${r.slot === picked ? "picked" : ""} ${r.rank === 1 ? "top" : ""}">
+      <td>${r.rank}</td>
+      <td>${r.answered ? "✓" : ""}${r.slot === picked ? " ←" : ""}</td>
+      <td class="mono">${r.score.toFixed(4)}</td>
+      ${r.terms.map(x => `<td class="mono">${x === null ? "—" : x.toFixed(2)}</td>`).join("")}
+      <td class="q"><span class="tag">${esc(r.action)}</span>${esc(r.question)}</td>
+    </tr>`).join("");
+  const w = t.lambdas;
+
+  app.innerHTML = "";
+  app.append($(`
+    <div>
+      <div class="card">
+        <div class="eyebrow">${isStop ? "Stop or continue — what the search did" : "What the model did"}</div>
+        ${head}
+        ${isStop ? (d.candidates.length
+          ? `<p class="hint">Next: the ${d.candidates.length} questions that competed to be asked
+             at this node. They are worth judging either way — if you would have stopped, the
+             pick is which question you would ask if you had to.</p>`
+          : `<p class="hint">The search proposed no follow-up question here, so there is nothing
+             further to judge on this one.</p>`)
+        : t.rows.length ? `
+          <div class="scroll"><table>
+            <thead><tr><th>#</th><th></th><th>score</th>
+              ${t.terms.map(x => `<th>${x}</th>`).join("")}<th class="q">question</th></tr></thead>
+            <tbody>${rows}</tbody></table></div>
+          <div class="hint">✓ = the model went on to answer it${picked === null ? "" : ", ← = your pick"}${
+            w ? `<br><span class="mono">score = ${t.terms.map(x => `${w[x]}·${x}`).join(" + ")}</span>` : ""}</div>`
+          : `<p class="hint">There is no ranking to show here: the search stopped at this node,
+             so it never proposed any follow-up question to score. The stop/continue call above
+             is the whole of this decision.</p>`}
+        <div class="row" style="margin-top:16px">
+          <button class="primary" data-act="next"><kbd>↵</kbd>${nextLabel}</button>
+          <button class="ghost" data-act="undo"><kbd>U</kbd>Change my answer</button>
+        </div>
+      </div>
+    </div>`));
+
+  wireReveal();
+}
+
+/* Next and Change-my-answer, shared by both shapes of the reveal.
+
+   What each does depends on the phase. After the stop answer nothing has been written yet,
+   so Next goes on to the candidates and Change-my-answer simply re-asks the stop question;
+   only after the pick is there a verdict for an undo to pop. */
+function wireReveal() {
+  app.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
+    const was = revealed;
+    const undo = b.dataset.act === "undo";
+    if (was.phase === "stop") {
+      if (!undo) return toCandidates(was.d);
+      revealed = null; stage = "stop"; sel = null;
+      return render();
+    }
+    revealed = null;
+    if (undo) return act("undo", was.d);
+    begin();
+  });
+  window.scrollTo({top: 0, behavior: "instant"});
+}
+
+/* Pull one metric out of the aggregate by a substring of its label, for the headline tiles.
+   Returns null when it is present but not estimable, so a tile can say so rather than
+   printing a number computed from three answers. */
+function headline(t, needle) {
+  const row = t.agg.find(r => r.label.indexOf(needle) >= 0);
+  return row && SurveyMetrics.estimable(row) ? row : null;
+}
+
+function tile(row, label, fallbackN) {
+  const value = row ? SurveyMetrics.fmtValue(row.value, row.fmt) : "—";
+  const sub = row
+    ? `chance ${SurveyMetrics.fmtValue(row.chance, row.fmt)} · n=${row.n}`
+    : `not estimable${fallbackN !== undefined ? ` at n=${fallbackN}` : ""}`;
+  return `<div class="tile"><div class="big">${value}</div>
+    <div class="lbl">${label}</div><div class="lbl mono">${sub}</div></div>`;
+}
+
+async function renderDone() {
+  await loadTruth();
+  const total = decisions().length;
+  const t = tally();
+  const scored = t && t.picks.length;
+
+  let tiles = "";
+  if (scored) {
+    const kap = headline(t, "κ_sel"), att = headline(t, "attainment");
+    const reg = headline(t, "standardized regret"), mwa = headline(t, "margin-weighted");
+    tiles = `
+    <div class="tiles">
+      ${tile(kap, "agreement with D2I's top pick, chance-corrected", t.picks.length)}
+      ${tile(att, "of the pool's score range you captured", t.picks.length)}
+      ${tile(reg, "shortfall, in pool standard deviations", t.picks.length)}
+      ${tile(mwa, "stop/continue agreement, margin-weighted", t.stops.length)}
+    </div>
+    <p class="hint">κ_sel is corrected for chance: <strong>0</strong> is what picking at random
+      from these same pools would score and <strong>1</strong> is D2I's top choice every time,
+      so it is comparable across pools of different sizes — a raw percentage is not.
+      Standardized regret is measured in each pool's own spread, so under
+      <strong>0.5</strong> means your pick sat inside the noise of D2I's own scoring rather
+      than genuinely below it.</p>`;
+  }
+
+  app.innerHTML = "";
+  app.append($(`
+    <div>
+      <div class="card">
+        <h2>Done — thank you.</h2>
+        <p>You answered all ${total} decisions${t && t.skipped ? ` (${t.skipped} skipped)` : ""}.</p>
+        ${tiles}
+        ${t && t.versionMismatch ? `<p class="hint warn">This page's scoring is version
+          ${esc(SurveyMetrics.VERSION)} but the bundle was built by version
+          ${esc(String(survey.meta.metrics.version))}. The numbers below may not match the
+          analysis — please mention this when you send your answers.</p>` : ""}
+        ${!survey.meta.reveal ? `<p class="hint">Scores are withheld in this build, so that
+          respondents cannot be influenced by them. The results will be reported in aggregate.</p>` : ""}
+      </div>
+
+      ${scored ? `<div class="card">
+        <div class="eyebrow">Your results</div>
+        <p class="hint">Every figure is shown against what a uniform random pick from the same
+          pools would have scored, with a 95% interval from a bootstrap that resamples whole
+          trajectories rather than single decisions — two of these questions can descend from
+          one trajectory, so treating them as independent would make the interval too narrow.
+          With ${t.picks.length} pick${t.picks.length === 1 ? "" : "s"} the intervals are wide
+          by design; the pooled analysis across respondents is where anything is concluded.</p>
+        ${t.judged.length < t.stops.length ? `<p class="hint">${t.judged.length} of
+          ${t.stops.length} stop call${t.stops.length === 1 ? "" : "s"} carry the judge's own
+          continuation utility. The rest are inferred from the search having carried on, so
+          they count towards agreement but cannot enter the margin, AUROC or threshold rows.</p>` : ""}
+        ${resultsHTML(t)}
+      </div>` : ""}
+
+      <div class="card" id="send"></div>          <!-- filled by wireSend, which owns its states -->
+
+      ${scored ? `<div class="card">
+        <div class="eyebrow">Decision by decision</div>
+        <p class="hint">Now that every answer is locked in, here is what D2I did at each node.</p>
+        ${t.rows.map(reviewRow).join("")}
+      </div>` : ""}
+    </div>`));
+
+  wireSend();
+  window.scrollTo({top: 0, behavior: "instant"});
+}
+
+/* The closing card has three shapes: already sent, ready to send, or — with no ENDPOINT
+   configured — download only. Rendered on its own so submitting can redraw just this card
+   and leave the score tiles and the review list untouched. */
+function sendCard(state) {
+  const dl = `<button class="${ENDPOINT && !R.submitted_at ? "ghost" : "primary"}" id="dl">Download a copy (.json)</button>`
+    // Only offered once there is a score to export: with --no-reveal the page has no answer
+    // key, so these would produce an empty table.
+    + (truth ? `<button class="ghost" id="csv">Download the table (.csv)</button>
+                <button class="ghost" id="md">Copy the table (Markdown)</button>` : "");
+  const again = `<button class="ghost" id="again">Take it again</button>`;
+
+  if (R.submitted_at) {
+    return `
+      <div class="eyebrow">Sent</div>
+      <p><strong class="ok">✓ Your answers have been submitted.</strong>${
+        state === "unconfirmed"
+          ? " Your browser would not let this page read the reply, so if you would like to be\
+              certain it arrived, download a copy and send it on as well."
+          : " Thank you — nothing else is needed."}</p>
+      <div class="row">${dl}${again}</div>`;
+  }
+
+  if (!ENDPOINT) {
+    return `
+      <div class="eyebrow">Send your answers</div>
+      <p>Nothing has left your browser. Download the file and email it to
+      <a href="mailto:shaolinx@usc.edu?subject=D2I%20survey%20response">shaolinx@usc.edu</a>,
+      or attach it wherever you were asked to.</p>
+      <div class="row">${dl}${again}</div>
+      <p class="hint">The file holds your answers, the slot numbers you chose and your notes —
+      no page contents and nothing about your machine beyond the browser string.</p>`;
+  }
+
+  return `
+    <div class="eyebrow">Send your answers</div>
+    <p>Nothing has left your browser yet. Submitting sends the answers you gave, your notes,
+    and whatever you typed in the "about you" fields — no page contents and nothing about
+    your machine beyond the browser string.</p>
+    ${state && state.startsWith("error:")
+      ? `<div class="err">Submitting failed — ${esc(state.slice(6))}.<br>
+         Please download a copy and email it to
+         <a href="mailto:shaolinx@usc.edu?subject=D2I%20survey%20response">shaolinx@usc.edu</a>,
+         or try again.</div>` : ""}
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="send-btn"${state === "sending" ? " disabled" : ""}>${
+        state === "sending" ? "Sending…" : state && state.startsWith("error:") ? "Try again" : "Submit my answers"}</button>
+      ${dl}${again}
+    </div>`;
+}
+
+function wireSend(state) {
+  const card = document.getElementById("send");
+  if (!card) return;
+  card.innerHTML = sendCard(state);
+
+  const b = document.getElementById("send-btn");
+  if (b) b.onclick = async () => {
+    wireSend("sending");
+    const res = await submit();
+    if (!res.ok) return wireSend("error:" + res.error);
+    R.submitted_at = new Date().toISOString();
+    save();
+    wireSend(res.confirmed ? "confirmed" : "unconfirmed");
+  };
+  document.getElementById("dl").onclick = download;
+  const csv = document.getElementById("csv");
+  if (csv) csv.onclick = downloadCSV;
+  const md = document.getElementById("md");
+  if (md) md.onclick = () => copyMarkdown(md);
+  document.getElementById("again").onclick = () => {
+    if (!confirm("Clear your answers and start the survey again?")) return;
+    R = null; localStorage.removeItem(KEY); screen = "intro"; render();
+  };
+}
+
+/* ------------------------------------------------------------------ router */
+function render() {
+  chrome();
+  if (screen === "intro" || !R) return renderIntro();
+  // The reveal outranks the "everything is answered" check: after the last decision it is
+  // still on screen, and only Next leads on to the results.
+  if (revealed) return renderReveal();
+  const i = nextIndex();
+  if (i < 0) { screen = "done"; chrome(); return renderDone(); }
+  renderDecision(decisions()[i]);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (screen !== "judge" || !R) return;
+  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") {
+    if (e.key === "Enter") document.getElementById("submit")?.click();
+    return;
+  }
+  const k = e.key.toLowerCase();
+  if (revealed) {
+    if (k === "enter" || k === "n") app.querySelector('[data-act="next"]')?.click();
+    else if (k === "u") app.querySelector('[data-act="undo"]')?.click();
+    return;
+  }
+  if (stage === "stop") {
+    // 1/2 select, matching the candidate screen; c/t stay as aliases for the old muscle
+    // memory, but they now select rather than answer, so ↵ is still required.
+    if (k === "1" || k === "c") app.querySelector('.cand[data-stop="0"]')?.click();
+    else if (k === "2" || k === "t") app.querySelector('.cand[data-stop="1"]')?.click();
+    else if (k === "enter") document.getElementById("submit")?.click();
+    else if (k === "s") app.querySelector('[data-act="skip"]')?.click();
+    else if (k === "u") app.querySelector('[data-act="undo"]')?.click();
+    return;
+  }
+  if (/^[1-9]$/.test(k)) app.querySelector(`.cand[data-slot="${k}"]`)?.click();
+  else if (k === "enter") document.getElementById("submit")?.click();
+  else if (k === "s") app.querySelector('[data-act="skip"]')?.click();
+  else if (k === "u") app.querySelector('[data-act="back"]')?.click();
+});
+
+(async () => {
+  try {
+    const r = await fetch("data/survey.json", {cache: "no-store"});
+    if (!r.ok) throw new Error(`survey.json — HTTP ${r.status}`);
+    survey = await r.json();
+  } catch (e) {
+    app.innerHTML = `<div class="card"><h2>The survey could not be loaded.</h2>
+      <p class="muted">${esc(e.message)}</p>
+      <p class="hint">If you are opening this file directly from disk, the browser blocks the
+      fetch. Serve the folder instead — <span class="mono">python3 -m http.server</span> from
+      the site root, then open <span class="mono">/survey/</span>.</p></div>`;
+    return;
+  }
+  document.getElementById("title").textContent = survey.meta.title;
+  document.title = survey.meta.title + " — D2I human evaluation";
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    // A rebuilt survey invalidates saved answers: the ids and the shuffle have moved.
+    if (saved && saved.survey && saved.survey.built_at === survey.meta.built_at) R = saved;
+  } catch (e) {}
+
+  // With feedback on, the key is needed from the first answer, so it is fetched up front
+  // rather than at the close. It is a published file either way; what changes is only how
+  // early it is in the tab.
+  if (survey.meta.feedback) await loadTruth();
+
+  // A finished response reopens on its own summary rather than back at the intro.
+  if (R && nextIndex() < 0 && R.verdicts.length) screen = "done";
+  render();
+})();
+</script>
+</body>
+</html>

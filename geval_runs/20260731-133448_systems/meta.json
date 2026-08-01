@@ -1,0 +1,36 @@
+{
+  "tag": "systems",
+  "written_at": "2026-07-31T13:42:33",
+  "command": "eval/geval_trajectory.py --group systems --repeats 3",
+  "selection": {
+    "group": [
+      "systems"
+    ],
+    "arms": null,
+    "datasets": null,
+    "level": "level_2",
+    "run_dir": null
+  },
+  "n_runs": 9,
+  "n_trajectories": 45,
+  "repeats": 3,
+  "judge_model": "gpt-4o-2024-08-06",
+  "temperature": "model default (unset)",
+  "quis_nodes": "full-path",
+  "rubric_version": "v8",
+  "prompt_hash": "6aece39ff501",
+  "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+  ],
+  "reused_existing_scores": false,
+  "interrupted": false,
+  "runs_selected": 9,
+  "runs_saved": 9,
+  "partial_runs": [],
+  "failed": []
+}

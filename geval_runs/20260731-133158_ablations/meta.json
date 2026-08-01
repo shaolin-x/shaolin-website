@@ -1,0 +1,38 @@
+{
+  "tag": "ablations",
+  "written_at": "2026-07-31T13:32:15",
+  "command": "eval/geval_trajectory.py --group ablations --repeats 5",
+  "selection": {
+    "group": [
+      "ablations"
+    ],
+    "arms": null,
+    "datasets": null,
+    "level": "level_2",
+    "run_dir": null
+  },
+  "n_runs": 1,
+  "n_trajectories": 1,
+  "repeats": 5,
+  "judge_model": "gpt-4o-2024-08-06",
+  "temperature": "model default (unset)",
+  "quis_nodes": "full-path",
+  "rubric_version": "v8",
+  "prompt_hash": "6aece39ff501",
+  "criteria": [
+    "goal_relevance",
+    "information_gain",
+    "interestingness",
+    "trustworthiness",
+    "actionability",
+    "resolution"
+  ],
+  "reused_existing_scores": false,
+  "interrupted": true,
+  "runs_selected": 24,
+  "runs_saved": 1,
+  "partial_runs": [
+    "gen-no_operators/qrobur_tree_table"
+  ],
+  "failed": []
+}

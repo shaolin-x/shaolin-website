@@ -1,0 +1,2114 @@
+{
+ "meta": {
+  "built_at": "2026-07-31T22:19:29",
+  "seed": 0,
+  "criteria": [
+   "goal_relevance",
+   "information_gain",
+   "interestingness",
+   "trustworthiness",
+   "actionability",
+   "resolution"
+  ],
+  "geval": {
+   "tag": "systems",
+   "written_at": "2026-07-31T13:42:33",
+   "judge_model": "gpt-4o-2024-08-06",
+   "temperature": "model default (unset)",
+   "rubric_version": "v8",
+   "prompt_hash": "6aece39ff501",
+   "repeats": 3,
+   "run": "runs/geval_runs/20260731-133448_systems"
+  }
+ },
+ "items": {
+  "b8159134": {
+   "system": "quis",
+   "arm": "quis",
+   "dataset": "qrobur_tree_table",
+   "level": "level_2",
+   "trajectory_index": 4,
+   "content": "bae4fcd8a2cc095112ec9db494eaa8d670d398a01b69c426e2cc6672e8129ffa",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/quis/qrobur_tree_table-level_2",
+   "assigned_criteria": [
+    "trustworthiness"
+   ],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory is not focused on SNP density or sequencing coverage patterns across genomic windows, as it mainly describes tree values without clear relevance to the analytical goal.",
+     "reasons": [
+      "The trajectory is not focused on SNP density or sequencing coverage patterns across genomic windows, as it mainly describes tree values without clear relevance to the analytical goal.",
+      "The trajectory is focused on 'tree' values while the goal is SNP density and sequencing coverage over genomic windows and positions. It does not address the analytical goal's questions.",
+      "The trajectory focuses on specific 'tree' values with large counts but does not address SNP density and sequencing coverage patterns directly relevant to genomic windows and chromosome positions."
+     ]
+    },
+    "information_gain": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "Both observations fail to build on each other or offer meaningful insights into the dataset's structure; they focus on unrelated patterns.",
+     "reasons": [
+      "Both observations fail to build on each other or offer meaningful insights into the dataset's structure; they focus on unrelated patterns.",
+      "Both steps in the trajectory identify distinct 'tree' values but do not resolve or progress any uncertainty related to SNP density or sequencing coverage, providing no valuable information gain.",
+      "There is no follow-up or progression of understanding between steps. Both observations repeat the same kind of finding without advancing the analysis."
+     ]
+    },
+    "interestingness": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The observations are neither surprising nor informative about SNP density or sequencing coverage; they restate system patterns without actionable context.",
+     "reasons": [
+      "The observations are neither surprising nor informative about SNP density or sequencing coverage; they restate system patterns without actionable context.",
+      "The findings regarding 'tree' values are not directly related to the analytical goal and remain analytically uninformative in the context of SNP density and coverage investigation.",
+      "The findings, about large counts in specific 'tree' values, do not provide insight relevant to the analytical goal, making them routine and uninteresting."
+     ]
+    },
+    "trustworthiness": {
+     "score": 5.0,
+     "scores": [
+      5,
+      5,
+      5
+     ],
+     "sd": 0.0,
+     "min": 5,
+     "max": 5,
+     "reason": "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+     "reasons": [
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims."
+     ],
+     "assigned": true
+    },
+    "actionability": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory lacks a concrete analytical direction or hypothesis relevant to the goal, offering no clear next steps.",
+     "reasons": [
+      "The trajectory lacks a concrete analytical direction or hypothesis relevant to the goal, offering no clear next steps.",
+      "The trajectory lacks connection to the analytical goal and provides no actionable insight or direction toward relevant follow-up analyses about SNP density or coverage.",
+      "The observations do not suggest any actionable steps or hypotheses that could further the analytical goal of understanding SNP and sequencing patterns."
+     ]
+    },
+    "resolution": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The initial observation is not resolved; subsequent steps do not address the uncertainties introduced by the base insight, which itself is unrelated to the goal.",
+     "reasons": [
+      "The initial observation is not resolved; subsequent steps do not address the uncertainties introduced by the base insight, which itself is unrelated to the goal.",
+      "The trajectory doesn't address or resolve any aspects of the base insight or the goal's focus on SNP density and sequencing coverage. It remains outside the important questions posed.",
+      "Neither observation resolves or elaborates on the base insight; both steps are similarly inconclusive and repetitive without addressing the core analytical questions."
+     ]
+    }
+   }
+  },
+  "f1ab3d14": {
+   "system": "d2i",
+   "arm": "d2i",
+   "dataset": "qrobur_tree_table",
+   "level": "level_2",
+   "trajectory_index": 3,
+   "content": "e23e9128f67ee1a6e9bf4b3781b1f93ca7851ad343404821efac13dfc35b3f04",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/d2i/qrobur_tree_table-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 4.0,
+     "scores": [
+      4,
+      4,
+      4
+     ],
+     "sd": 0.0,
+     "min": 4,
+     "max": 4,
+     "reason": "The trajectory focuses on SNP density and sequencing coverage, directly aligning with the analytical goal. Each observation provides insight into the pattern or prevalence of extreme values in genomic windows, contributing to goal understanding.",
+     "reasons": [
+      "The trajectory focuses on SNP density and sequencing coverage, directly aligning with the analytical goal. Each observation provides insight into the pattern or prevalence of extreme values in genomic windows, contributing to goal understanding.",
+      "The trajectory remains focused on SNP density and sequencing coverage across genomic windows, directly addressing the analytical goal.",
+      "The trajectory consistently addresses the analytical goal by exploring SNP density and sequencing coverage, particularly focusing on extreme values, which are pertinent to understanding patterns across genomic windows."
+     ]
+    },
+    "information_gain": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "While the trajectory progresses by refining and localizing findings, some observations are only moderately informative. The last step repeats a similar analysis without significantly advancing understanding.",
+     "reasons": [
+      "While the trajectory progresses by refining and localizing findings, some observations are only moderately informative. The last step repeats a similar analysis without significantly advancing understanding.",
+      "The observations deepen understanding progressively, but there is some repetition and limited marginal improvement in later steps.",
+      "Each step provides some new understanding, particularly the absence of overlap in extremes and different SNP density per 'end' position. However, progression is uneven, with some repetition between steps."
+     ]
+    },
+    "interestingness": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "The observations reveal that extreme SNP density does not overlap with high sequencing coverage, which is notable. However, the findings about proportions in different windows become routine by the end.",
+     "reasons": [
+      "The observations reveal that extreme SNP density does not overlap with high sequencing coverage, which is notable. However, the findings about proportions in different windows become routine by the end.",
+      "Some findings, like the absence of overlap in extremes for SNP density and sequencing coverage, are meaningful but not surprising.",
+      "The findings about SNP density extremes and lack of overlap are meaningful, but not highly unexpected or insightful beyond what a domain analyst might anticipate."
+     ]
+    },
+    "trustworthiness": {
+     "score": 2.6666666666666665,
+     "scores": [
+      3,
+      3,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "Claims are mostly consistent with evidence, but lack statistical tests to validate them. Observations rest solely on calculated proportions, somewhat limiting their credibility.",
+     "reasons": [
+      "Claims are mostly consistent with evidence, but lack statistical tests to validate them. Observations rest solely on calculated proportions, somewhat limiting their credibility.",
+      "Claims are mostly consistent with the evidence. However, the absence of statistical support leaves some conclusions insufficiently verified.",
+      "The claims are based solely on values without statistical support. Each claim is consistent with the provided values but lacks sufficient diagnostic detail to verify the conclusions independently."
+     ]
+    },
+    "actionability": {
+     "score": 2.6666666666666665,
+     "scores": [
+      2,
+      3,
+      3
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "The trajectory presents descriptive findings without clear follow-up steps or hypotheses. Negative findings are potentially actionable, but the trajectory does not direct specific further analyses.",
+     "reasons": [
+      "The trajectory presents descriptive findings without clear follow-up steps or hypotheses. Negative findings are potentially actionable, but the trajectory does not direct specific further analyses.",
+      "The trajectory suggests plausible next steps or hypotheses, yet lacks a clear convergence on a specific analytical thread.",
+      "The trajectory suggests lines of inquiry related to extreme SNP densities but lacks a clearly defined next step or hypothesis. Some insights about non-overlap are potentially actionable."
+     ]
+    },
+    "resolution": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "The trajectory addresses the initial observation by showing extreme values do not overlap. However, it leaves broader questions about the implications of these findings unresolved.",
+     "reasons": [
+      "The trajectory addresses the initial observation by showing extreme values do not overlap. However, it leaves broader questions about the implications of these findings unresolved.",
+      "The trajectory resolves several uncertainties about SNP density, but leaves some explanatory gaps unaddressed.",
+      "The trajectory addresses and partly resolves initial questions about extreme SNP densities, but doesn't fully explore or resolve all relevant uncertainties, such as mechanisms or broader patterns."
+     ]
+    }
+   }
+  },
+  "048046cf": {
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "dataset": "qrobur_tree_table",
+   "level": "level_2",
+   "trajectory_index": 2,
+   "content": "ab098ab711da5872fbff982aedbbca9f3e85b171ebb44f1489d4cef32f47e54c",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/agentpoirot/qrobur_tree_table-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 2.6666666666666665,
+     "scores": [
+      3,
+      2,
+      3
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "The trajectory addresses the variance in SNP density and sequencing coverage as related to genomic windows and chromosome positions but lacks significant depth or focus on chromosome-specific variations.",
+     "reasons": [
+      "The trajectory addresses the variance in SNP density and sequencing coverage as related to genomic windows and chromosome positions but lacks significant depth or focus on chromosome-specific variations.",
+      "The trajectory mentions relevant columns but does not sufficiently address the analytical goal of understanding SNP density and sequencing coverage patterns; it lacks a coherent chain to explain specific patterns.",
+      "The trajectory addresses SNP density and sequencing coverage but lacks depth and specific sub-questions about chromosome positions. Observations are broadly on-topic yet lack a focused resolution of the goal."
+     ]
+    },
+    "information_gain": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "Observations largely reiterate the same broad findings without resolving specific uncertainties or adding substantial new understanding.",
+     "reasons": [
+      "Observations largely reiterate the same broad findings without resolving specific uncertainties or adding substantial new understanding.",
+      "Most steps restate or provide minimal additional context to the initial data, lacking progression or resolution that significantly reduces uncertainty from previous steps.",
+      "There is some initial information on SNP density and coverage, but subsequent observations are repetitive or restate earlier findings without resolving further uncertainties."
+     ]
+    },
+    "interestingness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The findings are somewhat routine, emphasizing expected variability in SNP density without uncovering surprising insights or patterns.",
+     "reasons": [
+      "The findings are somewhat routine, emphasizing expected variability in SNP density without uncovering surprising insights or patterns.",
+      "The observations are largely routine, such as noting missing data or variability, without uncovering any surprising or insightful findings beyond basic descriptive statistics.",
+      "The findings on SNP density and coverage stability are mildly informative but expected based on dataset profile, offering limited surprise or new insight."
+     ]
+    },
+    "trustworthiness": {
+     "score": 2.3333333333333335,
+     "scores": [
+      2,
+      3,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "Claims are broadly consistent with the provided values but lack statistical support, weakening their verification.",
+     "reasons": [
+      "Claims are broadly consistent with the provided values but lack statistical support, weakening their verification.",
+      "Claims are generally consistent with the evidence provided, but the lack of statistical tests or aggregation limits the support for some observations, making conclusions weakly supported.",
+      "Claims are not consistently supported by statistical tests or robust evidence. Observations rely heavily on narrative interpretation without sufficient computational backing."
+     ]
+    },
+    "actionability": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "Hints at potential areas for deeper analysis, such as exploring conditions under which data is missing, but lacks a coherent direction for further exploration.",
+     "reasons": [
+      "Hints at potential areas for deeper analysis, such as exploring conditions under which data is missing, but lacks a coherent direction for further exploration.",
+      "While some steps hint at potential issues (e.g., missing data), there is no coherent direction for follow-up analysis or hypotheses that guide towards actionable conclusions.",
+      "The trajectory remains descriptive with few indications of follow-up actions or hypotheses to test. It lacks a coherent direction toward meaningful next steps."
+     ]
+    },
+    "resolution": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The trajectory introduces variability as a question but doesn't substantially resolve or explain the factors affecting SNP density and sequencing coverage.",
+     "reasons": [
+      "The trajectory introduces variability as a question but doesn't substantially resolve or explain the factors affecting SNP density and sequencing coverage.",
+      "The trajectory does not effectively resolve the uncertainties introduced by the initial base insight, leaving the key question regarding the relationship between SNP density and sequencing coverage insufficiently explored.",
+      "The trajectory introduces variability in SNP density but provides limited explanation, validation, or contextualization, leaving major uncertainties around the initial observation unresolved."
+     ]
+    }
+   }
+  },
+  "102628ad": {
+   "system": "d2i",
+   "arm": "d2i",
+   "dataset": "qrobur_tree_table",
+   "level": "level_2",
+   "trajectory_index": 2,
+   "content": "5d71e18d92b24273c7b8eb6752cabfe6a5a842497b5f17a8424070857d7f49b2",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/d2i/qrobur_tree_table-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 2.3333333333333335,
+     "scores": [
+      3,
+      2,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "The trajectory examines SNP density and sequencing coverage, which are central to the goal of investigating these metrics across genomic windows and chromosome positions. However, it doesn't fully explore the broader implications of these patterns.",
+     "reasons": [
+      "The trajectory examines SNP density and sequencing coverage, which are central to the goal of investigating these metrics across genomic windows and chromosome positions. However, it doesn't fully explore the broader implications of these patterns.",
+      "The observation touches on SNP density and coverage but doesn't meaningfully address patterns across genomic windows or chromosome positions, which are central to the goal.",
+      "The trajectory attempts to explore a correlation related to the goal but remains limited to just one observation without delivering significant insight into SNP density or sequencing coverage patterns."
+     ]
+    },
+    "information_gain": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The single-step observation identifies the absence of correlation between 'nsnps' and 'nsamplecov' at specific genomic window sizes, but it does not advance understanding or resolve previous uncertainty beyond this singular finding.",
+     "reasons": [
+      "The single-step observation identifies the absence of correlation between 'nsnps' and 'nsamplecov' at specific genomic window sizes, but it does not advance understanding or resolve previous uncertainty beyond this singular finding.",
+      "A limited amount of new understanding is gained by showing no correlation, but it's largely a surface-level insight without depth.",
+      "The single observation offers limited new understanding, mainly highlighting the absence of correlation in a vague manner without further explanations."
+     ]
+    },
+    "interestingness": {
+     "score": 1.6666666666666667,
+     "scores": [
+      2,
+      1,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "The lack of correlation between SNP density and coverage for small window sizes is somewhat interesting, but the finding lacks depth and context that would make it more insightful.",
+     "reasons": [
+      "The lack of correlation between SNP density and coverage for small window sizes is somewhat interesting, but the finding lacks depth and context that would make it more insightful.",
+      "Finding no correlation is relatively unremarkable and doesn't provide a non-obvious insight or provoke further analytical curiosity.",
+      "The finding that no correlation exists might be mildly informative, but it lacks complexity and does not provide a surprising or deep insight into the data."
+     ]
+    },
+    "trustworthiness": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "The observation is consistent with the evidence provided (absence of correlation), but it lacks strong statistical support, relying instead on raw return values, which weakens its evidential grounding.",
+     "reasons": [
+      "The observation is consistent with the evidence provided (absence of correlation), but it lacks strong statistical support, relying instead on raw return values, which weakens its evidential grounding.",
+      "The claim is consistent with the evidence; however, the lack of statistical tests weakens the support, resting reliance on the raw values.",
+      "The observation's claim is supported by the listed values, but lacks statistical tests or additional context, reducing its sufficiency."
+     ]
+    },
+    "actionability": {
+     "score": 2.3333333333333335,
+     "scores": [
+      3,
+      2,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "The observation suggests that the relationship between SNP density and sequencing coverage may not need further exploration for small window sizes, providing direction but not a strong convergent analytical thread.",
+     "reasons": [
+      "The observation suggests that the relationship between SNP density and sequencing coverage may not need further exploration for small window sizes, providing direction but not a strong convergent analytical thread.",
+      "Hints at a possible area to avoid future analysis (correlation exploration) but lacks concrete directions or hypotheses to pursue.",
+      "Identifying a lack of correlation might suggest a follow-up on different dimensions, but the trajectory does not converge on any concrete next steps."
+     ]
+    },
+    "resolution": {
+     "score": 2.0,
+     "scores": [
+      3,
+      2,
+      1
+     ],
+     "sd": 0.816496580927726,
+     "min": 1,
+     "max": 3,
+     "reason": "The trajectory clarifies that there's no correlation for small windows, addressing one specific aspect of the base question but leaving broader uncertainties about SNP and coverage patterns unresolved.",
+     "reasons": [
+      "The trajectory clarifies that there's no correlation for small windows, addressing one specific aspect of the base question but leaving broader uncertainties about SNP and coverage patterns unresolved.",
+      "It only partially resolves the question of correlation but doesn't extend to a broader context of the analytical goal.",
+      "The trajectory does not resolve the initial uncertainty; it introduces a finding but does not explain, localize, or contextualize it fully."
+     ]
+    }
+   }
+  },
+  "e50a8b9a": {
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "dataset": "qrobur_tree_table",
+   "level": "level_2",
+   "trajectory_index": 3,
+   "content": "452181cf1cdf4352e86d37bf379684466f9eced0197acb23671ac4066b6f313d",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/agentpoirot/qrobur_tree_table-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 3.3333333333333335,
+     "scores": [
+      4,
+      3,
+      3
+     ],
+     "sd": 0.4714045207910317,
+     "min": 3,
+     "max": 4,
+     "reason": "The trajectory maintains focus on SNP density and its distribution across genomic windows. Each observation aligns with the goal, addressing SNP variation, the significance of unique tree structures, missing data, and areas of evolutionary activity.",
+     "reasons": [
+      "The trajectory maintains focus on SNP density and its distribution across genomic windows. Each observation aligns with the goal, addressing SNP variation, the significance of unique tree structures, missing data, and areas of evolutionary activity.",
+      "The trajectory is generally aligned with the goal of investigating SNP density and sequencing coverage, providing insights into the distribution and implications. However, it doesn't fully explore chromosomal position or deeper analysis of patterns.",
+      "The trajectory is generally on goal, addressing SNP density and coverage, with steps focused on relevant genomic insights, but lacks comprehensive answers to all implied sub-questions of the analytical goal."
+     ]
+    },
+    "information_gain": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The trajectory repeats similar descriptive statistics without introducing substantial new insights. While initial observations establish context, later steps largely reiterate findings without significant new resolution.",
+     "reasons": [
+      "The trajectory repeats similar descriptive statistics without introducing substantial new insights. While initial observations establish context, later steps largely reiterate findings without significant new resolution.",
+      "The trajectory presents some new information about SNP density but offers limited progression. Observations lack depth and mainly restate or slightly refine prior findings.",
+      "Some steps add information, but the progression is uneven, with several observations restating previous findings without resolving new questions, particularly in SNP density."
+     ]
+    },
+    "interestingness": {
+     "score": 2.3333333333333335,
+     "scores": [
+      3,
+      2,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "Some findings, such as the implication of unique tree structures and missing data, are of moderate interest. However, the repeated emphasis on high SNP density is less surprising.",
+     "reasons": [
+      "Some findings, such as the implication of unique tree structures and missing data, are of moderate interest. However, the repeated emphasis on high SNP density is less surprising.",
+      "There are a few mildly informative findings, such as regions with high SNP density, but overall, the observations remain fairly routine given the dataset's profile.",
+      "A few observations are mildly interesting, but most findings are expected outcomes based on the dataset profile, with little novelty or surprising insights."
+     ]
+    },
+    "trustworthiness": {
+     "score": 2.6666666666666665,
+     "scores": [
+      3,
+      3,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "Most claims align with the evidential data, but the absence of statistical tests limits support strength. Claims about evolutionary significance are more speculative without adequate testing.",
+     "reasons": [
+      "Most claims align with the evidential data, but the absence of statistical tests limits support strength. Claims about evolutionary significance are more speculative without adequate testing.",
+      "Claims are generally consistent with evidence provided, but there is a lack of statistical support. Observations are primarily descriptive without deep validation.",
+      "Most claims are loosely based on the evidence provided, lacking statistical support, which leads to overstatements and weakly supported conclusions about SNP density and evolutionary significance."
+     ]
+    },
+    "actionability": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "Few concrete next steps are proposed. While gaps in data and unique tree structure are noted, the trajectory lacks a cohesive direction for further analysis.",
+     "reasons": [
+      "Few concrete next steps are proposed. While gaps in data and unique tree structure are noted, the trajectory lacks a cohesive direction for further analysis.",
+      "The trajectory suggests potential regions of interest but doesn't converge on actionable steps or hypotheses. It remains somewhat descriptive without clear follow-up directions.",
+      "While some observations hint at potential follow-up actions, the trajectory remains diffuse without a coherent direction or specific hypotheses or analyses to pursue."
+     ]
+    },
+    "resolution": {
+     "score": 2.3333333333333335,
+     "scores": [
+      3,
+      2,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "The trajectory begins to address uncertainties about SNP density distribution but leaves questions of significance and exact implications unresolved. Some attempts are made to contextualize findings.",
+     "reasons": [
+      "The trajectory begins to address uncertainties about SNP density distribution but leaves questions of significance and exact implications unresolved. Some attempts are made to contextualize findings.",
+      "Some initial uncertainties about SNP distribution are addressed, but substantial explanatory gaps remain. It doesn't fully contextualize or validate the base insight.",
+      "The trajectory investigates some aspects of the base insight, but leaves significant questions about SNP distribution and coverage unresolved, without deep clarification or explanation."
+     ]
+    }
+   }
+  },
+  "ba11ec56": {
+   "system": "quis",
+   "arm": "quis",
+   "dataset": "qrobur_tree_table",
+   "level": "level_2",
+   "trajectory_index": 1,
+   "content": "fae10b883e26b22013eb2737c1adfea9018545b7eda3752f779794d61cc361b3",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/quis/qrobur_tree_table-level_2",
+   "assigned_criteria": [
+    "trustworthiness"
+   ],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory focuses on maximum 'end' values across different conditions, which does not address SNP density or sequencing coverage patterns, drifting away from the analytical goal.",
+     "reasons": [
+      "The trajectory focuses on maximum 'end' values across different conditions, which does not address SNP density or sequencing coverage patterns, drifting away from the analytical goal.",
+      "The trajectory fails to address patterns in SNP density and sequencing coverage as specified by the analytical goal, focusing instead on unrelated tree values.",
+      "The trajectory fails to address the main goal of exploring SNP density and sequencing coverage patterns across genomic windows and chromosome positions. It only focuses on the 'tree' value's associations with 'MAX(end)', which is unrelated to the stated goal."
+     ]
+    },
+    "information_gain": {
+     "score": 1.3333333333333333,
+     "scores": [
+      2,
+      1,
+      1
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "While steps identify 'outstandingly large MAX(end)' in different subspaces, they provide limited progression or resolution of any analytical goal-related questions.",
+     "reasons": [
+      "While steps identify 'outstandingly large MAX(end)' in different subspaces, they provide limited progression or resolution of any analytical goal-related questions.",
+      "Each step repeats the analysis of outstandingly large MAX(end) without reducing uncertainty or explaining findings.",
+      "Each observation repeats the pattern of identifying the 'tree' value with an outstanding MAX(end), without resolving or expanding upon the previous steps. There is no progression or reduction of uncertainty across the steps."
+     ]
+    },
+    "interestingness": {
+     "score": 1.3333333333333333,
+     "scores": [
+      2,
+      1,
+      1
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "The findings are expected due to the focus on 'maximum' values, which are routine and not insightful for the stated analytical goal.",
+     "reasons": [
+      "The findings are expected due to the focus on 'maximum' values, which are routine and not insightful for the stated analytical goal.",
+      "The findings are routine and expected given the dataset profile, with no surprising or insightful revelations.",
+      "The trajectory surfaces repeated patterns of 'tree' values with large 'MAX(end)' without providing context or linking these findings to the analytical objectives. These observations are routine and lack genuine analytical insight."
+     ]
+    },
+    "trustworthiness": {
+     "score": 5.0,
+     "scores": [
+      5,
+      5,
+      5
+     ],
+     "sd": 0.0,
+     "min": 5,
+     "max": 5,
+     "reason": "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+     "reasons": [
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims."
+     ],
+     "assigned": true
+    },
+    "actionability": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory does not build toward a specific hypothesis or decision relevant to SNP density or sequencing coverage patterns, staying purely descriptive.",
+     "reasons": [
+      "The trajectory does not build toward a specific hypothesis or decision relevant to SNP density or sequencing coverage patterns, staying purely descriptive.",
+      "The observations do not converge toward any actionable conclusion or suggest any specific follow-up analyses.",
+      "There is no actionable insight provided. The trajectory does not converge on any actionable hypothesis, decision, or further analysis, remaining purely descriptive."
+     ]
+    },
+    "resolution": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "It does not address or resolve any questions about the analytical goal of SNP density or sequencing coverage, leaving the initial inquiry unclarified.",
+     "reasons": [
+      "It does not address or resolve any questions about the analytical goal of SNP density or sequencing coverage, leaving the initial inquiry unclarified.",
+      "The trajectory does not clarify any uncertainties raised by the analytical goal; it shifts focus entirely to irrelevant metrics.",
+      "The trajectory does not resolve any uncertainties related to the initial base insight about patterns in SNP density or sequencing coverage. Each step repeats a similar claim without contextualizing or explaining earlier findings."
+     ]
+    }
+   }
+  },
+  "a476a4b0": {
+   "system": "d2i",
+   "arm": "d2i",
+   "dataset": "salesfact",
+   "level": "level_2",
+   "trajectory_index": 4,
+   "content": "7f8455159a22c9012bc9241474110d1ce6cfc7d251670c9ed222af1248a1eab8",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/d2i/salesfact-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The observation touches on manufacturer and segment, but does not address the goal of exploring revenue across manufacturers, channels, regions, and segments comprehensively over time.",
+     "reasons": [
+      "The observation touches on manufacturer and segment, but does not address the goal of exploring revenue across manufacturers, channels, regions, and segments comprehensively over time.",
+      "The trajectory provides some information on regional market share but only touches on a part of the market dynamics, leaving out other aspects such as manufacturer, channel, and temporal changes.",
+      "The observation addresses regional revenue distribution, relevant to market share but misses other key aspects like manufacturers, channels, or temporal change, thus only partially aligns with the goal."
+     ]
+    },
+    "information_gain": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "As a single-step trajectory, it provides limited new understanding, focusing narrowly on a specific segment and region without broader context.",
+     "reasons": [
+      "As a single-step trajectory, it provides limited new understanding, focusing narrowly on a specific segment and region without broader context.",
+      "The single observation identifies dominance in one region and segment pair, but without further exploration or refinement, it adds limited new understanding.",
+      "The single observation provides a limited view on regional dominance without further exploration of temporal or segment dynamics, resulting in low information gain."
+     ]
+    },
+    "interestingness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "While identifying regional dominance in a specific segment, it offers no surprising insights beyond what might be anticipated given the dataset structure.",
+     "reasons": [
+      "While identifying regional dominance in a specific segment, it offers no surprising insights beyond what might be anticipated given the dataset structure.",
+      "The finding might be mildly informative regarding the East region's strength in a specific segment, but it's a common type of insight and lacks surprising elements.",
+      "While the finding about East's dominance in the Moderation segment is slightly informative, such regional dominance is common and not deeply insightful."
+     ]
+    },
+    "trustworthiness": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "The claim is consistent with attached evidence for the given proportion; however, the leap to confirm dominance lacks full statistical context or comparative baselines.",
+     "reasons": [
+      "The claim is consistent with attached evidence for the given proportion; however, the leap to confirm dominance lacks full statistical context or comparative baselines.",
+      "The claim is consistent with the evidence shown, but the sufficiency of evidence is not strong, as there are no statistical tests validating the dominance other than proportion.",
+      "The evidence supports the claim about regional revenue share, but additional statistical detail beyond the proportion reported would strengthen its reliability."
+     ]
+    },
+    "actionability": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The finding hints at regional revenue dominance but lacks a clear direction for further analysis or decision-making steps.",
+     "reasons": [
+      "The finding hints at regional revenue dominance but lacks a clear direction for further analysis or decision-making steps.",
+      "The observation does not suggest a concrete next step or decision. It provides a fact but lacks direction for further analysis or action.",
+      "The finding suggests East's dominance without suggesting follow-up actions. Little guidance is offered for further exploration or decisions."
+     ]
+    },
+    "resolution": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory does not resolve broader analytical questions concerning market share and revenue across other factors or over time.",
+     "reasons": [
+      "The trajectory does not resolve broader analytical questions concerning market share and revenue across other factors or over time.",
+      "The trajectory does not progress beyond the initial observation, leaving many potential questions about market dynamics unresolved.",
+      "The trajectory introduces one finding without resolving broader uncertainties about revenue patterns across other segments, channels, or over time."
+     ]
+    }
+   }
+  },
+  "9d6a2d9f": {
+   "system": "quis",
+   "arm": "quis",
+   "dataset": "salesfact",
+   "level": "level_2",
+   "trajectory_index": 0,
+   "content": "14b71a06299a3d7652b71d37ff1c3bd1ccc70e0e4946bfc8aa012729ef90aa82",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/quis/salesfact-level_2",
+   "assigned_criteria": [
+    "trustworthiness"
+   ],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory focuses exclusively on the 'Urban' category's unit sum without addressing the broader goal of revenue and market share analysis across relevant dimensions.",
+     "reasons": [
+      "The trajectory focuses exclusively on the 'Urban' category's unit sum without addressing the broader goal of revenue and market share analysis across relevant dimensions.",
+      "The trajectory focuses on 'Urban' units but does not address revenue or market share, missing the goal's focus on manufacturers, regions, and channels.",
+      "The trajectory does not address core elements of revenue, market share, or their breakdowns across manufacturer, channel, region, and segment over time, as specified in the goal."
+     ]
+    },
+    "information_gain": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "Each step is repetitive, specifying the same claim about 'Urban' with different subspaces but not fundamentally altering or deepening understanding.",
+     "reasons": [
+      "Each step is repetitive, specifying the same claim about 'Urban' with different subspaces but not fundamentally altering or deepening understanding.",
+      "Steps repeat the same 'Urban' dominance with no added context or resolution, offering no progression or new insights.",
+      "The observations are repetitive, merely narrowing the focus on 'Urban' repeatedly without resolving any questions relevant to revenue or market share analysis."
+     ]
+    },
+    "interestingness": {
+     "score": 1.6666666666666667,
+     "scores": [
+      2,
+      2,
+      1
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "The finding that 'Urban' has a large unit sum could be of mild interest but lacks context or non-obvious insights related to the broad analytical goal.",
+     "reasons": [
+      "The finding that 'Urban' has a large unit sum could be of mild interest but lacks context or non-obvious insights related to the broad analytical goal.",
+      "While 'Urban' dominance is noted, its repetition without variation in context becomes expected and uninformative.",
+      "The trajectory highlights a finding that might be part of common expectations (e.g., 'Urban' being large in a generic way) without providing insights into the goal's specifics."
+     ]
+    },
+    "trustworthiness": {
+     "score": 5.0,
+     "scores": [
+      5,
+      5,
+      5
+     ],
+     "sd": 0.0,
+     "min": 5,
+     "max": 5,
+     "reason": "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+     "reasons": [
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims."
+     ],
+     "assigned": true
+    },
+    "actionability": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory remains descriptive and does not offer concrete next steps or hypotheses for further analysis aligned with the goal of understanding revenue and market share.",
+     "reasons": [
+      "The trajectory remains descriptive and does not offer concrete next steps or hypotheses for further analysis aligned with the goal of understanding revenue and market share.",
+      "The trajectory offers no next steps or actionable insights, only iterating unbounded 'Urban' dominance without broader implications.",
+      "The trajectory is purely descriptive, focusing on an 'Urban' pattern without suggesting any concrete follow-up steps or analyses related to the analytical goal."
+     ]
+    },
+    "resolution": {
+     "score": 1.3333333333333333,
+     "scores": [
+      2,
+      1,
+      1
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "Attempts to contextualize the base insight by focusing on subspaces, but it does not resolve questions about why or how this is significant beyond numbers.",
+     "reasons": [
+      "Attempts to contextualize the base insight by focusing on subspaces, but it does not resolve questions about why or how this is significant beyond numbers.",
+      "The trajectory never resolves or clarifies why 'Urban' is dominant or its impact on the goal, leaving the base insight uncontextualized and unexplained.",
+      "The trajectory fails to clarify the initial observation about 'Urban' in a goal-relevant context or resolve questions about its influence on revenue or market share across specified dimensions."
+     ]
+    }
+   }
+  },
+  "24d1ce6a": {
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "dataset": "salesfact",
+   "level": "level_2",
+   "trajectory_index": 4,
+   "content": "8b6b3160f7d74254b2f48f6dd068a3f1478ec08a27cf31b1bfa8d6008bab2eab",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/agentpoirot/salesfact-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "The trajectory addresses market share for manufacturers and revenue trends across channels and regions, partially aligning with the analytical goal of exploring these aspects over time.",
+     "reasons": [
+      "The trajectory addresses market share for manufacturers and revenue trends across channels and regions, partially aligning with the analytical goal of exploring these aspects over time.",
+      "The trajectory addresses multiple aspects of the analytical goal such as segment and manufacturer market shares, revenue by channel, and regional performance, but lacks a cohesive progression that directly answers the overarching questions presented in the goal.",
+      "The trajectory touches on various elements of the goal, such as revenue across channels and segments, but lacks consistent focus. Each observation is partially relevant, though the trajectory does not cohesively tie the insights together."
+     ]
+    },
+    "information_gain": {
+     "score": 2.3333333333333335,
+     "scores": [
+      3,
+      2,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "Each step provides some new detail, but the progression is uneven; the steps do not consistently build upon each other to resolve important uncertainties.",
+     "reasons": [
+      "Each step provides some new detail, but the progression is uneven; the steps do not consistently build upon each other to resolve important uncertainties.",
+      "While each step adds some information regarding segments, manufacturers, and channels, the observations often reiterate findings without deeply resolving previous uncertainties or sharpening conclusions.",
+      "The observations are somewhat repetitive, offering incremental information about revenue and market share. However, they do not substantially build upon each other to reduce uncertainty."
+     ]
+    },
+    "interestingness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The findings, including segment dominance and channel performance, are somewhat expected given the dataset profile without providing surprising insights.",
+     "reasons": [
+      "The findings, including segment dominance and channel performance, are somewhat expected given the dataset profile without providing surprising insights.",
+      "The trajectory provides some expected or mildly informative insights, but most findings align with typical market data, lacking surprising or deeply enlightening observations.",
+      "Most observations present expected dominance in segments and channels without offering surprising insights. While mildly informative, the trajectory does not uncover anything notably non-obvious."
+     ]
+    },
+    "trustworthiness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The claims lack statistical support and are based solely on returned values; some claims, like the connection between market share and revenue growth, could overstate the evidence.",
+     "reasons": [
+      "The claims lack statistical support and are based solely on returned values; some claims, like the connection between market share and revenue growth, could overstate the evidence.",
+      "The claims rely heavily on descriptive statistics without accompanying statistical tests, leading to weak support for several key assertions. There is some overreach, especially with strong conclusions drawn from limited evidence.",
+      "The claims are weakly supported as none of the observations include statistical support. The stated dominance and market share observations rely solely on computed results, lacking sufficient verification."
+     ]
+    },
+    "actionability": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The trajectory provides some insights about market performance but does not strongly converge on a clear, actionable next step or hypothesis.",
+     "reasons": [
+      "The trajectory provides some insights about market performance but does not strongly converge on a clear, actionable next step or hypothesis.",
+      "Some observations hint at potential areas for further exploration, such as examining revenue trends by channel, but the insights do not coalesce into a distinct or actionable conclusion.",
+      "While the observations suggest possible areas to explore, such as the role of specific channels or regions, they lack a coherent direction or specific suggestion for next steps."
+     ]
+    },
+    "resolution": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The trajectory touches on aspects of the base insight but fails to address important uncertainties, such as why specific channels or regions are dominant.",
+     "reasons": [
+      "The trajectory touches on aspects of the base insight but fails to address important uncertainties, such as why specific channels or regions are dominant.",
+      "The trajectory makes some attempts at resolving questions from the base insight, such as market dominance and revenue channels, but significant explanatory gaps remain, lacking thorough investigation and validation of initial claims.",
+      "The trajectory introduces potential areas of interest in revenue generation but leaves many questions unanswered. The steps do not adequately explain or validate the initial observation about the Convenience segment."
+     ]
+    }
+   }
+  },
+  "098861e8": {
+   "system": "d2i",
+   "arm": "d2i",
+   "dataset": "salesfact",
+   "level": "level_2",
+   "trajectory_index": 1,
+   "content": "da2a80b630cb886d2fa1804d5ac170881c1e51dffcaeaa850f422f48c961b61b",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/d2i/salesfact-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "The trajectory mentions relevant columns 'revenue' and 'iscompetehide', but only partially addresses the analytical goal. It focuses narrowly on revenue trend by 'iscompetehide' without covering other goal aspects like market share, region, channel, or segment.",
+     "reasons": [
+      "The trajectory mentions relevant columns 'revenue' and 'iscompetehide', but only partially addresses the analytical goal. It focuses narrowly on revenue trend by 'iscompetehide' without covering other goal aspects like market share, region, channel, or segment.",
+      "The trajectory addresses VanArsdel's revenue over time, specifically mentioning the 'iscompetehide' factor, partially aligning with the goal to explore revenue trends over time, but it does not cover manufacturer, channel, region, or segment comprehensively.",
+      "The analysis touches on revenue trends over time specific to VanArsdel with a focus on iscompetehide status, which is related to the goal but doesn't cover all requested dimensions like channel or segment comprehensively."
+     ]
+    },
+    "information_gain": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The step provides limited new understanding beyond a single observation of revenue increase under a specific condition. The absence of multiple observations limits progression or deepening of analysis.",
+     "reasons": [
+      "The step provides limited new understanding beyond a single observation of revenue increase under a specific condition. The absence of multiple observations limits progression or deepening of analysis.",
+      "The observation introduces VanArsdel's revenue pattern based on 'iscompetehide,' but lacks further analysis or explanation, offering limited new understanding beyond a singular aspect.",
+      "The observation provides a single finding about revenue trends, but lacks progression or further exploration of related dimensions such as channel, segment, or region."
+     ]
+    },
+    "interestingness": {
+     "score": 2.3333333333333335,
+     "scores": [
+      2,
+      2,
+      3
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "The finding about VanArsdel's revenue trend is mildly informative but fairly narrow. Lacks additional context or insights beyond a singular condition for a single manufacturer.",
+     "reasons": [
+      "The finding about VanArsdel's revenue trend is mildly informative but fairly narrow. Lacks additional context or insights beyond a singular condition for a single manufacturer.",
+      "The insight about VanArsdel's revenue trajectory related to 'iscompetehide' is somewhat informative but lacks surprise or depth, making it mildly interesting.",
+      "Finding that VanArsdel's revenue surpasses in certain conditions is interesting but not revolutionary; a moderately insightful observation given the goal."
+     ]
+    },
+    "trustworthiness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The claim rests on descriptive statistics without statistical support or tests, making it weakly supported. Values are stated, but the strength of conclusion is limited by lack of rigorous testing.",
+     "reasons": [
+      "The claim rests on descriptive statistics without statistical support or tests, making it weakly supported. Values are stated, but the strength of conclusion is limited by lack of rigorous testing.",
+      "The claim about revenue change relies solely on returned values without statistical tests or detailed evidence, making it weakly supported and limiting its trustworthiness.",
+      "The observation lacks formal statistical tests to support the claims about revenue trends, relying solely on returned values, which weakens trustworthiness."
+     ]
+    },
+    "actionability": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The observation hints at potential follow-up regarding VanArsdel's revenue strategy, but it does not converge toward a coherent next step or hypothesis beyond the descriptive finding.",
+     "reasons": [
+      "The observation hints at potential follow-up regarding VanArsdel's revenue strategy, but it does not converge toward a coherent next step or hypothesis beyond the descriptive finding.",
+      "While the pattern identified suggests a point of interest for further exploration, it lacks a coherent next step or actionable insight connected to the broader analytical goal.",
+      "The finding suggests areas to explore, such as why the revenue surpasses under current conditions, but doesn't point decisively to specific actions or analyses."
+     ]
+    },
+    "resolution": {
+     "score": 1.6666666666666667,
+     "scores": [
+      1,
+      2,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "The trajectory does not resolve the base insight's uncertainties such as why VanArsdel's trends change or how these trends compare across other relevant conditions, regions, or segments.",
+     "reasons": [
+      "The trajectory does not resolve the base insight's uncertainties such as why VanArsdel's trends change or how these trends compare across other relevant conditions, regions, or segments.",
+      "The trajectory introduces a specific insight about VanArsdel but does not address the broader aspects of the initial uncertainty or connect it to other factors, leaving significant questions unanswered.",
+      "The base insight raises questions about revenue under different conditions, but the trajectory doesn't sufficiently resolve these by exploring related datasets further."
+     ]
+    }
+   }
+  },
+  "2518ede0": {
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "dataset": "salesfact",
+   "level": "level_2",
+   "trajectory_index": 2,
+   "content": "82210c30b70307739d19b06dcb0a457036e11e49e2b58f15dcdf84265bde1388",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/agentpoirot/salesfact-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 3.3333333333333335,
+     "scores": [
+      3,
+      4,
+      3
+     ],
+     "sd": 0.4714045207910317,
+     "min": 3,
+     "max": 4,
+     "reason": "Trajectory focuses on revenue and market share, aligning with the goal, but lacks depth in exploring channels, and regions over time in detail.",
+     "reasons": [
+      "Trajectory focuses on revenue and market share, aligning with the goal, but lacks depth in exploring channels, and regions over time in detail.",
+      "The steps generally focus on exploring revenue and market share across manufacturers, channels, and segments, which align with the analytical goal. Only minor drift occurs.",
+      "The observations focus on revenue and market share, relevant aspects of the analytical goal. However, not all aspects, such as time progression and segment analysis, are cohesively linked to the goal."
+     ]
+    },
+    "information_gain": {
+     "score": 2.3333333333333335,
+     "scores": [
+      2,
+      3,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "Observations introduce new revenue data but show little progression in resolving earlier insights or synthesizing across variables.",
+     "reasons": [
+      "Observations introduce new revenue data but show little progression in resolving earlier insights or synthesizing across variables.",
+      "While some steps deepen the understanding, such as the revenue growth of the 'Moderation' segment, others restate similar findings without resolving previous uncertainties.",
+      "Most observations introduce new information but do not naturally build on previous findings. The progression is uneven, with limited follow-up or deeper insight into prior steps."
+     ]
+    },
+    "interestingness": {
+     "score": 2.3333333333333335,
+     "scores": [
+      2,
+      3,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "Findings are mostly expected, such as dominance in the East region and by VanArsdel; lacks surprising or non-obvious insights.",
+     "reasons": [
+      "Findings are mostly expected, such as dominance in the East region and by VanArsdel; lacks surprising or non-obvious insights.",
+      "The trajectory highlights some important insights, like the prominence of VanArsdel and the role of digital platforms, but these are somewhat expected given the dataset profile.",
+      "While some findings are mildly informative, the observations are mostly expected and lack surprising insights or significant depth."
+     ]
+    },
+    "trustworthiness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "Claims are not adequately supported by statistical evidence; no tests or confidence measures reinforce the observations.",
+     "reasons": [
+      "Claims are not adequately supported by statistical evidence; no tests or confidence measures reinforce the observations.",
+      "Claims lack statistical support, relying on returned values alone, which weakens their grounding. Some statements overreach given the evidence provided.",
+      "Claims are generally consistent with the evidence, but lack statistical validation weakens their support, making them appear overstated."
+     ]
+    },
+    "actionability": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "Observations offer limited concrete next steps or hypotheses beyond descriptive insights, lacking a clear analytical direction.",
+     "reasons": [
+      "Observations offer limited concrete next steps or hypotheses beyond descriptive insights, lacking a clear analytical direction.",
+      "The trajectory suggests areas for analysis but does not converge on a specific actionable conclusion, remaining somewhat diffuse.",
+      "Few observations suggest concrete next steps or analytical directions, with the trajectory remaining diffusely informative rather than decisively actionable."
+     ]
+    },
+    "resolution": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "Base insight about East region is weakly contextualized; trajectory leaves many questions about underlying factors unresolved.",
+     "reasons": [
+      "Base insight about East region is weakly contextualized; trajectory leaves many questions about underlying factors unresolved.",
+      "The trajectory addresses aspects of the base insight but leaves significant uncertainties unresolved, such as the reasons behind regional dominance.",
+      "The trajectory adds information but does not effectively resolve the initial uncertainty around regional dominance and strategic implications, leaving several ambiguities."
+     ]
+    }
+   }
+  },
+  "cfb2a92b": {
+   "system": "quis",
+   "arm": "quis",
+   "dataset": "salesfact",
+   "level": "level_2",
+   "trajectory_index": 2,
+   "content": "dd0ff42dfc0f253ae428d84b05f5b6ff77c811dea7b3f7621fdb3aafa0d78ecf",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/quis/salesfact-level_2",
+   "assigned_criteria": [
+    "trustworthiness"
+   ],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory remains focused on the category 'Urban', which is not directly related to revenue, market share, or time trends as the goal specifies.",
+     "reasons": [
+      "The trajectory remains focused on the category 'Urban', which is not directly related to revenue, market share, or time trends as the goal specifies.",
+      "The trajectory focuses narrowly on the 'Urban' category count, which does not address revenue or market share across various dimensions as indicated in the analytical goal.",
+      "The trajectory focuses exclusively on the count of 'Urban' in various slices, which is tangential to the analytical goal of exploring revenue and market share."
+     ]
+    },
+    "information_gain": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "Each step simply reiterates the finding of 'Urban' being outstanding, without resolving any new questions or uncertainties from prior steps.",
+     "reasons": [
+      "Each step simply reiterates the finding of 'Urban' being outstanding, without resolving any new questions or uncertainties from prior steps.",
+      "Each observation repeats the finding of a high 'Urban' count in progressively narrower subspaces without resolving any significant analytical question from earlier steps.",
+      "Each step merely repeats the same pattern of 'Urban' being dominant in slightly different subsets, without resolving any new questions or reducing uncertainty about the main analysis goals."
+     ]
+    },
+    "interestingness": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The consistent observation of 'Urban' having high counts is unsurprising given its dominance in the dataset profile, making the sequence of statements routine and uninformative.",
+     "reasons": [
+      "The consistent observation of 'Urban' having high counts is unsurprising given its dominance in the dataset profile, making the sequence of statements routine and uninformative.",
+      "The finding that 'Urban' has a high count is routine and expected, lacking substantive insight into the analytical goal of revenue and market share exploration.",
+      "The findings about 'Urban' being dominant are neither surprising nor analytically meaningful given the dataset profile and without additional context."
+     ]
+    },
+    "trustworthiness": {
+     "score": 5.0,
+     "scores": [
+      5,
+      5,
+      5
+     ],
+     "sd": 0.0,
+     "min": 5,
+     "max": 5,
+     "reason": "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+     "reasons": [
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims."
+     ],
+     "assigned": true
+    },
+    "actionability": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory does not suggest any concrete next steps or analyses, as it repeatedly states the same descriptive finding.",
+     "reasons": [
+      "The trajectory does not suggest any concrete next steps or analyses, as it repeatedly states the same descriptive finding.",
+      "No actionable insights or hypotheses are suggested. The trajectory does not converge on a useful direction beyond stating a high count for 'Urban'.",
+      "The trajectory does not lead to any concrete next steps or decisions related to revenue or market share."
+     ]
+    },
+    "resolution": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "The trajectory fails to resolve the initial observation's uncertainty, as it only narrows the scope to the same finding without explanation, validation, or contextualization.",
+     "reasons": [
+      "The trajectory fails to resolve the initial observation's uncertainty, as it only narrows the scope to the same finding without explanation, validation, or contextualization.",
+      "The trajectory adds no resolution to the base insight. It repeats a surface-level observation with no deeper analysis or explanation.",
+      "The trajectory does not resolve any uncertainty introduced by the initial mention of 'Urban'; it repeatedly checks the same pattern across different subspaces without explanation or contextualization."
+     ]
+    }
+   }
+  },
+  "4d80ac43": {
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "dataset": "revenue_opportunities",
+   "level": "level_2",
+   "trajectory_index": 3,
+   "content": "ce457d10d56b60730d92f0e6fe2304803514a92966c0746e45bed12cf7fb2a97",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/agentpoirot/revenue_opportunities-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 4.0,
+     "scores": [
+      4,
+      4,
+      4
+     ],
+     "sd": 0.0,
+     "min": 4,
+     "max": 4,
+     "reason": "The trajectory consistently addresses the analytical goal by examining aspects of the sales pipeline, such as sales stages, partner impacts, opportunity sizes, and opportunity durations.",
+     "reasons": [
+      "The trajectory consistently addresses the analytical goal by examining aspects of the sales pipeline, such as sales stages, partner impacts, opportunity sizes, and opportunity durations.",
+      "The trajectory stays focused on understanding aspects of the sales pipeline as specified in the goal. Each observation contributes to explaining a component of the pipeline across stages and partner involvement.",
+      "The trajectory is focused on sales stages, partner status, and opportunity sizes, directly aligned with the analytical goal. Only minor drift is present."
+     ]
+    },
+    "information_gain": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "Each observation provides some additional information, but the progression is uneven and lacks strong statistical validation, which limits deeper understanding.",
+     "reasons": [
+      "Each observation provides some additional information, but the progression is uneven and lacks strong statistical validation, which limits deeper understanding.",
+      "Several observations provide meaningful insights, but the progression is uneven. For example, identifying the probability differences and opportunity durations deepens understanding, yet some findings lack the next step for deeper analysis.",
+      "The trajectory introduces meaningful findings, but the progression is uneven. Several observations merely reinforce prior statements without substantial expansion."
+     ]
+    },
+    "interestingness": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "Insights about sales stages and partner influence are moderately interesting and non-obvious, but the findings on opportunity size distribution are more routine.",
+     "reasons": [
+      "Insights about sales stages and partner influence are moderately interesting and non-obvious, but the findings on opportunity size distribution are more routine.",
+      "While the trajectory surfaces useful insights, such as the variation in opportunity duration across stages, some findings like opportunity size distribution are more routine and less surprising.",
+      "The trajectory provides some meaningful insights about sales pipeline dynamics but includes several expected or routine observations."
+     ]
+    },
+    "trustworthiness": {
+     "score": 2.3333333333333335,
+     "scores": [
+      2,
+      2,
+      3
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "The claims are generally consistent with the evidence provided, but the lack of statistical tests weakens the reliability of the overall conclusions.",
+     "reasons": [
+      "The claims are generally consistent with the evidence provided, but the lack of statistical tests weakens the reliability of the overall conclusions.",
+      "The claims are consistent with their evidence, but the lack of statistical support weakens the confidence in conclusions. Most evidence relies solely on observed values without tests to verify the claims.",
+      "The claims align with the evidence provided, but the lack of statistical tests and detailed support limits their robustness."
+     ]
+    },
+    "actionability": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "Findings suggest potential areas to investigate, like improving lead qualification, but the trajectory lacks a strong, coherent next step for action.",
+     "reasons": [
+      "Findings suggest potential areas to investigate, like improving lead qualification, but the trajectory lacks a strong, coherent next step for action.",
+      "The trajectory supports analyzing lead qualification and partner-driven opportunity handling, suggesting some direction for improvement, but lacks a strong, single analytical thread.",
+      "The trajectory suggests several plausible actions or hypotheses, but lacks a unified compelling direction."
+     ]
+    },
+    "resolution": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "Some issues around the sales stages and partner influence are resolved, but the trajectory does not fully clarify or validate the base insight on probability of closing.",
+     "reasons": [
+      "Some issues around the sales stages and partner influence are resolved, but the trajectory does not fully clarify or validate the base insight on probability of closing.",
+      "The trajectory answers several questions about the base insight by exploring probability by stage and duration. However, it leaves some questions, like the reason for stalling partner-driven opportunities, largely unresolved.",
+      "Some aspects of the base insight are investigated, such as sales stage impact and partner involvement, but significant explanatory gaps remain."
+     ]
+    }
+   }
+  },
+  "f5c93c56": {
+   "system": "quis",
+   "arm": "quis",
+   "dataset": "revenue_opportunities",
+   "level": "level_2",
+   "trajectory_index": 4,
+   "content": "ec6c0f76d0116e4fa3c3b8df126ba9ed594ac29803ba3279832fd6dc9a9df8bf",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/quis/revenue_opportunities-level_2",
+   "assigned_criteria": [
+    "trustworthiness"
+   ],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 2.3333333333333335,
+     "scores": [
+      2,
+      3,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "The trajectory mentions relevant columns (opportunity size, partner status), but provides minimal insight into the sales pipeline's size and shape across all stated dimensions. The narrow focus on 'Large' opportunity size limits broader understanding.",
+     "reasons": [
+      "The trajectory mentions relevant columns (opportunity size, partner status), but provides minimal insight into the sales pipeline's size and shape across all stated dimensions. The narrow focus on 'Large' opportunity size limits broader understanding.",
+      "The trajectory focuses mainly on opportunity size and factored product revenue but doesn't deeply explore other aspects of the pipeline such as regions, segments, or partner status in a broad context as the goal suggests.",
+      "The trajectory partially addresses the goal by focusing on 'opportunity_size' and its interactions, but it neglects other variables like 'region' and 'segment.'"
+     ]
+    },
+    "information_gain": {
+     "score": 1.3333333333333333,
+     "scores": [
+      1,
+      2,
+      1
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "Observations repeat the same statement about 'Large' opportunity size without resolving any new uncertainty. Increased specificity does not change the conclusion or add new understanding.",
+     "reasons": [
+      "Observations repeat the same statement about 'Large' opportunity size without resolving any new uncertainty. Increased specificity does not change the conclusion or add new understanding.",
+      "Each step narrowly focuses on a particular subspace repeating the same claim without providing substantial new insight beyond narrowing context based on partner and sales stage.",
+      "The steps are highly repetitive, examining the same finding across related subgroups without resolving significant uncertainties."
+     ]
+    },
+    "interestingness": {
+     "score": 1.6666666666666667,
+     "scores": [
+      1,
+      2,
+      2
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "The trajectory reveals predictable dominance of 'Large' opportunity size. Without evidence or unexpected findings, the insights remain routine and expected.",
+     "reasons": [
+      "The trajectory reveals predictable dominance of 'Large' opportunity size. Without evidence or unexpected findings, the insights remain routine and expected.",
+      "The findings are not particularly surprising or non-obvious, primarily confirming expected trends with large opportunity sizes leading to more revenue.",
+      "The finding that 'Large' opportunity size has the highest revenue could be interesting but is expected given 'Large' implies large revenue. Subgroup repetition adds little interest."
+     ]
+    },
+    "trustworthiness": {
+     "score": 5.0,
+     "scores": [
+      5,
+      5,
+      5
+     ],
+     "sd": 0.0,
+     "min": 5,
+     "max": 5,
+     "reason": "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+     "reasons": [
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims."
+     ],
+     "assigned": true
+    },
+    "actionability": {
+     "score": 1.3333333333333333,
+     "scores": [
+      1,
+      2,
+      1
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "The trajectory simply restates a dominance observation without actionable steps or directions for deeper exploration or decision-making.",
+     "reasons": [
+      "The trajectory simply restates a dominance observation without actionable steps or directions for deeper exploration or decision-making.",
+      "The trajectory suggests investigating large opportunities, but doesn't lead to a coherent next step or decision relevant to the complete goal.",
+      "The trajectory does not suggest actionable steps or further analysis. It repeatedly states an expected finding in narrower contexts."
+     ]
+    },
+    "resolution": {
+     "score": 1.3333333333333333,
+     "scores": [
+      1,
+      2,
+      1
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "There is no resolution of initial insight's questions, such as why 'Large' dominates or its implications. The trajectory fails to explain or contextualize the observation.",
+     "reasons": [
+      "There is no resolution of initial insight's questions, such as why 'Large' dominates or its implications. The trajectory fails to explain or contextualize the observation.",
+      "The trajectory fails to resolve the base insight's uncertainty comprehensively, merely restating narrowed contexts without addressing why 'Large' is outstanding or exploring other variables.",
+      "Uncertainties about why and where 'Large' size dominates remain unanswered; the trajectory adds no explanation, validation, or contextualization."
+     ]
+    }
+   }
+  },
+  "3c3632cb": {
+   "system": "agent_poirot",
+   "arm": "agentpoirot",
+   "dataset": "revenue_opportunities",
+   "level": "level_2",
+   "trajectory_index": 2,
+   "content": "6d932a1ff15a6c9cd06e1cdb8a76add664578bb7ae7da333500d8d5e42167fdb",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/agentpoirot/revenue_opportunities-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 4.0,
+     "scores": [
+      4,
+      4,
+      4
+     ],
+     "sd": 0.0,
+     "min": 4,
+     "max": 4,
+     "reason": "Nearly every observation addresses key components of the goal such as opportunity size, partner status, and regional performance.",
+     "reasons": [
+      "Nearly every observation addresses key components of the goal such as opportunity size, partner status, and regional performance.",
+      "The trajectory consistently focuses on the 2015 sales pipeline details, addressing opportunity size, partner status, and regional differences in sales.",
+      "Each observation contributes to understanding aspects of the 2015 sales pipeline, focusing on opportunity size, partner status, and regional differences, thus staying closely aligned with the goal."
+     ]
+    },
+    "information_gain": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "While the trajectory provides new insights in each step, the progression is mostly additive without deeper exploration or refinement.",
+     "reasons": [
+      "While the trajectory provides new insights in each step, the progression is mostly additive without deeper exploration or refinement.",
+      "Several observations deepen understanding, particularly regarding the segmentation of revenue by partner-driven status and sales stages. However, the lack of statistical tests limits the progression.",
+      "Each step introduces a new dimension of analysis, but several observations restate patterns without resolving prior uncertainties."
+     ]
+    },
+    "interestingness": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "The findings are informative but mostly expected, such as large opportunities performing best, which aligns with typical sales expectations.",
+     "reasons": [
+      "The findings are informative but mostly expected, such as large opportunities performing best, which aligns with typical sales expectations.",
+      "The insights on partner influence and regional differences offer meaningful findings, but some observations are expected from the data structure, like increased closing probability in advanced stages.",
+      "The findings are generally informative but follow expected patterns, such as larger opportunities generating more revenue and partner-driven opportunities being more lucrative."
+     ]
+    },
+    "trustworthiness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "Although claims are consistent with the results reported, the lack of statistical testing weakens the evidence supporting them.",
+     "reasons": [
+      "Although claims are consistent with the results reported, the lack of statistical testing weakens the evidence supporting them.",
+      "The claims generally align with the evidence, but the absence of statistical tests weakens their support. Statements rely on observed values without verification through tests.",
+      "Claims lack statistical support and rely solely on observed means; they are consistent with evidence but insufficiently supported by tests."
+     ]
+    },
+    "actionability": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "The trajectory suggests directions for improvement in partner-driven efforts and regional strategies, but lacks a clear decision-making action.",
+     "reasons": [
+      "The trajectory suggests directions for improvement in partner-driven efforts and regional strategies, but lacks a clear decision-making action.",
+      "The findings suggest possible areas for deeper analysis, like the influence of partners and regional strategies, but lack specific next steps or decisions.",
+      "Findings suggest potential areas for deeper exploration, such as leveraging partnerships and focusing on certain regions, but lack specific next analytical steps."
+     ]
+    },
+    "resolution": {
+     "score": 2.6666666666666665,
+     "scores": [
+      2,
+      3,
+      3
+     ],
+     "sd": 0.4714045207910317,
+     "min": 2,
+     "max": 3,
+     "reason": "Some aspects of the base insight are explored, such as partners and regions, but key uncertainties like statistical significance remain unresolved.",
+     "reasons": [
+      "Some aspects of the base insight are explored, such as partners and regions, but key uncertainties like statistical significance remain unresolved.",
+      "The trajectory explores various dimensions of the base insight but leaves questions about overall statistical significance unanswered due to absent tests.",
+      "The trajectory addresses the initial insight by exploring side analyses, but does not significantly close uncertainties introduced in the base insight."
+     ]
+    }
+   }
+  },
+  "cb9e955b": {
+   "system": "d2i",
+   "arm": "d2i",
+   "dataset": "revenue_opportunities",
+   "level": "level_2",
+   "trajectory_index": 1,
+   "content": "32483b0cc31cf581cdb41b9c96d0316fc3a114958e299df2b12addb1bcfa1c5c",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/d2i/revenue_opportunities-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 2.0,
+     "scores": [
+      1,
+      3,
+      2
+     ],
+     "sd": 0.816496580927726,
+     "min": 1,
+     "max": 3,
+     "reason": "The observation does not directly address the goal of examining the sales pipeline across specified dimensions; instead, it focuses on probabilities by unrelated dimensions.",
+     "reasons": [
+      "The observation does not directly address the goal of examining the sales pipeline across specified dimensions; instead, it focuses on probabilities by unrelated dimensions.",
+      "The trajectory partially addresses the goal by exploring variability in closing probabilities across multiple dimensions. However, it does not target all specified goal aspects, such as region and sales stage, nor does it provide conclusive insights into the pipeline's shape or size.",
+      "The analysis touches on some relevant dimensions (segment, partner) but does not provide a focused explanation of the 2015 sales pipeline's size and shape across all specified categories."
+     ]
+    },
+    "information_gain": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The finding provides some information on variability in probabilities but does not offer deep insights into the sales pipeline size or shape.",
+     "reasons": [
+      "The finding provides some information on variability in probabilities but does not offer deep insights into the sales pipeline size or shape.",
+      "The single observation provides some variability insight but lacks progression and analysis depth. No preceding observation to build upon limits its contextual contributions.",
+      "The trajectory introduces variability in probabilities by multiple dimensions but leaves unresolved questions about their impact on the overall sales pipeline."
+     ]
+    },
+    "interestingness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The result is somewhat informative but lacks strong novelty or surprise value, as it does not go beyond basic probability variability.",
+     "reasons": [
+      "The result is somewhat informative but lacks strong novelty or surprise value, as it does not go beyond basic probability variability.",
+      "The observation reveals some variability, but the lack of statistical support makes it common-sounding rather than insightful. It introduces distinctions that do not strongly deviate from profile expectations.",
+      "The variability across dimensions is mildly informative but not surprising or particularly insightful without further context or implications."
+     ]
+    },
+    "trustworthiness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The observation lacks statistical support or evidence that strongly verifies the claim, relying solely on stated values.",
+     "reasons": [
+      "The observation lacks statistical support or evidence that strongly verifies the claim, relying solely on stated values.",
+      "The claim relies on returned probabilities without statistical validation, weakening support. The evidence lacks diagnostic strength or statistical testing, raising doubts on consistency beyond the computation.",
+      "The claim of variability is not strongly supported due to the absence of statistical tests; it relies mainly on returned values."
+     ]
+    },
+    "actionability": {
+     "score": 1.3333333333333333,
+     "scores": [
+      1,
+      2,
+      1
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "The trajectory provides no clear follow-up actions or directions related to the analytical goal.",
+     "reasons": [
+      "The trajectory provides no clear follow-up actions or directions related to the analytical goal.",
+      "While variability is noted, no concrete follow-up actions or directions are suggested. The insight is too diffuse to directly motivate analytical steps or decisions.",
+      "The trajectory presents descriptive statistics without suggesting specific next steps or analyses, providing minimal direction for further exploration."
+     ]
+    },
+    "resolution": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "There is minimal resolution of the initial goal, leaving most questions about the sales pipeline unanswered.",
+     "reasons": [
+      "There is minimal resolution of the initial goal, leaving most questions about the sales pipeline unanswered.",
+      "The trajectory introduces variability across dimensions but fails to resolve or explain uncertainties introduced by this variability. Key questions about pipeline size and structure remain unanswered.",
+      "The trajectory does not resolve the uncertainty introduced in the initial observation regarding the impact of variability on the sales pipeline, and leaves significant questions open."
+     ]
+    }
+   }
+  },
+  "750210c6": {
+   "system": "quis",
+   "arm": "quis",
+   "dataset": "revenue_opportunities",
+   "level": "level_2",
+   "trajectory_index": 3,
+   "content": "11778896a9423d16ecb273dc1e5a6d228ed9cc74b4dd27079afafc90aad1fe5c",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/quis/revenue_opportunities-level_2",
+   "assigned_criteria": [
+    "trustworthiness"
+   ],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "The trajectory examines 'sales_stage', which is part of the goal, but it lacks coverage of other key aspects like region, segment, and partner status. It partially addresses the goal but remains too narrow.",
+     "reasons": [
+      "The trajectory examines 'sales_stage', which is part of the goal, but it lacks coverage of other key aspects like region, segment, and partner status. It partially addresses the goal but remains too narrow.",
+      "The trajectory focuses narrowly on the 'Lead' sales stage but does not explore other dimensions such as region, opportunity size, or partner status, which the goal implies should be examined.",
+      "The trajectory is focused narrowly on the 'Lead' sales stage without addressing other parts of the pipeline such as opportunity size, region, or partner status, which limits its relevance to the full goal."
+     ]
+    },
+    "information_gain": {
+     "score": 1.6666666666666667,
+     "scores": [
+      2,
+      2,
+      1
+     ],
+     "sd": 0.4714045207910317,
+     "min": 1,
+     "max": 2,
+     "reason": "Each step claims 'Lead' dominates in specific subspaces without resolving broader uncertainties about the sales pipeline. Minimal progression and repetitive focus on similar observations.",
+     "reasons": [
+      "Each step claims 'Lead' dominates in specific subspaces without resolving broader uncertainties about the sales pipeline. Minimal progression and repetitive focus on similar observations.",
+      "Each step repeats the finding about the 'Lead' sales stage without resolving broader questions about other goal-relevant dimensions. There is no meaningful progression.",
+      "Each step repeats the same claim with minor variations in subspace, without adding substantive new understanding or resolving open questions."
+     ]
+    },
+    "interestingness": {
+     "score": 2.0,
+     "scores": [
+      2,
+      2,
+      2
+     ],
+     "sd": 0.0,
+     "min": 2,
+     "max": 2,
+     "reason": "Finding that 'Lead' dominates in 'sales_stage' is not surprising given the dataset profile. The steps lack unexpected insights or deep analytical contributions.",
+     "reasons": [
+      "Finding that 'Lead' dominates in 'sales_stage' is not surprising given the dataset profile. The steps lack unexpected insights or deep analytical contributions.",
+      "Finding that 'Lead' has the largest count is expected given profile statistics. The trajectory doesn't uncover non-obvious insights beyond this.",
+      "Identifying 'Lead' as dominant is somewhat expected from the profile, and repeated emphasis without deeper insights limits the trajectory's interest."
+     ]
+    },
+    "trustworthiness": {
+     "score": 5.0,
+     "scores": [
+      5,
+      5,
+      5
+     ],
+     "sd": 0.0,
+     "min": 5,
+     "max": 5,
+     "reason": "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+     "reasons": [
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims.",
+      "Assigned, not judged: every QUIS statement is the direct rendering of a statistic computed by SQL aggregation over the stated subspace, so it holds of the data by construction. QUIS records no claim-level evidence for an evidence-grounded rubric to weigh, so scoring it against one would measure its output format, not its claims."
+     ],
+     "assigned": true
+    },
+    "actionability": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "No concrete follow-up actions or specific analytical steps are indicated. The trajectory is descriptive without suggesting a direction for further exploration or decision-making.",
+     "reasons": [
+      "No concrete follow-up actions or specific analytical steps are indicated. The trajectory is descriptive without suggesting a direction for further exploration or decision-making.",
+      "The trajectory remains descriptive, with no concrete next steps or hypotheses suggested. It doesn't build towards a specific analytical direction.",
+      "The trajectory lacks suggestions for further analysis or decision-making, merely confirming a known dominance without pointing to actionable insights."
+     ]
+    },
+    "resolution": {
+     "score": 1.0,
+     "scores": [
+      1,
+      1,
+      1
+     ],
+     "sd": 0.0,
+     "min": 1,
+     "max": 1,
+     "reason": "Fails to resolve any significant uncertainties introduced in the base insight. It does not explain why 'Lead' is dominant or contextualize the observation within the broader sales pipeline.",
+     "reasons": [
+      "Fails to resolve any significant uncertainties introduced in the base insight. It does not explain why 'Lead' is dominant or contextualize the observation within the broader sales pipeline.",
+      "The trajectory does not address whether this pattern holds in meaningful subspace, nor contextualize or explain it in terms of the other goal-relevant columns.",
+      "The trajectory does not resolve the initial insight beyond restating dominance in specific subspaces, leaving the broader context and causes unexplored."
+     ]
+    }
+   }
+  },
+  "17a2b0b4": {
+   "system": "d2i",
+   "arm": "d2i",
+   "dataset": "revenue_opportunities",
+   "level": "level_2",
+   "trajectory_index": 2,
+   "content": "77a6e86f9bd613e40d10c4f0a1979de041b1903fa472c7194b704a04a5ffc114",
+   "run_dir": "/Users/shaolinx/Desktop/shaolin-website/runs/d2i/revenue_opportunities-level_2",
+   "assigned_criteria": [],
+   "n_repeats": 3,
+   "scores": {
+    "goal_relevance": {
+     "score": 4.0,
+     "scores": [
+      4,
+      4,
+      4
+     ],
+     "sd": 0.0,
+     "min": 4,
+     "max": 4,
+     "reason": "The trajectory stays focused on analyzing the probability of closing sales across different dimensions, directly relating to assessing the sales pipeline in 2015.",
+     "reasons": [
+      "The trajectory stays focused on analyzing the probability of closing sales across different dimensions, directly relating to assessing the sales pipeline in 2015.",
+      "The trajectory focuses on understanding the sales pipeline, specifically examining trends in closing probabilities across months and stages. It addresses sub-questions related to the analytical goal, such as trends across time and differences by sales stage and region.",
+      "The trajectory effectively examines changes in closing probabilities across time, stages, and regions, which are central to understanding the 2015 sales pipeline dynamics."
+     ]
+    },
+    "information_gain": {
+     "score": 3.6666666666666665,
+     "scores": [
+      3,
+      4,
+      4
+     ],
+     "sd": 0.4714045207910317,
+     "min": 3,
+     "max": 4,
+     "reason": "The trajectory provides meaningful insights on trends and correlations but includes some redundancy and lacks deeper examination of certain dimensions.",
+     "reasons": [
+      "The trajectory provides meaningful insights on trends and correlations but includes some redundancy and lacks deeper examination of certain dimensions.",
+      "Each step progressively deepens understanding. The trajectory identifies key trends, provides detailed analysis by sales stage, and explores regional aspects and correlation with opportunity_days.",
+      "Each step builds meaningfully on the previous, with the trajectory moving from general trends to specific stages and conditions, resolving uncertainties progressively."
+     ]
+    },
+    "interestingness": {
+     "score": 3.3333333333333335,
+     "scores": [
+      3,
+      4,
+      3
+     ],
+     "sd": 0.4714045207910317,
+     "min": 3,
+     "max": 4,
+     "reason": "The trajectory uncovers the declining trend over time and lack of correlation for 'Lead' stage, which is informative but not highly surprising.",
+     "reasons": [
+      "The trajectory uncovers the declining trend over time and lack of correlation for 'Lead' stage, which is informative but not highly surprising.",
+      "The trajectory uncovers non-obvious insights, such as the significant decline in closing probabilities and the lack of correlation in certain subspaces, which are analytically meaningful.",
+      "The trajectory identifies non-obvious declines and correlations, but the findings are somewhat expected given the goal's parameters, making them moderately interesting."
+     ]
+    },
+    "trustworthiness": {
+     "score": 3.0,
+     "scores": [
+      3,
+      3,
+      3
+     ],
+     "sd": 0.0,
+     "min": 3,
+     "max": 3,
+     "reason": "Most claims are supported by evidence, but the lack of statistical support for the correlation claim weakens it.",
+     "reasons": [
+      "Most claims are supported by evidence, but the lack of statistical support for the correlation claim weakens it.",
+      "While most claims are supported by statistical evidence, the claim about the 'Lead' stage lacks recorded statistical support, reducing overall trustworthiness.",
+      "Evidence supports the first two steps well, but the claim about the lowest closing probabilities lacks statistical backing, slightly weakening overall trustworthiness."
+     ]
+    },
+    "actionability": {
+     "score": 3.3333333333333335,
+     "scores": [
+      3,
+      3,
+      4
+     ],
+     "sd": 0.4714045207910317,
+     "min": 3,
+     "max": 4,
+     "reason": "While the trajectory suggests some follow-up analyses, particularly regarding regions and stages, it does not converge to a specific hypothesis or next step.",
+     "reasons": [
+      "While the trajectory suggests some follow-up analyses, particularly regarding regions and stages, it does not converge to a specific hypothesis or next step.",
+      "The trajectory provides direction for understanding sales trends and suggests further investigation of stage-specific strategies but remains somewhat focused on description rather than concrete next steps.",
+      "The trajectory suggests potential focus areas for improving sales strategies, such as addressing declines in specific stages and regions."
+     ]
+    },
+    "resolution": {
+     "score": 4.0,
+     "scores": [
+      4,
+      4,
+      4
+     ],
+     "sd": 0.0,
+     "min": 4,
+     "max": 4,
+     "reason": "The trajectory resolves uncertainty about the declining closing probabilities over time and the absence of correlation in the 'Lead' stage, but some details remain unexplored.",
+     "reasons": [
+      "The trajectory resolves uncertainty about the declining closing probabilities over time and the absence of correlation in the 'Lead' stage, but some details remain unexplored.",
+      "Most uncertainties about the initial observation are resolved, including temporal trends and stage-specific differences, though regional understanding could be deeper.",
+      "Uncertainty about declining probabilities across the pipeline is resolved through localized analysis, clarifying trends and stages effectively."
+     ]
+    }
+   }
+  }
+ }
+}

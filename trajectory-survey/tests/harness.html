@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>harness</title></head>
+<body>
+<pre id="out">running…</pre>
+<!-- A browser smoke test for index.html: it drives the whole survey — Start, every scale on
+     every screen, Next, through to the closing table — inside an iframe and dumps the
+     result, so a runtime error on a screen that only appears after ten clicks fails loudly
+     instead of silently. Same origin, so it can reach into the frame; served, not opened
+     off disk, because the page itself fetches its data.
+
+       python3 -m http.server 8000                            # from the site root
+       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+         --headless=new --virtual-time-budget=20000 --dump-dom \
+         --user-data-dir=/tmp/chrome-harness \
+         http://localhost:8000/trajectory-survey/tests/harness.html | grep -A40 HARNESS_LOG
+
+     Or just open it in a browser and read the <pre>. -->
+<iframe id="f" src="../index.html" width="1400" height="1000"></iframe>
+<script>
+const f = document.getElementById("f");
+const out = document.getElementById("out");
+const log = [];
+let ticks = 0;
+
+f.onload = () => {
+  f.contentWindow.onerror = (m, s, l, c, e) => { log.push("ERROR " + m + " @" + l + ":" + c); };
+  f.contentWindow.localStorage.clear();
+  setTimeout(tick, 800);
+};
+
+function tick() {
+  const d = f.contentDocument;
+  if (++ticks > 400) return finish("gave up after " + ticks + " ticks");
+  const go = d.getElementById("go");
+  if (go) { log.push("intro: clicking Start"); go.click(); return setTimeout(tick, 60); }
+
+  if (!window.__checked && d.querySelector(".crit")) { window.__checked = true; return checks(d); }
+  // Optional criteria are deliberately left blank: the run then also proves that a screen
+  // carrying one can be finished without it.
+  const crits = [...d.querySelectorAll(".crit:not(.optional)")];
+  const spare = d.querySelectorAll(".crit.optional").length;
+  const unrated = crits.find(c => !c.querySelector(".scale button.sel"));
+  if (unrated) {
+    const n = (crits.indexOf(unrated) % 5) + 1;      // spread scores over the whole scale
+    unrated.querySelectorAll(".scale button")[n - 1].click();
+    return setTimeout(tick, 20);
+  }
+  const next = d.getElementById("next");
+  if (next) {
+    if (next.disabled) {
+      return finish("Next is disabled with every REQUIRED criterion rated"
+                    + (spare ? " (" + spare + " optional left blank — it should not wait for those)" : ""));
+    }
+    if (spare) {
+      const why = d.querySelector(".whyoptional");
+      log.push("optional criterion on this screen: " + spare
+               + ", Next enabled without it (right), counter: "
+               + (d.getElementById("critcount") || {}).textContent
+               + (why ? "\n    explained on screen: \"" + why.textContent.trim().slice(0, 90) + "…\""
+                      : "\n    ** NO EXPLANATION SHOWN **"));
+    }
+    // The first fully rated screen is where the Previous round trip is exercised.
+    if (!backTested) return testBack(d, () => setTimeout(tick, 60));
+    log.push("rating screen " + (d.querySelector(".counter") || {}).textContent + ": Next");
+    next.click();
+    return setTimeout(tick, 60);
+  }
+  // The closing screen either carries the agreement tiles or, in a collection-only build
+  // with no answer key published, just the thank-you and the download.
+  if (d.querySelector(".tiles")) return finish("done screen reached (with results)");
+  if (d.getElementById("dl")) return finish("done screen reached (collection only)");
+  setTimeout(tick, 60);
+}
+
+/* Two things a click-through would not notice on its own: that scoring a criterion leaves
+   both columns' scroll positions where they were, and that the dataset profile came out as
+   parsed blocks rather than as the raw dump. */
+function checks(d) {
+  const cols = [...d.querySelectorAll(".split > div")];
+  const right = cols[cols.length - 1];
+  right.scrollTop = 120;
+  const before = right.scrollTop;
+  d.querySelector(".crit .scale button").click();
+  setTimeout(() => {
+    const after = right.scrollTop;
+    log.push("scroll after scoring: " + before + " -> " + after
+             + (before === after ? "  (held)" : "  ** JUMPED **"));
+    const pcols = d.querySelectorAll(".pcol").length;
+    const first = d.querySelector(".pcol");
+    log.push("profile blocks: " + pcols);
+    if (first) log.push("profile first block: " + first.textContent.replace(/\s+/g, " ").trim().slice(0, 160));
+    log.push("criterion counter: " + (d.getElementById("critcount") || {}).textContent);
+    log.push("Previous on the first screen: "
+             + (d.getElementById("prev").disabled ? "disabled (right)" : "** ENABLED **"));
+    setTimeout(tick, 40);
+  }, 80);
+}
+
+/* Rate one screen, go Next, then come back with Previous: the scores just given must be on
+   the scales again, and moving forward again must not have created a second answer for the
+   same trajectory. */
+let backTested = false;
+function testBack(d, done) {
+  backTested = true;
+  const given = [...d.querySelectorAll(".crit")].map(
+    c => (c.querySelector(".scale button.sel") || {}).textContent);
+  d.getElementById("next").click();
+  setTimeout(() => {
+    const d2 = f.contentDocument;
+    d2.getElementById("prev").click();
+    setTimeout(() => {
+      const d3 = f.contentDocument;
+      const back = [...d3.querySelectorAll(".crit")].map(
+        c => (c.querySelector(".scale button.sel") || {}).textContent);
+      const same = JSON.stringify(given) === JSON.stringify(back);
+      log.push("back: scores restored " + (same ? "(held)" : "** LOST: " + back + " **"));
+      log.push("back: counter says " + (d3.querySelector(".counter") || {}).textContent);
+      log.push("back: revising badge " + (d3.querySelector(".revising") ? "shown" : "** MISSING **"));
+      const R = JSON.parse(f.contentWindow.localStorage.getItem("d2i-rating-v1") || "{}");
+      log.push("back: answers stored " + (R.answers || []).length + " (expected 1)");
+      d3.getElementById("next").click();
+      setTimeout(() => {
+        const R2 = JSON.parse(f.contentWindow.localStorage.getItem("d2i-rating-v1") || "{}");
+        log.push("back: after re-submitting, answers " + (R2.answers || []).length
+                 + " (expected 1 — replaced, not appended)");
+        done();
+      }, 80);
+    }, 80);
+  }, 80);
+}
+
+/* The closing screen's way back in: "Change my scores" must land on a rating screen with
+   that trajectory's answers still on the scales. */
+function testRevise(then) {
+  const d = f.contentDocument;
+  const b = d.querySelector("button.revise");
+  if (!b) { log.push("revise: ** NO BUTTON ON THE RESULTS SCREEN **"); return then(); }
+  b.click();
+  setTimeout(() => {
+    const d2 = f.contentDocument;
+    const rated = [...d2.querySelectorAll(".crit")]
+      .filter(c => c.querySelector(".scale button.sel")).length;
+    log.push("revise: back on " + (d2.querySelector(".counter") || {}).textContent
+             + ", " + rated + " criteria still scored");
+    // The one-click way back, which only exists once nothing is outstanding.
+    (d2.getElementById("toresults") || d2.getElementById("next")).click();
+    setTimeout(() => {
+      const d3 = f.contentDocument;
+      const backOn = d3.querySelector(".tiles") ? "(yes, with results)"
+                   : d3.getElementById("dl") ? "(yes, collection-only screen)" : "** NO **";
+      log.push("revise: returned to the closing screen " + backOn);
+      then();
+    }, 200);
+  }, 120);
+}
+
+function finish(why) {
+  if (why.indexOf("done screen") === 0 && !window.__revised) {
+    window.__revised = true;
+    return testRevise(() => finish(why));
+  }
+  const d = f.contentDocument;
+  // What a respondent would actually send back, so a build that collects nothing fails
+  // here rather than after someone has sat through it.
+  const R = JSON.parse(f.contentWindow.localStorage.getItem("d2i-rating-v1") || "{}");
+  const rated = (R.answers || []).filter(a => !a.skipped);
+  const cells = rated.reduce((n, a) => n + Object.keys(a.scores || {}).length, 0);
+  log.push("response: " + (R.answers || []).length + " answers, " + rated.length
+           + " rated, " + cells + " ratings, results block "
+           + (R.results ? JSON.stringify(R.results).slice(0, 60) : "(not built yet)"));
+  log.push("answers carry a content fingerprint: "
+           + ((R.answers || []).every(a => a.content) ? "yes" : "** NO **"));
+  // What the Download button would write, without writing it: the record has to carry the
+  // trajectories that were rated, and the submitted copy has to not.
+  const full = f.contentWindow.fullRecord ? f.contentWindow.fullRecord() : null;
+  if (full) {
+    const answers = full.answers || [];
+    const withScreen = answers.filter(a => a.screen);
+    const steps = withScreen.reduce((n, a) => n + (a.screen.steps || []).length, 0);
+    const systems = [...new Set(withScreen.map(a => a.screen.system).filter(Boolean))].sort();
+    log.push("download record: " + answers.length + " answers, " + withScreen.length
+             + " carrying their screen, " + steps + " steps, "
+             + Math.round(JSON.stringify(full).length / 1024) + " KB");
+    const sc = withScreen[0] && withScreen[0].screen;
+    if (sc) {
+      log.push("  screen 1 holds: goal " + (sc.goal || "").length + " chars, profile "
+               + (sc.profile || "").length + " chars, " + (sc.steps || []).length
+               + " steps, " + (sc.criteria || []).length + " criteria with rubric text ("
+               + (sc.criteria || []).filter(c => c.levels && Object.keys(c.levels).length === 5).length
+               + " with all five levels, "
+               + (sc.criteria || []).filter(c => c.optional).length + " optional)");
+      log.push("  provenance: system=" + sc.system + " dataset=" + sc.dataset
+               + " position " + sc.position + "/" + sc.of
+               + "  [systems seen: " + systems.join(", ") + "]");
+    }
+    // The rubric's own prose says "judge" all over the place, so look for the score
+    // fields by key, not for the word.
+    const blob = JSON.stringify(full);
+    const leaks = ["judge_scores", "\"judge\":", "\"results\":", "exact_chance", "judge_self"]
+      .filter(k => blob.indexOf(k) >= 0);
+    log.push("  carries no model scores: " + (leaks.length ? "** " + leaks.join(", ") + " **" : "yes"));
+  } else {
+    log.push("** fullRecord() not reachable **");
+  }
+  log.push("== " + why);
+  out.textContent = "HARNESS_LOG\n" + log.join("\n")
+    + "\nHARNESS_COUNTER " + (d.getElementById("counter") || {}).textContent
+    + "\nHARNESS_DOM\n" + d.getElementById("app").innerHTML;
+}
+</script>
+</body></html>
